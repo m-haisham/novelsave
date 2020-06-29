@@ -26,9 +26,9 @@ class NovelSave:
         ###
         # get data
         ###
-        with Waiter('Scraping novel'):
-            scraper = Scraper(self.email, self.password)
+        scraper = Scraper(self.email, self.password)
 
+        with Waiter('Scraping novel'):
             novel = scraper.novel(Scraper.novel_url(self.novel_id))
 
             # for subsequent requests
@@ -74,6 +74,7 @@ class NovelSave:
         data = NovelData(self.novel_id)
         pending_ids = data.pending_access.all()
         if len(pending_ids) <= 0:
+            print(f'{Waiter.CROSS} None pending')
             return
 
         if self.email is not None and self.password is not None:
@@ -81,7 +82,7 @@ class NovelSave:
         else:
             api = ParsedApi()
 
-        for id in tqdm(pending_ids, desc='↓ pending]'):
+        for id in tqdm(pending_ids, desc='↓ pending'):
             # get data
             chapter = api.chapter(self.novel_id, id)
             data.chapters_access.put(chapter)

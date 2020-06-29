@@ -1,12 +1,13 @@
 class Waiter:
 
     CHECK = '✓'
+    CROSS = '✗'
     HOURGLASS = '⌛'
 
     def __init__(self, message):
         self.message = message
 
-        print(f'\r  {Waiter.HOURGLASS} {message}', end='')
+        print(f'\r {Waiter.HOURGLASS} {message}', end='')
 
     def __enter__(self):
         pass

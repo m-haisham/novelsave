@@ -3,12 +3,16 @@ from novelsave import NovelSave
 
 parser = argparse.ArgumentParser(description='tool to convert webnovel to epub')
 parser.add_argument('novel', type=str, help='either id or url of novel')
-parser.add_argument('--email', type=str,  help='email credential')
-parser.add_argument('--pass', type=str, help='password credential', dest='password')
-parser.add_argument('-u', '--update', action='store_true', help='update webnovel details')
-parser.add_argument('-p', '--pending', action='store_true', help='download pending')
-parser.add_argument('-c', '--create', action='store_true', help='create epub')
 parser.add_argument('-t', '--timeout', type=int, help='webdriver timeout', default=60)
+
+actions = parser.add_argument_group(title='actions')
+actions.add_argument('-u', '--update', action='store_true', help='update webnovel details')
+actions.add_argument('-p', '--pending', action='store_true', help='download pending')
+actions.add_argument('-c', '--create', action='store_true', help='create epub')
+
+credentials = parser.add_argument_group(title='credentials')
+credentials.add_argument('--email', type=str,  help='email credential')
+credentials.add_argument('--pass', type=str, help='password credential', dest='password')
 
 args = parser.parse_args()
 

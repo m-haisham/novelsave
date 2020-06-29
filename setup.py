@@ -9,7 +9,7 @@ setup(
     name='novelsave',
     version=novelsave.__version__,
     author="Schicksal",
-    description="Tool to convert webnovel to epu",
+    description="Tool to convert webnovel to epub",
     author_email='mhaisham79@gmail.com',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -32,7 +32,7 @@ setup(
 
     url='https://github.com/mHaisham/novelsave',
     project_urls={
-        'Source code': 'https://github.com/mHaisham/schnittstelle'
+        'Source code': 'https://github.com/mHaisham/novelsave'
     },
     packages=find_packages(),
     python_requires='>=3.6'

@@ -11,7 +11,7 @@ class Epub:
 
         book = epub.EpubBook()
 
-        book.set_identifier(novel.id)
+        book.set_identifier(str(novel.id))
         book.set_title(novel.title)
         book.add_author(novel.author)
 

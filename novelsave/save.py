@@ -2,6 +2,9 @@ from pathlib import Path
 
 import requests
 from tqdm import tqdm
+from webnovel import WebnovelBot
+from webnovel.models import Novel
+from webnovel.api import ParsedApi
 
 from .database import NovelData
 from .database.base import DIR
@@ -9,12 +12,11 @@ from .scraper import Scraper
 from .epub import Epub
 from .ui import Waiter
 
-from webnovel.api import ParsedApi
-
 
 class NovelSave:
     email: str = None
     password: str = None
+    timeout: int = 60
 
     def __init__(self, novel_id):
         self.novel_id = novel_id
@@ -23,23 +25,38 @@ class NovelSave:
         """
         Update novel data
         """
-        ###
+        # # #
         # get data
-        ###
-        scraper = Scraper(self.email, self.password)
+        novel_url = Scraper.novel_url(self.novel_id)
+        if self.email is None or self.password is None:
+            with Waiter('Scraping novel'):
+                # as there is no need to signin
+                # avoid opening a selenium window
+                novel = Novel.from_url(novel_url)
+                api = ParsedApi()
 
-        with Waiter('Scraping novel'):
-            novel = scraper.novel(Scraper.novel_url(self.novel_id))
+                # obtain table of contents
+                toc = api.toc(self.novel_id)
+        else:
+            webnovel = WebnovelBot(timeout=self.timeout)
 
-            # for subsequent requests
-            api = scraper.create_api()
+            with Waiter('Sign in'):
+                webnovel.driver.get(novel_url)
 
-            # close selenium window
-            # only novel 'needs' to be obtained through selenium
-            scraper.close()
+                webnovel.signin(self.email, self.password)
 
-            # obtain table of contents
-            toc = api.toc(self.novel_id)
+            with Waiter('Scraping novel'):
+                novel = webnovel.novel()
+
+                # for subsequent requests
+                api = webnovel.create_api()
+
+                # close selenium window
+                # only novel 'needs' to be obtained through selenium
+                webnovel.close()
+
+                # obtain table of contents
+                toc = api.toc(self.novel_id)
 
         # download cover
         with Waiter('Downloading cover'):
@@ -48,6 +65,7 @@ class NovelSave:
         with self.cover_path().open('wb') as f:
             f.write(cover_data.content)
 
+        # # #
         # update data
         data = NovelData(self.novel_id)
 
@@ -63,7 +81,7 @@ class NovelSave:
 
             data.pending_access.truncate()
             data.pending_access.insert_all(
-                list({c.id for v in toc.values() for c in v}.difference(all_saved_ids)),
+                list({c.id for v in toc.values() for c in v if not c.locked}.difference(all_saved_ids)),
                 check=False
             )
 
@@ -77,12 +95,19 @@ class NovelSave:
             print(f'{Waiter.CROSS} None pending')
             return
 
-        if self.email is not None and self.password is not None:
-            api = Scraper(self.email, self.password).create_api()
-        else:
+        if self.email is None or self.password is None:
             api = ParsedApi()
+        else:
+            # sign in to get access token
+            webnovel = WebnovelBot(timeout=self.timeout)
+            webnovel.driver.get(Scraper.novel_url(self.novel_id))
+            webnovel.signin(self.email, self.password)
 
-        for id in tqdm(pending_ids, desc='↓ pending'):
+            # create request api using token to use for chapter requests
+            api = webnovel.create_api()
+            webnovel.close()
+
+        for id in tqdm(pending_ids, desc='⌛ pending'):
             # get data
             chapter = api.chapter(self.novel_id, id)
             data.chapters_access.put(chapter)

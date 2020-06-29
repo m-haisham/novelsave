@@ -8,6 +8,7 @@ parser.add_argument('--pass', type=str, help='password credential', dest='passwo
 parser.add_argument('-u', '--update', action='store_true', help='update webnovel details')
 parser.add_argument('-p', '--pending', action='store_true', help='download pending')
 parser.add_argument('-c', '--create', action='store_true', help='create epub')
+parser.add_argument('-t', '--timeout', type=int, help='webdriver timeout', default=60)
 
 args = parser.parse_args()
 
@@ -20,6 +21,7 @@ else:
 novelsave = NovelSave(novel_id)
 novelsave.email = args.email
 novelsave.password = args.password
+novelsave.timeout = args.timeout
 
 if not any([args.update, args.pending, args.create]):
     print('No actions selected')

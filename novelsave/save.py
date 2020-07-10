@@ -14,14 +14,14 @@ from .ui import Waiter
 
 
 class NovelSave:
-    email: str = None
-    password: str = None
     timeout: int = 60
 
     _api: ParsedApi = None
 
-    def __init__(self, novel_id):
+    def __init__(self, novel_id, email=None, password=None):
         self.novel_id = novel_id
+        self.email = email
+        self.password = password
 
     def update_data(self):
         """

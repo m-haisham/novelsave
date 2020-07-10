@@ -28,7 +28,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     license="MIT license",
-    keywords='console interface progress',
+    keywords='webnovel novel scrape save own',
 
     url='https://github.com/mHaisham/novelsave',
     project_urls={

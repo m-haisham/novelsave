@@ -19,7 +19,8 @@ setup(
         'yattag',
         'tqdm',
         'ebooklib',
-        'requests'
+        'requests',
+        'webnovelbot'
     ],
 
     classifiers=[

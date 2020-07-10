@@ -58,6 +58,12 @@ class Epub:
         epub.write_epub(save_path / Path(novel.title + '.epub'), book, {})
 
     def _chapter(self, chapter):
+        """
+        create chapter xhtml
+
+        :param chapter: novel chapter
+        :return: chapter xhtml
+        """
         doc, tag, text = Doc().tagtext()
         with tag('h1'):
             text(chapter.title)

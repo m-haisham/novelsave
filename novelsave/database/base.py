@@ -3,7 +3,7 @@ from pathlib import Path
 from tinydb import TinyDB
 from .accessors import InfoAccess, VolumesAccess, ChaptersAccess, PendingAccess
 
-DIR = Path('novels')
+DIR = Path.home() / Path('novels')
 
 
 class NovelData:

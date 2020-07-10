@@ -1,7 +1,7 @@
 import argparse
 from novelsave import NovelSave
 
-parser = argparse.ArgumentParser(description='tool to convert webnovel to epub')
+parser = argparse.ArgumentParser(description='tool to convert webnovel to epub', epilog='Own your novels')
 parser.add_argument('novel', type=str, help='either id or url of novel')
 parser.add_argument('-t', '--timeout', type=int, help='webdriver timeout', default=60)
 
@@ -11,13 +11,13 @@ actions.add_argument('-p', '--pending', action='store_true', help='download pend
 actions.add_argument('-c', '--create', action='store_true', help='create epub')
 
 credentials = parser.add_argument_group(title='credentials')
-credentials.add_argument('--email', type=str,  help='email credential')
-credentials.add_argument('--pass', type=str, help='password credential', dest='password')
+credentials.add_argument('--email', type=str,  help='webnovel email')
+credentials.add_argument('--pass', type=str, help='webnovel password', dest='password')
 
 args = parser.parse_args()
 
 # parse novel id
-if 'https' in args.novel:
+if 'https://' in args.novel:
     novel_id = int(args.novel.split('/')[4])
 else:
     novel_id = int(args.novel)
@@ -28,7 +28,7 @@ novelsave.password = args.password
 novelsave.timeout = args.timeout
 
 if not any([args.update, args.pending, args.create]):
-    print('No actions selected')
+    print('✗ No actions selected')
 
 if args.update:
     novelsave.update_data()

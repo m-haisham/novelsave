@@ -15,6 +15,10 @@ pip install novelsave
 python3 -m novelsave 11022733006234505 -u -p -c
 ```
 
+#### Save directory
+
+Novels are saved to folder `novels` in user home
+
 ### Help
 
 ```batch

@@ -54,7 +54,7 @@ class Epub:
         book.add_item(epub.EpubNcx())
         book.add_item(epub.EpubNav())
 
-        book.spine = ['nav', *[c for volume in book_chapters.values() for c in volume]]
+        book.spine = [c for volume in book_chapters.values() for c in volume]
         epub.write_epub(save_path / Path(novel.title + '.epub'), book, {})
 
     def _chapter(self, chapter):

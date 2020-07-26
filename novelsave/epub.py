@@ -66,7 +66,7 @@ class Epub:
         """
         doc, tag, text = Doc().tagtext()
         with tag('h1'):
-            text(chapter.title)
+            text(f'{chapter.no} {chapter.title}')
 
         for para in chapter.paragraphs:
             with tag('p'):

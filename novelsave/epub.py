@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from ebooklib import epub
@@ -55,7 +56,9 @@ class Epub:
         book.add_item(epub.EpubNav())
 
         book.spine = [c for volume in book_chapters.values() for c in volume]
-        epub.write_epub(save_path / Path(novel.title + '.epub'), book, {})
+
+        title = re.sub(r'[\\/:*"\'<>|.%$^&£?]', '', novel.title)
+        epub.write_epub(save_path / Path(f'{title}.epub').resolve(), book, {})
 
     def _chapter(self, chapter):
         """
@@ -66,7 +69,8 @@ class Epub:
         """
         doc, tag, text = Doc().tagtext()
         with tag('h1'):
-            text(f'{chapter.no} {chapter.title}')
+            prefix = f'{f"{chapter.no} " if chapter.no > 0 else ""}'
+            text(f'{prefix}{chapter.title}')
 
         for para in chapter.paragraphs:
             with tag('p'):

@@ -30,25 +30,19 @@ class Epub:
         # create chapters
         book_chapters = {}
         for chapter in chapters:
-            book_chapter = epub.EpubHtml(title=chapter.title, file_name=f'chapter_{chapter.no}.xhtml', lang='en')
-
-            book_chapter.content = self._chapter(chapter)
-            book.add_item(book_chapter)
+            epub_chapter = self._epub_chapter(chapter)
+            book.add_item(epub_chapter)
 
             volume = volume_map[chapter.id]
             if volume in book_chapters.keys():
-                book_chapters[volume].append(book_chapter)
+                book_chapters[volume].append(epub_chapter)
             else:
-                book_chapters[volume] = [book_chapter]
+                book_chapters[volume] = [epub_chapter]
 
         # table of contents
         book.toc = (
-            *[
-                (
-                    epub.Section(name),
-                    tuple(chapters)
-                ) for name, chapters in book_chapters.items()
-            ],
+            (epub.Section(name), tuple(chapters))
+            for name, chapters in book_chapters.items()
         )
 
         # add default NCX and Nav file
@@ -60,20 +54,25 @@ class Epub:
         title = re.sub(r'[\\/:*"\'<>|.%$^&£?]', '', novel.title)
         epub.write_epub(save_path / Path(f'{title}.epub').resolve(), book, {})
 
-    def _chapter(self, chapter):
+    def _epub_chapter(self, chapter):
         """
         create chapter xhtml
 
         :param chapter: novel chapter
         :return: chapter xhtml
         """
+        prefix = f'{f"{chapter.no} " if chapter.no > 0 else ""}'
+        title = f'{prefix}{chapter.title}'
+        epub_chapter = epub.EpubHtml(title=title, file_name=f'chapter_{chapter.no}.xhtml', lang='en')
+
+        # html content
         doc, tag, text = Doc().tagtext()
         with tag('h1'):
-            prefix = f'{f"{chapter.no} " if chapter.no > 0 else ""}'
-            text(f'{prefix}{chapter.title}')
+            text(title)
 
         for para in chapter.paragraphs:
             with tag('p'):
                 text(para)
 
-        return doc.getvalue()
+        epub_chapter.content = doc.getvalue()
+        return epub_chapter

@@ -1,8 +1,8 @@
 import time
 from threading import Thread, Event
 
-from .frequency import Frequency
 from .bar import LoaderBar
+from .frequency import Frequency
 from .line import Line
 
 

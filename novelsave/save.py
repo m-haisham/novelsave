@@ -1,10 +1,9 @@
 from pathlib import Path
 
 import requests
-from tqdm import tqdm
 from webnovel import WebnovelBot
-from webnovel.models import Novel
 from webnovel.api import ParsedApi
+from webnovel.models import Novel
 from webnovel.tools import UrlTools
 
 from .database import NovelData

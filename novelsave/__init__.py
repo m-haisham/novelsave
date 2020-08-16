@@ -1,4 +1,4 @@
-from .save import NovelSave
 from .epub import Epub
+from .save import NovelSave
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'

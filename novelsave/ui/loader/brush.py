@@ -9,7 +9,7 @@ from .line import Line
 class BrushThread(Thread):
     stop_reason: str
 
-    def __init__(self, desc: str, value=-1, total=1, frequency=20):
+    def __init__(self, desc: str, value=-1, total=1, frequency=10):
 
         # thread options
         super(BrushThread, self).__init__()

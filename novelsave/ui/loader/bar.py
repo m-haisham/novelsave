@@ -46,7 +46,7 @@ class LoaderBar:
         reverse = reversed(self._indefinite[:-1])
         empty_state = self._indefinite[-1]
 
-        self._indefinite += reverse
+        # self._indefinite += reverse
         self._indefinite.append(empty_state)
 
         self.indefinite_index = len(self._indefinite) - 1

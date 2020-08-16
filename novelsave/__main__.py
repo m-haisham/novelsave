@@ -1,4 +1,8 @@
 import argparse
+from getpass import getpass
+
+from webnovel.tools import UrlTools
+
 from novelsave import NovelSave
 
 parser = argparse.ArgumentParser(description='tool to convert webnovel to epub', epilog='Own your novels')
@@ -12,19 +16,22 @@ actions.add_argument('-c', '--create', action='store_true', help='create epub')
 
 credentials = parser.add_argument_group(title='credentials')
 credentials.add_argument('--email', type=str,  help='webnovel email')
-credentials.add_argument('--pass', type=str, help='webnovel password', dest='password')
 
 args = parser.parse_args()
 
 # parse novel id
 if 'https://' in args.novel:
-    novel_id = int(args.novel.split('/')[4])
+    novel_id = UrlTools.from_novel_url(args.novel)
 else:
     novel_id = int(args.novel)
 
 novelsave = NovelSave(novel_id)
-novelsave.email = args.email
-novelsave.password = args.password
+
+# get credentials
+if args.email is not None:
+    novelsave.email = args.email
+    novelsave.password = getpass()
+
 novelsave.timeout = args.timeout
 
 if not any([args.update, args.pending, args.create]):

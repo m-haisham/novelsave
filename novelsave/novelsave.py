@@ -1,35 +1,25 @@
+import inspect
+
+from .sources import Webnovel
+from .template import NovelSaveTemplate
+from .sourcesave import SourceNovelSave
+from .websave import WebNovelSave
+
+
 class NovelSave:
-    def __init__(self, url, username, password):
-        self.url = url
-        self.username = username
-        self.password = password
+    def __new__(cls, *args, **kwargs):
+        url = args[0] if args else kwargs['url']
 
-    def update(self):
-        """
-        Update novel data
+        arguments = kwargs.copy()
+        for i, arg in enumerate(inspect.getfullargspec(NovelSaveTemplate.__init__).args[1:]):
+            try:
+                arguments[arg] = args[i]
+            except IndexError:
+                break
 
-        - Get new data
-        - Download new cover
-        - Update pending
-        """
-        raise NotImplementedError
+        if Webnovel.of(url):
+            cls = WebNovelSave(arguments['url'], arguments['username'], arguments['password'])
+        else:
+            cls = SourceNovelSave(arguments['url'])
 
-    def download(self):
-        """
-        Download current pending chapters
-        """
-        raise NotImplementedError
-
-    def create_epub(self):
-        """
-        create epub from current data
-        """
-        raise NotImplementedError
-
-    def open_db(self):
-        """
-        Create or open database of current novel
-
-        :return: database
-        """
-        raise NotImplementedError
+        return cls

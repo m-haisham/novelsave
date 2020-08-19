@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from .novelsave import NovelSave
+from .template import NovelSaveTemplate
 
 from .database import NovelBase
 from .sources import WuxiaWorldCo
 from .ui import Loader, UiTools
 
 
-class SourceNovelSave(NovelSave):
+class SourceNovelSave(NovelSaveTemplate):
     def __init__(self, url):
         super(SourceNovelSave, self).__init__(url, None, None)
 
@@ -22,7 +22,7 @@ class SourceNovelSave(NovelSave):
         # download cover
         data = UiTools.download(novel.thumbnail, desc='Downloading cover')
         with self.cover_path().open('wb') as f:
-            f.write(data)
+            f.write(data.getbuffer())
 
         # update novel information
         with Loader('Update novel'):
@@ -39,7 +39,25 @@ class SourceNovelSave(NovelSave):
             )
 
     def download(self):
-        pass
+        pending = self.db.pending.all()
+        if not pending:
+            print('[✗] No pending chapters')
+            return
+
+        with Loader('Init', value=0, total=len(pending)) as brush:
+            for i, url in enumerate(pending):
+                # update brush
+                brush.value += 1
+
+                prefix = f'[{brush.value}/{brush.total}]'
+                brush.desc = f'{prefix} {url}'
+
+                # get data
+                chapter = self.source.chapter(url)
+                self.db.chapters.put(chapter)
+
+                # at last remove chapter from pending
+                self.db.pending.remove(url)
 
     def create_epub(self):
         pass

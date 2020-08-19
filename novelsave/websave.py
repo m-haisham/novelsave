@@ -10,10 +10,10 @@ from .database import WebNovelData
 from .database import DIR
 from .epub import Epub
 from .ui import Loader, Waiter
-from .novelsave import NovelSave
+from .template import NovelSaveTemplate
 
 
-class WebNovelSave(NovelSave):
+class WebNovelSave(NovelSaveTemplate):
     timeout: int = 60
 
     _api: ParsedApi = None
@@ -67,7 +67,7 @@ class WebNovelSave(NovelSave):
         data = WebNovelData(self.novel_id)
         pending_ids = data.pending_access.all()
         if len(pending_ids) <= 0:
-            print(f'{Waiter.CROSS} None pending')
+            print('[✗] No pending chapters')
             return
 
         api = self.get_api()

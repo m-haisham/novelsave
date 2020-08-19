@@ -7,6 +7,7 @@ from ..models import Novel, Chapter
 
 
 class Source:
+    base: str
 
     @staticmethod
     def of(url: str) -> bool:

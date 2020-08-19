@@ -6,6 +6,7 @@ from ..models import Novel, Chapter
 
 
 class WuxiaWorldCo(Source):
+    base = 'https://www.wuxiaworld.co'
     url_pattern = re.compile(r'https://www\.wuxiaworld\.co(?!(m))')
 
     @staticmethod
@@ -30,7 +31,7 @@ class WuxiaWorldCo(Source):
             chapter = Chapter(
                 no=int(no),
                 title=title,
-                url=item['href']
+                url=f"{self.base}{item['href']}"
             )
 
             chapters.append(chapter)

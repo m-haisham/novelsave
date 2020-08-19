@@ -22,7 +22,7 @@ class MultiClassTable(IAccessor):
 
     def put(self, obj):
         """
-        put chapter with unique identifier chapter.id into database
+        put object with unique identifier chapter.id into database
 
         :param obj: object to be added
         :return: None

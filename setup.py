@@ -17,10 +17,12 @@ setup(
     install_requires=[
         'tinydb',
         'yattag',
-        'tqdm',
         'ebooklib',
         'requests',
-        'webnovelbot'
+        'webnovelbot',
+        'bs4',
+        'lxml',
+        'requests'
     ],
 
     classifiers=[

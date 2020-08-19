@@ -19,23 +19,22 @@ credentials.add_argument('--email', type=str,  help='webnovel email')
 
 args = parser.parse_args()
 
-# parse novel id
+# soup novel id
 if 'https://' in args.novel:
     novel_id = UrlTools.from_novel_url(args.novel)
 else:
     novel_id = int(args.novel)
 
 novelsave = NovelSave(novel_id)
+novelsave.timeout = args.timeout
 
 # get credentials
 if args.email is not None:
     novelsave.email = args.email
     novelsave.password = getpass()
 
-novelsave.timeout = args.timeout
-
 if not any([args.update, args.pending, args.create]):
-    print('✗ No actions selected')
+    print('[✗] No actions selected')
 
 if args.update:
     novelsave.update_data()

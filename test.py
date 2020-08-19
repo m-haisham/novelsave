@@ -1,15 +1,15 @@
-import time
+from novelsave.sources import WuxiaWorldCo
 
-from novelsave.ui import Loader
+NOVEL = 'https://www.wuxiaworld.co/Reincarnation-Of-The-Strongest-Sword-God/'
+CHAPTER = 'https://www.wuxiaworld.co/Reincarnation-Of-The-Strongest-Sword-God/1239956.html'
 
 if __name__ == '__main__':
-    total = 2
 
-    with Loader('hi', value=0, total=total) as brush:
-        for i in range(total):
-            time.sleep(1)
-            brush.update(brush.value + 1)
+    source = WuxiaWorldCo()
+    print(WuxiaWorldCo.of(NOVEL))
+    novel, chapters = source.novel(NOVEL)
 
-        brush.value = -1
-        while True:
-            pass
+    chapter = source.chapter(CHAPTER)
+    print(chapter.paragraphs)
+
+    print('')

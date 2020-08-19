@@ -36,9 +36,9 @@
 # .idea/artifacts
 # .idea/compiler.xml
 # .idea/jarRepositories.xml
-# .idea/modules.xml
+# .idea/sources.xml
 # .idea/*.iml
-# .idea/modules
+# .idea/sources
 # *.iml
 # *.ipr
 
@@ -79,7 +79,7 @@ fabric.properties
 # Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
 
 # *.iml
-# modules.xml
+# sources.xml
 # .idea/misc.xml
 # *.ipr
 
@@ -104,7 +104,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
+# C sources
 *.so
 
 # Distribution / packaging

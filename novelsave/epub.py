@@ -1,4 +1,6 @@
 import re
+from uuid import uuid4
+
 from pathlib import Path
 
 from ebooklib import epub
@@ -14,7 +16,8 @@ class Epub:
 
         book = epub.EpubBook()
 
-        book.set_identifier(str(novel.id))
+        # id
+        book.set_identifier(str(novel.id if hasattr(novel, 'id') else uuid4()))
         book.set_title(novel.title)
         book.add_author(novel.author)
 
@@ -35,17 +38,25 @@ class Epub:
             epub_chapter = self._epub_chapter(chapter)
             book.add_item(epub_chapter)
 
-            volume = volume_map[chapter.id]
+            try:
+                volume = volume_map[chapter.id]
+            except (AttributeError, KeyError):
+                volume = '_default'
+
             if volume in book_chapters.keys():
                 book_chapters[volume].append(epub_chapter)
             else:
                 book_chapters[volume] = [epub_chapter]
 
         # table of contents
-        book.toc = (
-            (epub.Section(name), tuple(chapters))
-            for name, chapters in book_chapters.items()
-        )
+        if len(book_chapters.keys()) == 1:
+            # no volume sections
+            book.toc = list(book_chapters.values())[0]
+        else:
+            book.toc = (
+                (epub.Section(name), tuple(chapters))
+                for name, chapters in book_chapters.items()
+            )
 
         # add default NCX and Nav file
         book.add_item(epub.EpubNcx())

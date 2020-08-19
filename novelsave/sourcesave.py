@@ -33,9 +33,13 @@ class SourceNovelSave(NovelSaveTemplate):
         with Loader('Update pending'):
             saved_urls = [chapter.url for chapter in self.db.chapters.all()]
 
+            # so that downloads are ascending
+            pending = list({chapter.url for chapter in chapters}.difference(saved_urls))
+            pending.sort(key=lambda c: c.no)
+
             self.db.pending.truncate()
             self.db.pending.insert_all(
-                list({chapter.url for chapter in chapters}.difference(saved_urls)),
+                pending,
                 check=False
             )
 
@@ -66,7 +70,7 @@ class SourceNovelSave(NovelSaveTemplate):
                 novel=self.db.novel.parse(),
                 cover=self.cover_path(),
                 volumes={},
-                chapters=self.db.chapters.all,
+                chapters=self.db.chapters.all(),
                 save_path=self.db.path.parent
             )
 

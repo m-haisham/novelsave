@@ -242,3 +242,4 @@ dmypy.json
 *.epub
 
 temp.py
+test.py

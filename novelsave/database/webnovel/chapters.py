@@ -4,11 +4,11 @@ from tinydb import where
 from tinydb.table import Document
 from webnovel.models import Chapter
 
-from .interface import IAccessor
+from ..accessors import IAccessor
 
 
 class ChaptersAccess(IAccessor):
-    table_name = 'chapters'
+    _table_name = 'chapters'
 
     fields = ['no', 'id', 'title', 'paragraphs']
 

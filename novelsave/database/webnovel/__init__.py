@@ -1,0 +1,1 @@
+from .webnovel import WebNovelData

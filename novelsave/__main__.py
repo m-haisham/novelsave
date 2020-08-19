@@ -31,7 +31,7 @@ novelsave.timeout = args.timeout
 # get credentials
 if args.email is not None:
     novelsave.email = args.email
-    novelsave.password = getpass()
+    novelsave.password = getpass('[-] password')
 
 if not any([args.update, args.pending, args.create]):
     print('[✗] No actions selected')

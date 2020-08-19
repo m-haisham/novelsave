@@ -1,14 +1,15 @@
+from tinydb import where
 from typing import List
 
-from tinydb import where
-
-from .interface import IAccessor
+from ..accessors import IAccessor
 
 
-class PendingAccess(IAccessor):
-    table_name = 'pending'
+class SequenceTable(IAccessor):
+    FIELD_KEY = 'KEY'
 
-    FIELD_ID = 'ID'
+    def __init__(self, db, table):
+        super(SequenceTable, self).__init__(db)
+        self.table_name = table
 
     def insert(self, id: int, check=True):
         """
@@ -20,7 +21,7 @@ class PendingAccess(IAccessor):
         """
         data = self._to_dict(id)
         if check:
-            self.table.upsert(data, where(PendingAccess.FIELD_ID) == id)
+            self.table.upsert(data, where(SequenceTable.FIELD_KEY) == id)
         else:
             self.table.insert(data)
 
@@ -41,20 +42,20 @@ class PendingAccess(IAccessor):
 
         self.table.insert_multiple(data)
 
-    def remove(self, id):
+    def remove(self, value):
         """
         removes id from pending
 
         :param id: id to remove
         :return: None
         """
-        self.table.remove(where(PendingAccess.FIELD_ID) == id)
+        self.table.remove(where(SequenceTable.FIELD_KEY) == id)
 
-    def all(self) -> List[int]:
+    def all(self) -> List:
         """
         :return: all pending ids
         """
-        return [doc[PendingAccess.FIELD_ID] for doc in self.table.all()]
+        return [doc[SequenceTable.FIELD_KEY] for doc in self.table.all()]
 
-    def _to_dict(self, id) -> dict:
-        return {PendingAccess.FIELD_ID: id}
+    def _to_dict(self, value) -> dict:
+        return {SequenceTable.FIELD_KEY: value}

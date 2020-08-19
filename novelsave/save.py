@@ -6,8 +6,8 @@ from webnovel.api import ParsedApi
 from webnovel.models import Novel
 from webnovel.tools import UrlTools
 
-from .database import NovelData
-from .database.base import DIR
+from .database import WebNovelData
+from .database import DIR
 from .epub import Epub
 from .ui import Loader, Waiter
 
@@ -44,7 +44,7 @@ class NovelSave:
 
         # # #
         # update data
-        data = NovelData(self.novel_id)
+        data = WebNovelData(self.novel_id)
 
         with Loader('Update novel'):
             data.info_access.set_info(novel)
@@ -66,7 +66,7 @@ class NovelSave:
         """
         Download remaining chapters
         """
-        data = NovelData(self.novel_id)
+        data = WebNovelData(self.novel_id)
         pending_ids = data.pending_access.all()
         if len(pending_ids) <= 0:
             print(f'{Waiter.CROSS} None pending')
@@ -93,7 +93,7 @@ class NovelSave:
         """
         Create epub with current data
         """
-        data = NovelData(self.novel_id)
+        data = WebNovelData(self.novel_id)
 
         with Loader('Create epub'):
             Epub().create(

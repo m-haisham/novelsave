@@ -2,24 +2,24 @@ from pathlib import Path
 
 from tinydb import TinyDB
 
-from .accessors import InfoAccess, VolumesAccess, ChaptersAccess, PendingAccess
+from .tables import KeyValueTable, SequenceTable
+from .file import slugify
+from ..models import Novel
 
 DIR = Path.home() / Path('novels')
 
 
-class NovelData:
-    def __init__(self, novel_id):
-        # open novel
-        self.db = self.open_db(novel_id)
+class NovelBase:
+    def __init__(self, url):
+        self.db = self.open_db(url)
 
-        # set accessors
-        self.info_access = InfoAccess(self.db)
-        self.volumes_access = VolumesAccess(self.db)
-        self.chapters_access = ChaptersAccess(self.db)
-        self.pending_access = PendingAccess(self.db)
+        self.novel = KeyValueTable(self.db, 'novel', Novel, ['title', 'author', 'thumbnail', 'url'])
+        self.pending = SequenceTable(self.db, 'pending')
 
-    def open_db(self, novel_id) -> TinyDB:
-        path = self._novel_path(novel_id)
+    def open_db(self, url) -> TinyDB:
+        folder_name = slugify(url.split('/')[-1])
+
+        path = DIR / Path(folder_name) / Path('data.db')
         path.parent.mkdir(parents=True, exist_ok=True)
 
         if not path.exists() and not path.is_file():
@@ -27,6 +27,3 @@ class NovelData:
                 pass
 
         return TinyDB(path)
-
-    def _novel_path(self, novel_id):
-        return DIR / Path(f'n{novel_id}') / Path('data.db')

@@ -1,44 +1,44 @@
-from tinydb import where
 from typing import List
+
+from tinydb import where
 
 from ..accessors import IAccessor
 
 
 class SequenceTable(IAccessor):
-    FIELD_KEY = 'KEY'
-
-    def __init__(self, db, table):
+    def __init__(self, db, table, key='KEY'):
         super(SequenceTable, self).__init__(db)
         self.table_name = table
+        self.field_key = key
 
-    def insert(self, id: int, check=True):
+    def insert(self, value: int, check=True):
         """
         adds id to pending
 
-        :param id: id of chapter
+        :param value: id of chapter
         :param check: do nothing if already exists
         :return: None
         """
-        data = self._to_dict(id)
+        data = self._to_dict(value)
         if check:
-            self.table.upsert(data, where(SequenceTable.FIELD_KEY) == id)
+            self.table.upsert(data, where(self.field_key) == value)
         else:
             self.table.insert(data)
 
-    def insert_all(self, ids: List[int], check=True):
+    def insert_all(self, values: List[int], check=True):
         """
         adds all the ids to pending
 
         more optimized for adding multiple ids
 
-        :param ids: ids of chapters to add
+        :param values: ids of chapters to add
         :param check: do nothing if already exists
         :return: None
         """
         if check:
-            data = [self._to_dict(id) for id in ids if id not in self.all()]
+            data = [self._to_dict(id) for id in values if id not in self.all()]
         else:
-            data = [self._to_dict(id) for id in ids]
+            data = [self._to_dict(id) for id in values]
 
         self.table.insert_multiple(data)
 
@@ -49,13 +49,13 @@ class SequenceTable(IAccessor):
         :param id: id to remove
         :return: None
         """
-        self.table.remove(where(SequenceTable.FIELD_KEY) == id)
+        self.table.remove(where(self.field_key) == id)
 
     def all(self) -> List:
         """
         :return: all pending ids
         """
-        return [doc[SequenceTable.FIELD_KEY] for doc in self.table.all()]
+        return [doc[self.field_key] for doc in self.table.all()]
 
     def _to_dict(self, value) -> dict:
-        return {SequenceTable.FIELD_KEY: value}
+        return {self.field_key: value}

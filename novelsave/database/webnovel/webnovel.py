@@ -6,7 +6,6 @@ from .chapters import ChaptersAccess
 from .info import InfoAccess
 from .pending import PendingAccess
 from .volumes import VolumesAccess
-
 from ..base import DIR
 
 

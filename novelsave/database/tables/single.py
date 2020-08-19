@@ -1,11 +1,15 @@
-from typing import List, overload
+from typing import List
 
 from ..accessors import KeyValueAccessor
 
 
-class KeyValueTable(KeyValueAccessor):
+class SingleClassTable(KeyValueAccessor):
     def __init__(self, db, table: str, cls, fields: List[str]):
-        super(KeyValueTable, self).__init__(db)
+        super(SingleClassTable, self).__init__(db)
+
+        # error checks
+        if not fields:
+            raise ValueError("'fields' must not be empty")
 
         self.table_name = table
         self.cls = cls

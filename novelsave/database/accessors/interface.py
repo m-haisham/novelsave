@@ -1,14 +1,30 @@
-from tinydb import TinyDB
-from tinydb.table import Table
+from typing import List
+
+from tinydb import TinyDB, where
+from tinydb.table import Document, Table
 
 
 class IAccessor:
     db: TinyDB
-    _table_name: str
+    _table_name: str = None
 
     def __init__(self, db: TinyDB):
         self.db = db
-        self._table = self.db.table(self._table_name)
+
+        if self._table_name is None:
+            self._table = None
+        else:
+            self._table = self.db.table(self._table_name)
+
+    def where(self, key, value) -> List[Document]:
+        """
+        search minified
+        
+        :param key: identifier
+        :param value: corresponding value to key
+        :return: where the key of document has value provided
+        """
+        return self.table.search(where(key) == value)
 
     def truncate(self):
         self.table.truncate()

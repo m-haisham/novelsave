@@ -33,8 +33,7 @@ class SourceNovelSave(NovelSaveTemplate):
             saved_urls = [chapter.url for chapter in self.db.chapters.all()]
 
             # so that downloads are ascending
-            pending = list({chapter.url for chapter in chapters}.difference(saved_urls))
-            pending.sort(key=lambda c: c.no)
+            pending = list({chapter.url for chapter in sorted(chapters, key=lambda c: c.no)}.difference(saved_urls))
 
             self.db.pending.truncate()
             self.db.pending.insert_all(

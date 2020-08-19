@@ -1,14 +1,13 @@
 from typing import List
 
 from tinydb import where
-from tinydb.table import Document
 from webnovel.models import Chapter
 
-from .interface import IAccessor
+from ..accessors import IAccessor
 
 
 class ChaptersAccess(IAccessor):
-    table_name = 'chapters'
+    _table_name = 'chapters'
 
     fields = ['no', 'id', 'title', 'paragraphs']
 
@@ -48,14 +47,6 @@ class ChaptersAccess(IAccessor):
             return self._from_dict(docs[0])
         else:
             raise ValueError(f'More than one value with id: {id}')
-
-    def where(self, key, value) -> List[Document]:
-        """
-        :param key: identifier
-        :param value: corresponding value to key
-        :return: where the key of document has value provided
-        """
-        return self.table.search(where(key) == value)
 
     def _to_dict(self, chapter) -> dict:
         return {field: getattr(chapter, field) for field in ChaptersAccess.fields}

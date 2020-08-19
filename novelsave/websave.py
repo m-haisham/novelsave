@@ -1,32 +1,28 @@
 from pathlib import Path
 
-import requests
-from tqdm import tqdm
 from webnovel import WebnovelBot
-from webnovel.models import Novel
 from webnovel.api import ParsedApi
+from webnovel.models import Novel
 from webnovel.tools import UrlTools
 
-from .database import NovelData
-from .database.base import DIR
+from .database import DIR
+from .database import WebNovelData
 from .epub import Epub
-from .ui import Loader, Waiter
+from .template import NovelSaveTemplate
+from .ui import Loader, UiTools
 
 
-class NovelSave:
+class WebNovelSave(NovelSaveTemplate):
     timeout: int = 60
 
     _api: ParsedApi = None
 
-    def __init__(self, novel_id, email=None, password=None):
-        self.novel_id = novel_id
-        self.email = email
-        self.password = password
+    def __init__(self, url, username=None, password=None):
+        super(WebNovelSave, self).__init__(url, username, password)
 
-    def update_data(self):
-        """
-        Update novel data
-        """
+        self.novel_id = UrlTools.from_novel_url(url)
+
+    def update(self):
         # get api
         api = self.get_api()
 
@@ -37,15 +33,13 @@ class NovelSave:
             toc = api.toc(self.novel_id)
 
         # download cover
-        with Loader('Downloading cover'):
-            cover_data = requests.get(novel.cover_url)
-
+        cover_data = UiTools.download(novel.cover_url)
         with self.cover_path().open('wb') as f:
-            f.write(cover_data.content)
+            f.write(cover_data.getbuffer())
 
         # # #
         # update data
-        data = NovelData(self.novel_id)
+        data = WebNovelData(self.novel_id)
 
         with Loader('Update novel'):
             data.info_access.set_info(novel)
@@ -63,14 +57,14 @@ class NovelSave:
                 check=False
             )
 
-    def download_pending(self):
+    def download(self):
         """
         Download remaining chapters
         """
-        data = NovelData(self.novel_id)
+        data = WebNovelData(self.novel_id)
         pending_ids = data.pending_access.all()
         if len(pending_ids) <= 0:
-            print(f'{Waiter.CROSS} None pending')
+            print('[✗] No pending chapters')
             return
 
         api = self.get_api()
@@ -94,7 +88,7 @@ class NovelSave:
         """
         Create epub with current data
         """
-        data = NovelData(self.novel_id)
+        data = WebNovelData(self.novel_id)
 
         with Loader('Create epub'):
             Epub().create(
@@ -117,7 +111,7 @@ class NovelSave:
                 # sign in to get access token
                 webnovel = WebnovelBot(timeout=self.timeout)
                 webnovel.driver.get(UrlTools.to_novel_url(self.novel_id))
-                webnovel.signin(self.email, self.password)
+                webnovel.signin(self.username, self.password)
 
                 # get api with token
                 self._api = webnovel.create_api()
@@ -131,7 +125,7 @@ class NovelSave:
         return self._api
 
     def should_signin(self):
-        return self.email is not None and self.password is not None
+        return self.username is not None and self.password is not None
 
     def cover_path(self) -> Path:
         return self.path() / Path('cover.jpg')

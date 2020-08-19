@@ -1,4 +1,4 @@
-from novelsave import NovelSave
+from novelsave import WebNovelSave
 
 # replace these values
 NOVEL = 6831850602000905
@@ -6,7 +6,7 @@ EMAIL = None
 PASSWORD = None
 
 if __name__ == '__main__':
-    ns = NovelSave(NOVEL)
+    ns = WebNovelSave(NOVEL)
     ns.email = EMAIL
     ns.password = PASSWORD
 

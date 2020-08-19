@@ -1,6 +1,6 @@
-# NovelSave `Own your novels`
+# NovelSave
 
-Tool to convert webnovel to epub
+Tool to convert novels to epub
 
 ## Install
 
@@ -12,7 +12,7 @@ pip install novelsave
 
 ### Example
 ```
-python3 -m novelsave 11022733006234505 -u -p -c
+python3 -m novelsave https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c
 ```
 
 #### Save directory
@@ -35,15 +35,13 @@ optional arguments:
                         webdriver timeout
 
 actions:
-  -u, --update          update webnovel details
-  -p, --pending         download pending
-  -c, --create          create epub
+  -u, --update          update novel details
+  -p, --pending         download pending chapters
+  -c, --create          create epub from downloaded chapters
 
 credentials:
   --email EMAIL         webnovel email
   --pass PASSWORD       webnovel password
-
-Own your novels
 ```
 
 ## Manual
@@ -53,3 +51,8 @@ Access all the saved data using `novelsave.database.NovelData`
 Manipulate the data using the accessors provided in the class
 
 Creating an epub is easy as calling a function. `novelsave.Epub().create()`
+
+## Sources
+
+- [webnovel.com](https://www.webnovel.com)
+- [wuxiaworld.co](https://www.wuxiaworld.co/)

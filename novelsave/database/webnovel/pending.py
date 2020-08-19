@@ -2,11 +2,11 @@ from typing import List
 
 from tinydb import where
 
-from .interface import IAccessor
+from ..accessors import IAccessor
 
 
 class PendingAccess(IAccessor):
-    table_name = 'pending'
+    _table_name = 'pending'
 
     FIELD_ID = 'ID'
 
@@ -54,7 +54,7 @@ class PendingAccess(IAccessor):
         """
         :return: all pending ids
         """
-        return [o[PendingAccess.FIELD_ID] for o in self.table.all()]
+        return [doc[PendingAccess.FIELD_ID] for doc in self.table.all()]
 
     def _to_dict(self, id) -> dict:
         return {PendingAccess.FIELD_ID: id}

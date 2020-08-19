@@ -1,10 +1,10 @@
 from webnovel.models import Novel
 
-from .keyvalue import KeyValueAccessor
+from ..accessors import KeyValueAccessor
 
 
 class InfoAccess(KeyValueAccessor):
-    table_name = 'info'
+    _table_name = 'info'
 
     fields = ['id', 'title', 'synopsis', 'author', 'url', 'cover_url']
 

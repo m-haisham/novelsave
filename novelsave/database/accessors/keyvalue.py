@@ -11,9 +11,6 @@ class KeyValueAccessor(IAccessor):
     KEY_ID = 'KEY'
     VALUE_ID = 'VALUE'
 
-    def __init__(self, db):
-        super(KeyValueAccessor, self).__init__(db)
-
     def put(self, key, value):
         """
         Puts the data into table marked by unique identifier

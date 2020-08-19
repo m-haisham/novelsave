@@ -1,8 +1,10 @@
-import re
 from pathlib import Path
+from uuid import uuid4
 
 from ebooklib import epub
 from yattag import Doc
+
+from .database import slugify
 
 
 class Epub:
@@ -12,7 +14,8 @@ class Epub:
 
         book = epub.EpubBook()
 
-        book.set_identifier(str(novel.id))
+        # id
+        book.set_identifier(str(novel.id if hasattr(novel, 'id') else uuid4()))
         book.set_title(novel.title)
         book.add_author(novel.author)
 
@@ -30,26 +33,28 @@ class Epub:
         # create chapters
         book_chapters = {}
         for chapter in chapters:
-            book_chapter = epub.EpubHtml(title=chapter.title, file_name=f'chapter_{chapter.no}.xhtml', lang='en')
+            epub_chapter = self._epub_chapter(chapter)
+            book.add_item(epub_chapter)
 
-            book_chapter.content = self._chapter(chapter)
-            book.add_item(book_chapter)
+            try:
+                volume = volume_map[chapter.id]
+            except (AttributeError, KeyError):
+                volume = '_default'
 
-            volume = volume_map[chapter.id]
             if volume in book_chapters.keys():
-                book_chapters[volume].append(book_chapter)
+                book_chapters[volume].append(epub_chapter)
             else:
-                book_chapters[volume] = [book_chapter]
+                book_chapters[volume] = [epub_chapter]
 
         # table of contents
-        book.toc = (
-            *[
-                (
-                    epub.Section(name),
-                    tuple(chapters)
-                ) for name, chapters in book_chapters.items()
-            ],
-        )
+        if len(book_chapters.keys()) == 1:
+            # no volume sections
+            book.toc = list(book_chapters.values())[0]
+        else:
+            book.toc = (
+                (epub.Section(name), tuple(chapters))
+                for name, chapters in book_chapters.items()
+            )
 
         # add default NCX and Nav file
         book.add_item(epub.EpubNcx())
@@ -57,23 +62,27 @@ class Epub:
 
         book.spine = [c for volume in book_chapters.values() for c in volume]
 
-        title = re.sub(r'[\\/:*"\'<>|.%$^&£?]', '', novel.title)
-        epub.write_epub(save_path / Path(f'{title}.epub').resolve(), book, {})
+        epub.write_epub(save_path / Path(f'{slugify(novel.title)}.epub').resolve(), book, {})
 
-    def _chapter(self, chapter):
+    def _epub_chapter(self, chapter):
         """
         create chapter xhtml
 
         :param chapter: novel chapter
         :return: chapter xhtml
         """
+        prefix = f'{f"{chapter.no} " if chapter.no > 0 else ""}'
+        title = f'{prefix}{chapter.title}'
+        epub_chapter = epub.EpubHtml(title=title, file_name=f'chapter_{chapter.no}.xhtml', lang='en')
+
+        # html content
         doc, tag, text = Doc().tagtext()
         with tag('h1'):
-            prefix = f'{f"{chapter.no} " if chapter.no > 0 else ""}'
-            text(f'{prefix}{chapter.title}')
+            text(title)
 
         for para in chapter.paragraphs:
             with tag('p'):
                 text(para)
 
-        return doc.getvalue()
+        epub_chapter.content = doc.getvalue()
+        return epub_chapter

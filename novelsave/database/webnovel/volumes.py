@@ -1,10 +1,10 @@
 from typing import List
 
-from .keyvalue import KeyValueAccessor
+from ..accessors import KeyValueAccessor
 
 
 class VolumesAccess(KeyValueAccessor):
-    table_name = 'volume'
+    _table_name = 'volume'
 
     def set_volume(self, volume_name: str, ids: List[int]):
         """

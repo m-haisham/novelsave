@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from . import Epub
 from .template import NovelSaveTemplate
 
 from .database import NovelBase
@@ -60,7 +61,14 @@ class SourceNovelSave(NovelSaveTemplate):
                 self.db.pending.remove(url)
 
     def create_epub(self):
-        pass
+        with Loader('Create epub'):
+            Epub().create(
+                novel=self.db.novel.parse(),
+                cover=self.cover_path(),
+                volumes={},
+                chapters=self.db.chapters.all,
+                save_path=self.db.path.parent
+            )
 
     def open_db(self):
         return NovelBase(self.url)
@@ -69,4 +77,13 @@ class SourceNovelSave(NovelSaveTemplate):
         return self.db.path.parent / Path('cover.jpg')
 
     def parse_source(self):
-        return WuxiaWorldCo()
+        """
+        create source object to which the url belongs to
+
+        :return: source object
+        """
+        for source in [WuxiaWorldCo]:
+            if source.of(self.url):
+                return source()
+
+        raise ValueError(f'"{self.url}" does not belong to any available source')

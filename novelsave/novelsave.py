@@ -15,7 +15,8 @@ class NovelSave:
             try:
                 arguments[arg] = args[i]
             except IndexError:
-                break
+                if arg not in arguments.keys():
+                    arguments[arg] = None
 
         if Webnovel.of(url):
             cls = WebNovelSave(arguments['url'], arguments['username'], arguments['password'])

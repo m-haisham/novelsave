@@ -17,8 +17,8 @@ class WebNovelSave(NovelSaveTemplate):
 
     _api: ParsedApi = None
 
-    def __init__(self, url, email=None, password=None):
-        super(WebNovelSave, self).__init__(url, email, password)
+    def __init__(self, url, username=None, password=None):
+        super(WebNovelSave, self).__init__(url, username, password)
 
         self.novel_id = UrlTools.from_novel_url(url)
 
@@ -111,7 +111,7 @@ class WebNovelSave(NovelSaveTemplate):
                 # sign in to get access token
                 webnovel = WebnovelBot(timeout=self.timeout)
                 webnovel.driver.get(UrlTools.to_novel_url(self.novel_id))
-                webnovel.signin(self.email, self.password)
+                webnovel.signin(self.username, self.password)
 
                 # get api with token
                 self._api = webnovel.create_api()
@@ -125,7 +125,7 @@ class WebNovelSave(NovelSaveTemplate):
         return self._api
 
     def should_signin(self):
-        return self.email is not None and self.password is not None
+        return self.username is not None and self.password is not None
 
     def cover_path(self) -> Path:
         return self.path() / Path('cover.jpg')

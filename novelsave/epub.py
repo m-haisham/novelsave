@@ -1,7 +1,5 @@
-import re
-from uuid import uuid4
-
 from pathlib import Path
+from uuid import uuid4
 
 from ebooklib import epub
 from yattag import Doc

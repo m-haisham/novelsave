@@ -1,5 +1,6 @@
-from tinydb import where
 from typing import List
+
+from tinydb import where
 
 from ..accessors import IAccessor
 from ...models import Chapter

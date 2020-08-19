@@ -1,10 +1,9 @@
 from pathlib import Path
 
 from . import Epub
-from .template import NovelSaveTemplate
-
-from .database import NovelBase
+from .database import NovelData
 from .sources import WuxiaWorldCo
+from .template import NovelSaveTemplate
 from .ui import Loader, UiTools
 
 
@@ -75,7 +74,7 @@ class SourceNovelSave(NovelSaveTemplate):
             )
 
     def open_db(self):
-        return NovelBase(self.url)
+        return NovelData(self.url)
 
     def cover_path(self):
         return self.db.path.parent / Path('cover.jpg')

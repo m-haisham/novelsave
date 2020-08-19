@@ -1,16 +1,15 @@
 from pathlib import Path
 
-import requests
 from webnovel import WebnovelBot
 from webnovel.api import ParsedApi
 from webnovel.models import Novel
 from webnovel.tools import UrlTools
 
-from .database import WebNovelData
 from .database import DIR
+from .database import WebNovelData
 from .epub import Epub
-from .ui import Loader, Waiter
 from .template import NovelSaveTemplate
+from .ui import Loader, UiTools
 
 
 class WebNovelSave(NovelSaveTemplate):
@@ -34,11 +33,9 @@ class WebNovelSave(NovelSaveTemplate):
             toc = api.toc(self.novel_id)
 
         # download cover
-        with Loader('Downloading cover'):
-            cover_data = requests.get(novel.cover_url)
-
+        cover_data = UiTools.download(novel.cover_url)
         with self.cover_path().open('wb') as f:
-            f.write(cover_data.content)
+            f.write(cover_data.getbuffer())
 
         # # #
         # update data

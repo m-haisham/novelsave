@@ -1,7 +1,7 @@
 from pathlib import Path
+from typing import Tuple
 
 from tinydb import TinyDB
-from typing import Tuple
 
 from .file import slugify
 from .tables import SingleClassTable, SequenceTable, MultiClassTable
@@ -10,7 +10,7 @@ from ..models import Novel, Chapter
 DIR = Path.home() / Path('novels')
 
 
-class NovelBase:
+class NovelData:
     def __init__(self, url):
         self.db, self.path = self.open_db(url)
 

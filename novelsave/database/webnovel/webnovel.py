@@ -1,7 +1,7 @@
 from pathlib import Path
+from typing import Tuple
 
 from tinydb import TinyDB
-from typing import Tuple
 
 from .chapters import ChaptersAccess
 from .info import InfoAccess

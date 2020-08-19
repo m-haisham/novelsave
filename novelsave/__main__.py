@@ -3,7 +3,7 @@ from getpass import getpass
 
 from webnovel.tools import UrlTools
 
-from novelsave import NovelSave
+from novelsave import WebNovelSave
 
 parser = argparse.ArgumentParser(description='tool to convert webnovel to epub', epilog='Own your novels')
 parser.add_argument('novel', type=str, help='either id or url of novel')
@@ -25,7 +25,7 @@ if 'https://' in args.novel:
 else:
     novel_id = int(args.novel)
 
-novelsave = NovelSave(novel_id)
+novelsave = WebNovelSave(novel_id)
 novelsave.timeout = args.timeout
 
 # get credentials

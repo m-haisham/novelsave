@@ -10,22 +10,20 @@ from .database import WebNovelData
 from .database import DIR
 from .epub import Epub
 from .ui import Loader, Waiter
+from .novelsave import NovelSave
 
 
-class NovelSave:
+class WebNovelSave(NovelSave):
     timeout: int = 60
 
     _api: ParsedApi = None
 
-    def __init__(self, novel_id, email=None, password=None):
-        self.novel_id = novel_id
-        self.email = email
-        self.password = password
+    def __init__(self, url, email=None, password=None):
+        super(WebNovelSave, self).__init__(url, email, password)
 
-    def update_data(self):
-        """
-        Update novel data
-        """
+        self.novel_id = UrlTools.from_novel_url(url)
+
+    def update(self):
         # get api
         api = self.get_api()
 
@@ -62,7 +60,7 @@ class NovelSave:
                 check=False
             )
 
-    def download_pending(self):
+    def download(self):
         """
         Download remaining chapters
         """

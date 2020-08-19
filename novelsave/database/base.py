@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from tinydb import TinyDB
+from typing import Tuple
 
 from .file import slugify
 from .tables import SingleClassTable, SequenceTable, MultiClassTable
@@ -11,13 +12,13 @@ DIR = Path.home() / Path('novels')
 
 class NovelBase:
     def __init__(self, url):
-        self.db = self.open_db(url)
+        self.db, self.path = self.open_db(url)
 
         self.novel = SingleClassTable(self.db, 'novel', Novel, ['title', 'author', 'thumbnail', 'url'])
         self.pending = SequenceTable(self.db, 'pending', key='url')
         self.chapters = MultiClassTable(self.db, 'chapters', Chapter, ['no', 'title', 'paragraphs', 'url'], 'url')
 
-    def open_db(self, url) -> TinyDB:
+    def open_db(self, url) -> Tuple[TinyDB, Path]:
         # trailing slash adds nothing
         if url[-1] == '/':
             url = url[:-1]
@@ -31,4 +32,4 @@ class NovelBase:
             with path.open('w'):
                 pass
 
-        return TinyDB(path)
+        return TinyDB(path), path

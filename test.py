@@ -1,6 +1,7 @@
 from novelsave.sources import WuxiaWorldCo
 from novelsave.database import NovelBase
 
+
 NOVEL = 'https://www.wuxiaworld.co/Reincarnation-Of-The-Strongest-Sword-God/'
 CHAPTER = 'https://www.wuxiaworld.co/Reincarnation-Of-The-Strongest-Sword-God/1239956.html'
 

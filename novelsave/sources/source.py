@@ -12,7 +12,7 @@ class Source:
     def of(url: str) -> bool:
         """
         :param url: url to test
-        :return: whether the url is from source
+        :return: whether the url is from this source
         """
         raise NotImplementedError
 

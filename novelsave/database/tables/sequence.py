@@ -27,9 +27,9 @@ class SequenceTable(IAccessor):
 
     def insert_all(self, values: List[int], check=True):
         """
-        adds all the ids to pending
+        adds all the values to pending
 
-        more optimized for adding multiple ids
+        more optimized for adding multiple values
 
         :param values: ids of chapters to add
         :param check: do nothing if already exists
@@ -44,16 +44,16 @@ class SequenceTable(IAccessor):
 
     def remove(self, value):
         """
-        removes id from pending
+        removes value from pending
 
-        :param id: id to remove
+        :param value: value to remove
         :return: None
         """
-        self.table.remove(where(self.field_key) == id)
+        self.table.remove(where(self.field_key) == value)
 
     def all(self) -> List:
         """
-        :return: all pending ids
+        :return: all values
         """
         return [doc[self.field_key] for doc in self.table.all()]
 

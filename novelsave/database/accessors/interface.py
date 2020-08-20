@@ -14,7 +14,7 @@ class IAccessor:
         if self._table_name is None:
             self._table = None
         else:
-            self._table = self.db.table(self._table_name)
+            self._table = self.db.table(self._table_name, cache_size=None)
 
     def where(self, key, value) -> List[Document]:
         """
@@ -35,7 +35,7 @@ class IAccessor:
 
     @table_name.setter
     def table_name(self, name):
-        self._table = self.db.table(name)
+        self._table = self.db.table(name, cache_size=None)
         self._table_name = name
 
     @property

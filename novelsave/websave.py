@@ -95,6 +95,8 @@ class WebNovelSave(NovelSaveTemplate):
                 # at last
                 data.pending_access.remove(chapter.id)
 
+                controller.queue_out.task_done()
+
     def create_epub(self):
         """
         Create epub with current data

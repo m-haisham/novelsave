@@ -74,6 +74,8 @@ class SourceNovelSave(NovelSaveTemplate):
                 # at last remove chapter from pending
                 self.db.pending.remove(chapter.url)
 
+                controller.queue_out
+
     def create_epub(self):
         with Loader('Create epub'):
             Epub().create(

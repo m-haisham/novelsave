@@ -11,13 +11,14 @@ class ConcurrentActionsController:
 
         # used to tell when all tasks done
         self.remaining_count = AtomicInt(0)
+        self.backlog = 0
 
         self.threads = [
             ActionThread(
                 task,
                 self.queue_in,
                 self.queue_out,
-                on_complete=self.remaining_count.decrement,
+                on_complete=self.queue_in.task_done,
                 name=f'action_thread_{i}',
             )
             for i in range(count)
@@ -46,4 +47,15 @@ class ConcurrentActionsController:
         """
         :return: whether all the tasks are done
         """
-        return self.remaining_count.get_noblock() == 0 and self.queue_out.qsize() == 0
+        if self.backlog > 0:
+            self.backlog -= 1
+            return False
+
+        with self.queue_in.all_tasks_done:
+            q_in = self.queue_in.unfinished_tasks == 0
+
+        with self.queue_out.all_tasks_done:
+            self.backlog = self.queue_out.unfinished_tasks
+            q_out = self.backlog == 0
+
+        return q_in and q_out

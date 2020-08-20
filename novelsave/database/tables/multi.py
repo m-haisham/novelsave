@@ -22,6 +22,12 @@ class MultiClassTable(IAccessor):
         self.identifier = identifier
 
     def insert(self, obj):
+        """
+        put object without checking if it already exists
+
+        :param obj: object to be added
+        :return: None
+        """
         self.table.insert(self._to_dict(obj))
 
     def put(self, obj):

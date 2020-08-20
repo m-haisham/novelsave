@@ -11,6 +11,15 @@ class ChaptersAccess(IAccessor):
 
     fields = ['no', 'id', 'title', 'paragraphs']
 
+    def insert(self, obj):
+        """
+        put object without checking if it already exists
+
+        :param obj: object to be added
+        :return: None
+        """
+        self.table.insert(self._to_dict(obj))
+
     def put(self, chapter: Chapter):
         """
         put chapter with unique identifier chapter.id into database

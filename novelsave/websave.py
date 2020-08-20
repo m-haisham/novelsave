@@ -5,6 +5,7 @@ from webnovel.api import ParsedApi
 from webnovel.models import Novel
 from webnovel.tools import UrlTools
 
+from .concurrent import ConcurrentActionsController
 from .database import DIR
 from .database import WebNovelData
 from .epub import Epub
@@ -69,20 +70,30 @@ class WebNovelSave(NovelSaveTemplate):
 
         api = self.get_api()
 
-        with Loader('Init', value=0, total=len(pending_ids)) as brush:
-            for i, id in enumerate(pending_ids):
+        with Loader('Populating tasks', value=0, total=len(pending_ids)) as brush:
+
+            # initialize controller
+            controller = ConcurrentActionsController(4, task=api.chapter)
+            for id in pending_ids:
+                controller.add(self.novel_id, id)
+
+            # start downloading
+            controller.start()
+
+            while not controller.done:
+                chapter = controller.queue_out.get()
+
                 # update brush
                 brush.value += 1
 
                 prefix = f'[{brush.value}/{brush.total}]'
-                brush.desc = f'{prefix} {id}'
+                brush.desc = f'{prefix} {chapter.id}'
 
                 # get data
-                chapter = api.chapter(self.novel_id, id)
                 data.chapters_access.put(chapter)
 
                 # at last
-                data.pending_access.remove(id)
+                data.pending_access.remove(chapter.id)
 
     def create_epub(self):
         """

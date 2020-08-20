@@ -90,7 +90,7 @@ class WebNovelSave(NovelSaveTemplate):
                 brush.desc = f'{prefix} {chapter.id}'
 
                 # get data
-                data.chapters_access.put(chapter)
+                data.chapters_access.insert(chapter)
 
                 # at last
                 data.pending_access.remove(chapter.id)

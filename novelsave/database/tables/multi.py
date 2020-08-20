@@ -21,18 +21,17 @@ class MultiClassTable(IAccessor):
         self.fields = fields
         self.identifier = identifier
 
-    def put(self, obj, check=True):
+    def insert(self, obj):
+        self.table.insert(self._to_dict(obj))
+
+    def put(self, obj):
         """
         put object with unique identifier chapter.id into database
 
         :param obj: object to be added
-        :param check: uses upsert if true
         :return: None
         """
-        if check:
-            self.table.upsert(self._to_dict(obj), where(self.identifier) == getattr(obj, self.identifier))
-        else:
-            self.table.insert(self._to_dict(obj))
+        self.table.upsert(self._to_dict(obj), where(self.identifier) == getattr(obj, self.identifier))
 
     def put_all(self, objs: List):
         """

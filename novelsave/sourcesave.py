@@ -69,12 +69,12 @@ class SourceNovelSave(NovelSaveTemplate):
                 brush.desc = f'{prefix} {chapter.url}'
 
                 # get data
-                self.db.chapters.put(chapter)
+                self.db.chapters.insert(chapter)
 
                 # at last remove chapter from pending
                 self.db.pending.remove(chapter.url)
 
-                controller.queue_out
+                controller.queue_out.task_done()
 
     def create_epub(self):
         with Loader('Create epub'):

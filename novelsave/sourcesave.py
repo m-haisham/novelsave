@@ -20,7 +20,7 @@ class SourceNovelSave(NovelSaveTemplate):
             novel, chapters = self.source.novel(self.url)
 
         # download cover
-        data = UiTools.download(novel.thumbnail, desc='Downloading cover')
+        data = UiTools.download(novel.thumbnail, desc=f'Downloading cover {novel.thumbnail}')
         with self.cover_path().open('wb') as f:
             f.write(data.getbuffer())
 

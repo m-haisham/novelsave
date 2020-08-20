@@ -33,7 +33,7 @@ class WebNovelSave(NovelSaveTemplate):
             toc = api.toc(self.novel_id)
 
         # download cover
-        cover_data = UiTools.download(novel.cover_url)
+        cover_data = UiTools.download(novel.cover_url, desc=f'Downloading cover {novel.cover_url}')
         with self.cover_path().open('wb') as f:
             f.write(cover_data.getbuffer())
 

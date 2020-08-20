@@ -21,6 +21,9 @@ class MultiClassTable(IAccessor):
         self.fields = fields
         self.identifier = identifier
 
+    def insert(self, obj):
+        self.table.insert(self._to_dict(obj))
+
     def put(self, obj):
         """
         put object with unique identifier chapter.id into database

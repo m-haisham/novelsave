@@ -1,5 +1,4 @@
 from pathlib import Path
-from uuid import uuid4
 
 from ebooklib import epub
 from yattag import Doc
@@ -15,7 +14,7 @@ class Epub:
         book = epub.EpubBook()
 
         # id
-        book.set_identifier(str(novel.id if hasattr(novel, 'id') else uuid4()))
+        book.set_identifier(str(novel.id if hasattr(novel, 'id') else f'id_{novel.title}'))
         book.set_title(novel.title)
         book.add_author(novel.author)
 

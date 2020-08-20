@@ -13,8 +13,12 @@ class ActionThread(Thread):
 
     def run(self) -> None:
         while self.feed_in.qsize() != 0:
+
+            # run task using params from feeder
+            # push output to feed out sink
             self.feed_out.put(
                 self.target(*self.feed_in.get())
             )
 
+            # call that a task has been done
             self.on_complete()

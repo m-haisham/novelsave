@@ -5,6 +5,7 @@ from .database import NovelData
 from .sources import WuxiaWorldCo
 from .template import NovelSaveTemplate
 from .ui import Loader, UiTools
+from .concurrent import ConcurrentActionsController
 
 
 class SourceNovelSave(NovelSaveTemplate):
@@ -47,20 +48,31 @@ class SourceNovelSave(NovelSaveTemplate):
             print('[✗] No pending chapters')
             return
 
-        with Loader('Init', value=0, total=len(pending)) as brush:
-            for i, url in enumerate(pending):
+        with Loader('Populating tasks', value=0, total=len(pending)) as brush:
+
+            # initialize controller
+            controller = ConcurrentActionsController(4, task=self.source.chapter)
+            for url in pending:
+                controller.add(url)
+
+            # start downloading
+            controller.start()
+
+            # wait until downloads are done
+            while not controller.done:
+                chapter = controller.queue_out.get()
+
                 # update brush
                 brush.value += 1
 
                 prefix = f'[{brush.value}/{brush.total}]'
-                brush.desc = f'{prefix} {url}'
+                brush.desc = f'{prefix} {chapter.url}'
 
                 # get data
-                chapter = self.source.chapter(url)
                 self.db.chapters.put(chapter)
 
                 # at last remove chapter from pending
-                self.db.pending.remove(url)
+                self.db.pending.remove(chapter.url)
 
     def create_epub(self):
         with Loader('Create epub'):

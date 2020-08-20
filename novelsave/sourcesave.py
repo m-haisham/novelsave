@@ -2,7 +2,7 @@ from pathlib import Path
 
 from . import Epub
 from .database import NovelData
-from .sources import WuxiaWorldCo
+from .sources import WuxiaWorldCo, BoxNovel
 from .template import NovelSaveTemplate
 from .ui import Loader, UiTools
 from .concurrent import ConcurrentActionsController
@@ -98,7 +98,7 @@ class SourceNovelSave(NovelSaveTemplate):
 
         :return: source object
         """
-        for source in [WuxiaWorldCo]:
+        for source in [WuxiaWorldCo, BoxNovel]:
             if source.of(self.url):
                 return source()
 

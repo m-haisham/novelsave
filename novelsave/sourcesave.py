@@ -42,16 +42,20 @@ class SourceNovelSave(NovelSaveTemplate):
                 check=False
             )
 
-    def download(self):
+    def download(self, thread_count=4, limit=None):
         pending = self.db.pending.all()
         if not pending:
             print('[✗] No pending chapters')
             return
 
+        # limiting number of chapters downloaded
+        if limit is not None and limit < len(pending):
+            pending = pending[:limit]
+
         with Loader('Populating tasks', value=0, total=len(pending)) as brush:
 
             # initialize controller
-            controller = ConcurrentActionsController(4, task=self.source.chapter)
+            controller = ConcurrentActionsController(thread_count, task=self.source.chapter)
             for url in pending:
                 controller.add(url)
 
@@ -61,6 +65,9 @@ class SourceNovelSave(NovelSaveTemplate):
             # wait until downloads are done
             while not controller.done:
                 chapter = controller.queue_out.get()
+
+                # to test speed
+                # brush.print(controller.queue_out.qsize())
 
                 # update brush
                 brush.value += 1

@@ -7,6 +7,7 @@ from novelsave import NovelSave
 
 parser = argparse.ArgumentParser(description='tool to convert novels to epub')
 parser.add_argument('novel', type=str, help='either id (only for webnovels) or url of novel')
+parser.add_argument('--threads', type=int, help='number of download threads', default=4)
 parser.add_argument('-t', '--timeout', type=int, help='webdriver timeout', default=60)
 
 actions = parser.add_argument_group(title='actions')
@@ -40,7 +41,7 @@ if args.update:
     novelsave.update()
 
 if args.pending:
-    novelsave.download()
+    novelsave.download(thread_count=args.threads)
 
 if args.create:
     novelsave.create_epub()

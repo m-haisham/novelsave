@@ -14,9 +14,12 @@ class NovelSaveTemplate:
         """
         raise NotImplementedError
 
-    def download(self):
+    def download(self, thread_count=4, limit=None):
         """
         Download current pending chapters
+
+        :param thread_count: amount of download threads
+        :param limit: amount of chapters to download
         """
         raise NotImplementedError
 

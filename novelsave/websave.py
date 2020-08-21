@@ -58,7 +58,7 @@ class WebNovelSave(NovelSaveTemplate):
                 check=False
             )
 
-    def download(self):
+    def download(self, thread_count=4, limit=None):
         """
         Download remaining chapters
         """
@@ -68,12 +68,16 @@ class WebNovelSave(NovelSaveTemplate):
             print('[✗] No pending chapters')
             return
 
+        # limiting number of chapters downloaded
+        if limit is not None and limit < len(pending_ids):
+            pending = pending_ids[:limit]
+
         api = self.get_api()
 
         with Loader('Populating tasks', value=0, total=len(pending_ids)) as brush:
 
             # initialize controller
-            controller = ConcurrentActionsController(4, task=api.chapter)
+            controller = ConcurrentActionsController(thread_count, task=api.chapter)
             for id in pending_ids:
                 controller.add(self.novel_id, id)
 

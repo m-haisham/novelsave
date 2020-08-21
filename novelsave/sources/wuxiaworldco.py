@@ -26,7 +26,7 @@ class WuxiaWorldCo(Source):
 
         chapters = []
         for item in soup.find_all('a', {'class': 'chapter-item'}):
-            no, title = item.find('p').text.split(' ', 1)
+            no, title = self._parse_title(item.find('p').text)
 
             chapter = Chapter(
                 no=int(no),
@@ -41,7 +41,7 @@ class WuxiaWorldCo(Source):
     def chapter(self, url: str) -> Chapter:
         soup = self.soup(url)
 
-        no, title = soup.find('h1', {'class': 'chapter-title'}).text.split(' ', 1)
+        no, title = self._parse_title(soup.find('h1', {'class': 'chapter-title'}).text)
 
         # remove google ads
         for element in soup.find_all('ins', {'class': 'adsbygoogle'}):
@@ -58,3 +58,25 @@ class WuxiaWorldCo(Source):
             paragraphs=content[:-2],
             url=url
         )
+
+    def _parse_title(self, u_title: str) -> Tuple[int, str]:
+        # when title is affixed by chapter
+        if u_title[:8].lower() == 'chapter ':
+            _, no, title = u_title.split(' ', maxsplit=2)
+
+            try:
+                # Chapter {no} {title}
+                return int(no), title
+            except ValueError:
+                # semi colon after no
+                # Chapter {no}: {title}
+                return int(no[:-1]), title
+
+        try:
+            # {no} {title}
+            no, title = u_title.split(' ', maxsplit=1)
+            return int(no), title
+        except ValueError:
+            # typically volume 0 chapters that doesnt have chapter no.
+            # {title}
+            return -1, u_title

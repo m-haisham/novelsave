@@ -22,16 +22,18 @@ Novels are saved to folder `novels` in user home
 ### Help
 
 ```batch
-usage: __main__.py [-h] [-t TIMEOUT] [-u] [-p] [-c] [--email EMAIL] [--pass PASSWORD] novel
+usage: __main__.py [-h] [-tc THREADS] [-t TIMEOUT] [-u] [-p] [-c] [--email EMAIL] novel
 
-tool to convert webnovel to epub
+tool to convert novels to epub
 
 positional arguments:
-  novel                 either id or url of novel
+  novel                 either id (only for webnovels) or url of novel
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t TIMEOUT, --timeout TIMEOUT
+  -tc THREADS, --threads THREADS
+                        number of download threads
+  -to TIMEOUT, --timeout TIMEOUT
                         webdriver timeout
 
 actions:
@@ -41,7 +43,7 @@ actions:
 
 credentials:
   --email EMAIL         webnovel email
-  --pass PASSWORD       webnovel password
+
 ```
 
 ## Manual
@@ -56,3 +58,4 @@ Creating an epub is easy as calling a function. `novelsave.Epub().create()`
 
 - [webnovel.com](https://www.webnovel.com)
 - [wuxiaworld.co](https://www.wuxiaworld.co/)
+- [boxnovel.com](https://www.boxnovel.co/)

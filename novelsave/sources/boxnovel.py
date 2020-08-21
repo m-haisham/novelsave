@@ -51,15 +51,25 @@ class BoxNovel(Source):
             full_title = soup.find('div', {'class': 'cha-tit'}).find('h3').text.strip()
             no, title = self._parse_chapter_title(full_title)
 
-            paragraphs = [
-                element.find('p').text.strip()
-                for element in soup.find_all('div', {'class': 'cha-paragraph'})
-            ]
+            p_elements = soup.find_all('div', {'class': 'cha-paragraph'})
+            if p_elements:
+                paragraphs = [
+                    element.find('p').text.strip()
+                    for element in p_elements
+                ]
+            else:
+                paragraphs = []
+                for element in soup.find('div', {'class': 'cha-content'}).find_all('p'):
+                    if element.find('em') is not None:
+                        paragraphs.append(element.find('em').text.strip())
+                    else:
+                        paragraphs.append(str(element.find(text=True, recursive=False)).strip())
+
         else:
             reading_content = soup.find('div', {'class': 'reading-content'})
 
             full_title = None
-            for tag in ['h2', 'h3']:
+            for tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
                 elements = reading_content.find_all(tag)
                 if elements:
                     full_title = ' '.join([element.text for element in elements])

@@ -14,10 +14,14 @@ class BoxNovel(Source):
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 
+        description = soup.find('div', {'class': 'j_synopsis'})
+        if description is None:
+            description = soup.find('div', {'id': 'editdescription'})
+
         novel = Novel(
             title=soup.find('div', {'class': 'post-title'}).text.strip(),
             author=soup.find('div', {'class': 'author-content'}).text,
-            synopsis=soup.find('div', {'class': 'j_synopsis'}).text,
+            synopsis=description.text,
             thumbnail=soup.find('div', {'class': 'summary_image'}).find('img')['src'],
             url=url
         )

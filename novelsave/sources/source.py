@@ -5,6 +5,9 @@ from bs4 import BeautifulSoup
 
 from ..models import Novel, Chapter
 
+header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) '
+                        'Chrome/39.0.2171.95 Safari/537.36'}
+
 
 class Source:
     base: str
@@ -36,5 +39,8 @@ class Source:
         raise NotImplementedError
 
     def soup(self, url: str) -> BeautifulSoup:
-        response = requests.get(url)
+        response = requests.get(url, headers=header)
+        if response.status_code != 200:
+            raise Exception('Did not get proper response')
+
         return BeautifulSoup(response.content, 'lxml')

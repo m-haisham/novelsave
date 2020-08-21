@@ -1,4 +1,3 @@
-
 class Line:
 
     @staticmethod

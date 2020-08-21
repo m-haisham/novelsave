@@ -16,7 +16,7 @@ actions.add_argument('-p', '--pending', action='store_true', help='download pend
 actions.add_argument('-c', '--create', action='store_true', help='create epub from downloaded chapters')
 
 credentials = parser.add_argument_group(title='credentials')
-credentials.add_argument('--email', type=str,  help='webnovel email')
+credentials.add_argument('--email', type=str, help='webnovel email')
 
 args = parser.parse_args()
 

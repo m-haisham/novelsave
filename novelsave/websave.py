@@ -10,7 +10,8 @@ from .database import DIR
 from .database import WebNovelData
 from .epub import Epub
 from .template import NovelSaveTemplate
-from .ui import Loader, UiTools
+from .tools import UiTools
+from .ui import Loader
 
 
 class WebNovelSave(NovelSaveTemplate):
@@ -70,7 +71,7 @@ class WebNovelSave(NovelSaveTemplate):
 
         # limiting number of chapters downloaded
         if limit is not None and limit < len(pending_ids):
-            pending = pending_ids[:limit]
+            pending_ids = pending_ids[:limit]
 
         api = self.get_api()
 

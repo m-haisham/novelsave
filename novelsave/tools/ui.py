@@ -2,7 +2,7 @@ from io import BytesIO
 
 import requests
 
-from .loader import Loader
+from ..ui import Loader
 
 
 class UiTools:

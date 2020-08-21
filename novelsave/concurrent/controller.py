@@ -1,7 +1,6 @@
 from queue import Queue
 
 from .action import ActionThread
-from .atomic import AtomicInt
 
 
 class ConcurrentActionsController:

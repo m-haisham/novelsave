@@ -1,5 +1,5 @@
-from threading import Thread
 from queue import Queue
+from threading import Thread
 
 
 class ActionThread(Thread):
@@ -13,7 +13,6 @@ class ActionThread(Thread):
 
     def run(self) -> None:
         while self.feed_in.qsize() != 0:
-
             # run task using params from feeder
             # push output to feed out sink
             self.feed_out.put(

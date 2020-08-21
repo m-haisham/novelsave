@@ -1,11 +1,12 @@
 from pathlib import Path
 
 from . import Epub
-from .database import NovelData
-from .sources import WuxiaWorldCo, BoxNovel
-from .template import NovelSaveTemplate
-from .ui import Loader, UiTools
 from .concurrent import ConcurrentActionsController
+from .database import NovelData
+from .sources import WuxiaWorldCo, BoxNovel, ReadLightNovel
+from .template import NovelSaveTemplate
+from .tools import StringTools, UiTools
+from .ui import Loader
 
 
 class SourceNovelSave(NovelSaveTemplate):
@@ -34,7 +35,7 @@ class SourceNovelSave(NovelSaveTemplate):
             saved_urls = [chapter.url for chapter in self.db.chapters.all()]
 
             # so that downloads are ascending
-            pending = list({chapter.url for chapter in sorted(chapters, key=lambda c: c.no)}.difference(saved_urls))
+            pending = list({chapter.url for chapter in chapters}.difference(saved_urls))
 
             self.db.pending.truncate()
             self.db.pending.insert_all(
@@ -47,6 +48,8 @@ class SourceNovelSave(NovelSaveTemplate):
         if not pending:
             print('[✗] No pending chapters')
             return
+
+        pending.sort(key=StringTools.collect_integers)
 
         # limiting number of chapters downloaded
         if limit is not None and limit < len(pending):
@@ -66,8 +69,9 @@ class SourceNovelSave(NovelSaveTemplate):
             while not controller.done:
                 chapter = controller.queue_out.get()
 
-                # to test speed
+                # debug
                 # brush.print(controller.queue_out.qsize())
+                # brush.print(f'{chapter.no} {chapter.title}')
 
                 # update brush
                 brush.value += 1
@@ -105,7 +109,7 @@ class SourceNovelSave(NovelSaveTemplate):
 
         :return: source object
         """
-        for source in [WuxiaWorldCo, BoxNovel]:
+        for source in [WuxiaWorldCo, BoxNovel, ReadLightNovel]:
             if source.of(self.url):
                 return source()
 

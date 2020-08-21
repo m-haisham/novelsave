@@ -1,4 +1,3 @@
-
 class Frequency:
     timer: float
     _frequency: int

@@ -9,6 +9,7 @@ from ..tools import StringTools
 class ReadLightNovel(Source):
     base = 'https://www.readlightnovel.org'
 
+    @staticmethod
     def of(url: str) -> bool:
         return url[:len(ReadLightNovel.base)] == ReadLightNovel.base
 

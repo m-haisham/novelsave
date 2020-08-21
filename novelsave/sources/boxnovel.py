@@ -1,8 +1,9 @@
+import re
 from typing import Tuple, List
 
 from .source import Source
 from ..models import Chapter, Novel
-
+from ..tools import StringTools
 
 class BoxNovel(Source):
     base = 'https://boxnovel.com'
@@ -57,12 +58,30 @@ class BoxNovel(Source):
         else:
             reading_content = soup.find('div', {'class': 'reading-content'})
 
-            full_title = reading_content.find('h2').text
+            full_title = None
+            for tag in ['h2', 'h3']:
+                elements = reading_content.find_all(tag)
+                if elements:
+                    full_title = ' '.join([element.text for element in elements])
+                    break
+
+            # if title is in <p>
+            if full_title is None:
+                full_title = reading_content.find('p').text
+
+                # remove the title from it
+                p_elements = reading_content.find_all('p')[1:]
+            else:
+                p_elements = reading_content.find_all('p')
+
+            if full_title[0] != 'C':
+                raise Exception(url)
+
             no, title = self._parse_chapter_title(full_title)
 
             paragraphs = [
                 element.text.strip()
-                for element in reading_content.find_all('p')
+                for element in p_elements
             ]
 
         return Chapter(
@@ -86,7 +105,5 @@ class BoxNovel(Source):
         return no, title
 
     def _parse_chapter_title(self, s) -> Tuple[int, str]:
-        order, title = s.split(': ', maxsplit=1)
-        no = int(order.split(' ')[-1])
-
-        return no, title
+        match = re.match(r'Chapter (\d+):? ?(.+)', s, re.IGNORECASE)
+        return int(match.group(1)), match.group(2).strip()

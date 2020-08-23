@@ -97,7 +97,7 @@ class BoxNovel(Source):
         return Chapter(
             no=no,
             title=title,
-            paragraphs=paragraphs,
+            paragraphs=[para for para in paragraphs if para],
             url=url
         )
 

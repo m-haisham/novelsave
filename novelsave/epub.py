@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 
 from ebooklib import epub
@@ -14,7 +15,7 @@ class Epub:
         book = epub.EpubBook()
 
         # id
-        book.set_identifier(str(novel.id if hasattr(novel, 'id') else f'id_{novel.title}'))
+        book.set_identifier(str(novel.id if hasattr(novel, 'id') else hashlib.md5(novel.title).hexdigest()))
         book.set_title(novel.title)
         book.add_author(novel.author)
 

@@ -15,7 +15,7 @@ class Epub:
         book = epub.EpubBook()
 
         # id
-        book.set_identifier(str(novel.id if hasattr(novel, 'id') else hashlib.md5(novel.title).hexdigest()))
+        book.set_identifier(str(novel.id if hasattr(novel, 'id') else hashlib.md5(novel.title.encode('utf-8')).hexdigest()))
         book.set_title(novel.title)
         book.add_author(novel.author)
 

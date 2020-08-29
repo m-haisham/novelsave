@@ -48,14 +48,16 @@ class WuxiaWorldCo(Source):
             element.decompose()
 
         content = [
-            text.strip('\r\n\t \n')
+            text.strip()
             for text in soup.find('div', {'class': 'chapter-entity'}).find_all(text=True, recursive=False)
         ]
+
+        # content = self._clean_content(content)
 
         return Chapter(
             no=int(no),
             title=title,
-            paragraphs=content[:-2],
+            paragraphs=content,
             url=url
         )
 
@@ -80,3 +82,21 @@ class WuxiaWorldCo(Source):
             # typically volume 0 chapters that doesnt have chapter no.
             # {title}
             return -1, u_title
+
+    def _clean_content(self, content):
+        # check is paragraph has line breaks or tabs inside
+        # if split to separate paragraphs
+        for i, para in enumerate(content):
+            para = re.sub(r'[\n\t\r]', ' ', para)
+
+            parts = [part.strip() for part in para.split('  ') if part]
+            if len(parts) > 1:
+
+                # insert the paragraphs separately
+                content[i] = parts[0]
+                for j, part in enumerate(parts[1:], start=1):
+                    content.insert(i + j, part)
+            else:
+                content[i] = para
+
+        return content

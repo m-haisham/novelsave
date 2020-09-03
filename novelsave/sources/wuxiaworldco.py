@@ -52,7 +52,7 @@ class WuxiaWorldCo(Source):
             for text in soup.find('div', {'class': 'chapter-entity'}).find_all(text=True, recursive=False)
         ]
 
-        # content = self._clean_content(content)
+        content = self._clean_content(content)
 
         return Chapter(
             no=int(no),
@@ -84,19 +84,20 @@ class WuxiaWorldCo(Source):
             return -1, u_title
 
     def _clean_content(self, content):
+        paragraphs = []
+
         # check is paragraph has line breaks or tabs inside
         # if split to separate paragraphs
         for i, para in enumerate(content):
             para = re.sub(r'[\n\t\r]', ' ', para)
 
             parts = [part.strip() for part in para.split('  ') if part]
-            if len(parts) > 1:
 
-                # insert the paragraphs separately
-                content[i] = parts[0]
-                for j, part in enumerate(parts[1:], start=1):
-                    content.insert(i + j, part)
-            else:
-                content[i] = para
+            # filter out junk
+            paragraphs.extend([
+                part
+                for part in parts
+                if part not in ['Please go to', 'to read the latest chapters for free']
+            ])
 
-        return content
+        return paragraphs

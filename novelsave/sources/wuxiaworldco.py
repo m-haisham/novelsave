@@ -94,10 +94,12 @@ class WuxiaWorldCo(Source):
             parts = [part.strip() for part in para.split('  ') if part]
 
             # filter out junk
-            paragraphs.extend([
+            p = ' '.join([
                 part
                 for part in parts
                 if part not in ['Please go to', 'to read the latest chapters for free']
             ])
+
+            paragraphs.append(p)
 
         return paragraphs

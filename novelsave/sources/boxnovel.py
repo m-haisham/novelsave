@@ -5,6 +5,7 @@ from .source import Source
 from ..models import Chapter, Novel
 from ..tools import StringTools
 
+
 class BoxNovel(Source):
     base = 'https://boxnovel.com'
 
@@ -20,7 +21,7 @@ class BoxNovel(Source):
             description = soup.find('div', {'id': 'editdescription'})
 
         novel = Novel(
-            title=soup.find('div', {'class': 'post-title'}).text.strip(),
+            title=''.join(soup.find('div', {'class': 'post-title'}).find_all(text=True, recursive=False)).strip(),
             author=soup.find('div', {'class': 'author-content'}).text,
             synopsis=description.text,
             thumbnail=soup.find('div', {'class': 'summary_image'}).find('img')['src'],
@@ -53,10 +54,17 @@ class BoxNovel(Source):
 
             p_elements = soup.find_all('div', {'class': 'cha-paragraph'})
             if p_elements:
-                paragraphs = [
-                    element.find('p').text.strip()
-                    for element in p_elements
-                ]
+
+                paragraphs = []
+                for element in p_elements:
+                    p = element.find('p')
+                    if p is not None:
+                        paragraphs.append(p.text.strip())
+
+                # paragraphs = [
+                #     element.find('p').text.strip()
+                #     for element in p_elements
+                # ]
             else:
                 paragraphs = []
                 for element in soup.find('div', {'class': 'cha-content'}).find_all('p'):

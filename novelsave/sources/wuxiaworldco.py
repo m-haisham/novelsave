@@ -52,6 +52,9 @@ class WuxiaWorldCo(Source):
             for text in soup.find('div', {'class': 'chapter-entity'}).find_all(text=True, recursive=False)
         ]
 
+        # removes random junk inside paragraphs
+        # including new-line, tab
+        #
         content = self._clean_content(content)
 
         return Chapter(
@@ -93,12 +96,12 @@ class WuxiaWorldCo(Source):
 
             parts = [part.strip() for part in para.split('  ') if part]
 
-            # filter out junk
-            p = ' '.join([
+            # filter out junk lines
+            p = ' '.join((
                 part
                 for part in parts
                 if part not in ['Please go to', 'to read the latest chapters for free']
-            ])
+            ))
 
             paragraphs.append(p)
 

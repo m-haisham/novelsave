@@ -98,7 +98,10 @@ class ReadLightNovel(Source):
 
         def add_paragraph(s: str):
             if s and not StringTools.startswith(s, 'Translator:') and not StringTools.startswith(s, 'Chapter '):
-                paragraphs.append(s)
+
+                paragraphs.append(
+                    self.format_paragraph(s)
+                )
 
         if content.find('p') is None:
             # no <p> elements
@@ -116,3 +119,29 @@ class ReadLightNovel(Source):
             paragraphs=paragraphs,
             url=url
         )
+
+    def format_paragraph(self, p: str):
+
+        construct = list(p)
+        indexes = []
+        for i, c in enumerate(construct):
+            if c == '.':
+                if construct[i-1] == ' ':
+                    indexes.append(i-1)
+
+                try:
+                    if construct[i+1] == ' ' and construct[i+2]:
+                        indexes.append(i+1)
+                except IndexError:
+                    pass
+
+        # no need for changes
+        if len(indexes) == 0:
+            return p
+
+        paragraph = ''
+        for i, c in enumerate(construct):
+            if i not in indexes:
+                paragraph += c
+
+        return paragraph

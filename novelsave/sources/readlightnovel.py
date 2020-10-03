@@ -130,7 +130,7 @@ class ReadLightNovel(Source):
                     indexes.append(i-1)
 
                 try:
-                    if construct[i+1] == ' ' and construct[i+2]:
+                    if construct[i+1] == ' ' and not construct[i+2]:
                         indexes.append(i+1)
                 except IndexError:
                     pass

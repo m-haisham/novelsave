@@ -7,16 +7,18 @@ from novelsave import NovelSave
 
 parser = argparse.ArgumentParser(description='tool to convert novels to epub')
 parser.add_argument('novel', type=str, help='either id (only for webnovels) or url of novel')
-parser.add_argument('-tc', '--threads', type=int, help='number of download threads', default=4)
-parser.add_argument('-to', '--timeout', type=int, help='webdriver timeout', default=60)
 
 actions = parser.add_argument_group(title='actions')
 actions.add_argument('-u', '--update', action='store_true', help='update novel details')
 actions.add_argument('-p', '--pending', action='store_true', help='download pending chapters')
 actions.add_argument('-c', '--create', action='store_true', help='create epub from downloaded chapters')
+actions.add_argument('--force-cover', action='store_true', help='download and overwrite the existing cover')
 
 credentials = parser.add_argument_group(title='credentials')
 credentials.add_argument('--email', type=str, help='webnovel email')
+
+parser.add_argument('--threads', type=int, help='number of download threads', default=4)
+parser.add_argument('--timeout', type=int, help='webdriver timeout', default=60)
 
 args = parser.parse_args()
 
@@ -32,13 +34,13 @@ if args.email is not None:
     novelsave.email = args.email
 
     print()  # some breathing room
-    novelsave.password = getpass('[-] password')
+    novelsave.password = getpass('[-] password: ')
 
 if not any([args.update, args.pending, args.create]):
     print('[✗] No actions selected')
 
 if args.update:
-    novelsave.update()
+    novelsave.update(force_cover=args.force_cover)
 
 if args.pending:
     novelsave.download(thread_count=args.threads)

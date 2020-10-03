@@ -4,7 +4,7 @@ class NovelSaveTemplate:
         self.username = username
         self.password = password
 
-    def update(self):
+    def update(self, force_cover=False):
         """
         Update novel data
 

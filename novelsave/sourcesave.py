@@ -16,15 +16,16 @@ class SourceNovelSave(NovelSaveTemplate):
         self.db = self.open_db()
         self.source = self.parse_source()
 
-    def update(self):
+    def update(self, force_cover=False):
         # scrape website, get novel info and toc
         with Loader('Scraping novel'):
             novel, chapters = self.source.novel(self.url)
 
-        # download cover
-        data = UiTools.download(novel.thumbnail, desc=f'Downloading cover {novel.thumbnail}')
-        with self.cover_path().open('wb') as f:
-            f.write(data.getbuffer())
+        if force_cover or not self.cover_path().exists():
+            # download cover
+            data = UiTools.download(novel.thumbnail, desc=f'Downloading cover {novel.thumbnail}')
+            with self.cover_path().open('wb') as f:
+                f.write(data.getbuffer())
 
         # update novel information
         with Loader('Update novel'):

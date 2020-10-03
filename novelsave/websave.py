@@ -24,7 +24,7 @@ class WebNovelSave(NovelSaveTemplate):
 
         self.novel_id = UrlTools.from_novel_url(url)
 
-    def update(self):
+    def update(self, force_cover=False):
         # get api
         api = self.get_api()
 
@@ -34,10 +34,11 @@ class WebNovelSave(NovelSaveTemplate):
             # obtain table of contents
             toc = api.toc(self.novel_id)
 
-        # download cover
-        cover_data = UiTools.download(novel.cover_url, desc=f'Downloading cover {novel.cover_url}')
-        with self.cover_path().open('wb') as f:
-            f.write(cover_data.getbuffer())
+        if force_cover or not self.cover_path().exists():
+            # download cover
+            cover_data = UiTools.download(novel.cover_url, desc=f'Downloading cover {novel.cover_url}')
+            with self.cover_path().open('wb') as f:
+                f.write(cover_data.getbuffer())
 
         # # #
         # update data

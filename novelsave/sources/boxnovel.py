@@ -21,7 +21,7 @@ class BoxNovel(Source):
             description = soup.find('div', {'id': 'editdescription'})
 
         novel = Novel(
-            title=''.join(soup.find('div', {'class': 'post-title'}).find_all(text=True, recursive=False)).strip(),
+            title=''.join(soup.find('div', {'class': 'post-title'}).find('h3').find_all(text=True, recursive=False)).strip(),
             author=soup.find('div', {'class': 'author-content'}).text,
             synopsis=description.text,
             thumbnail=soup.find('div', {'class': 'summary_image'}).find('img')['src'],

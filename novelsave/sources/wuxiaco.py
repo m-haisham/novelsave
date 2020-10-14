@@ -5,13 +5,13 @@ from .source import Source
 from ..models import Novel, Chapter
 
 
-class WuxiaWorldCo(Source):
+class WuxiaCo(Source):
     base = 'https://www.wuxiaworld.co'
     url_pattern = re.compile(r'https://www\.wuxiaworld\.co(?!(m))')
 
     @staticmethod
     def of(url: str) -> bool:
-        return bool(WuxiaWorldCo.url_pattern.match(url))
+        return bool(WuxiaCo.url_pattern.match(url))
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)

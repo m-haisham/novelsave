@@ -13,3 +13,9 @@ class StringTools:
     @staticmethod
     def collect_integers(s: str) -> Tuple[int]:
         return tuple(int(n) for n in int_pattern.findall(s))
+
+    @staticmethod
+    def clean(s: str):
+        s = s.replace(' ', ' ')
+
+        return s

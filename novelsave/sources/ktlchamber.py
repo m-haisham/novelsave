@@ -6,8 +6,8 @@ from .source import Source
 from ..models import Novel, Chapter
 from ..tools import StringTools
 
-class Ktlchamber(Source):
 
+class Ktlchamber(Source):
     base = 'https://ktlchamber.wordpress.com'
 
     chapter_regex = re.compile(r'Chapter[  ](\d+)\.[  ]?(.*)', flags=re.IGNORECASE)
@@ -35,6 +35,7 @@ class Ktlchamber(Source):
         )
 
         chapters = []
+        prefix = f"{url}{'' if url[-1] == '/' else '/'}"
         for a in entry_content.find_all('a'):
             text = a.text
             if StringTools.startswith(text, 'Chapter'):
@@ -43,7 +44,7 @@ class Ktlchamber(Source):
                 chapter = Chapter(
                     no=int(result.group(1)),
                     title=result.group(2),
-                    url=f"{url}/{a['href']}"
+                    url=f"{prefix}{a['href']}"
                 )
 
                 chapters.append(chapter)
@@ -68,10 +69,10 @@ class Ktlchamber(Source):
         entry_content = soup.find('div', {'class': 'entry-content'})
         p_elements = entry_content.find_all('p')
 
-        paragraphs = [
-            element.text
-            for element in p_elements
-        ]
+        paragraphs = []
+        for element in p_elements[1:-1]:
+            for text in element.find_all(text=True):
+                paragraphs.append(text.strip())
 
         result = self.chapter_regex.search(soup.find('h1', {'class': 'entry-title'}).text)
 

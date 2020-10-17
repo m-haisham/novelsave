@@ -40,7 +40,7 @@ class Source:
 
     def soup(self, url: str) -> BeautifulSoup:
         response = requests.get(url, headers=header)
-        if response.status_code != 200:
+        if response.status_code == 200:
+            return BeautifulSoup(response.content, 'lxml')
+        else:
             raise Exception('Did not get proper response')
-
-        return BeautifulSoup(response.content, 'lxml')

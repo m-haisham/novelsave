@@ -6,6 +6,7 @@ from .wuxiaco import WuxiaCo
 # from .scribblehub import ScribbleHub
 from .insanitycave import InsanityCave
 from .ktlchamber import Ktlchamber
+from .lightnovelworld import LightNovelWorld
 
 sources = [
     WuxiaCo,
@@ -13,4 +14,5 @@ sources = [
     ReadLightNovel,
     InsanityCave,
     Ktlchamber,
+    LightNovelWorld,
 ]

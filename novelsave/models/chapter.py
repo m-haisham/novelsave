@@ -5,7 +5,7 @@ from typing import List
 
 @dataclass
 class Chapter:
-    no: int = None
+    no: float = None
     title: str = None
     paragraphs: List[str] = None
     url: str = None

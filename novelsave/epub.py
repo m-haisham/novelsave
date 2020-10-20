@@ -2,6 +2,7 @@ import hashlib
 from pathlib import Path
 
 from ebooklib import epub
+from .tools import StringTools
 from yattag import Doc
 
 from .database import slugify
@@ -71,7 +72,7 @@ class Epub:
         :param chapter: novel chapter
         :return: chapter xhtml
         """
-        prefix = f'{f"{chapter.no} " if chapter.no > 0 else ""}'
+        prefix = f'{f"{StringTools.from_float(chapter.no)} " if chapter.no > 0 else ""}'
         title = f'{prefix}{chapter.title}'
         epub_chapter = epub.EpubHtml(title=title, file_name=f'chapter_{chapter.no}.xhtml', lang='en')
 

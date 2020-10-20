@@ -109,19 +109,19 @@ class BoxNovel(Source):
             url=url
         )
 
-    def _parse_title(self, s) -> Tuple[int, str]:
+    def _parse_title(self, s) -> Tuple[float, str]:
         if ' - ' in s:
             # there is a name in title
             order, title = s.split(' - ', maxsplit=1)
-            no = int(order.split(' ', maxsplit=1)[-1])
+            no = float(order.split(' ', maxsplit=1)[-1])
 
         else:
             # no title, just chapter no
             title = s
-            no = int(s.split(' ', maxsplit=1)[-1])
+            no = float(s.split(' ', maxsplit=1)[-1])
 
         return no, title
 
     def _parse_chapter_title(self, s) -> Tuple[int, str]:
         match = re.match(r'Chapter (\d+):? ?(.+)', s, re.IGNORECASE)
-        return int(match.group(1)), match.group(2).strip()
+        return float(match.group(1)), match.group(2).strip()

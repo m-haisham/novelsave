@@ -43,4 +43,4 @@ class Source:
         if response.status_code == 200:
             return BeautifulSoup(response.content, 'lxml')
         else:
-            raise Exception('Did not get proper response')
+            raise Exception(f'{response.status_code}: {url}')

@@ -27,3 +27,7 @@ class StringTools:
         s = s.replace(' ', ' ')
 
         return s
+
+    @staticmethod
+    def from_float(f: float) -> str:
+        return ('%f' % f).rstrip('0').rstrip('.')

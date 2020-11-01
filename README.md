@@ -60,3 +60,6 @@ Creating an epub is easy as calling a function. `novelsave.Epub().create()`
 - [wuxiaworld.co](https://www.wuxiaworld.co/)
 - [boxnovel.com](https://www.boxnovel.co/)
 - [readlightnovel.org](https://www.readlightnovel.org/)
+- [insanitycave.poetry](https://insanitycave.poetry.blog/)
+- [ktlchamber.wordpress](https://ktlchamber.wordpress.com)
+- [kieshitl.wordpress](https://kieshitl.wordpress.com)

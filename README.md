@@ -11,8 +11,21 @@ pip install novelsave
 ## Commandline
 
 ### Example
+
+**Update a novel**
+
 ```
-python3 -m novelsave https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c
+novelsave https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c
+```
+
+**Check/Update configurations**
+
+```
+novelsave config
+```
+
+```
+novelsave config -d novels
 ```
 
 #### Save directory
@@ -22,28 +35,30 @@ Novels are saved to folder `novels` in user home
 ### Help
 
 ```batch
-usage: __main__.py [-h] [-tc THREADS] [-t TIMEOUT] [-u] [-p] [-c] [--email EMAIL] novel
+usage: __main__.py [-h] [-u] [-p] [-c] [--force-cover] [--email EMAIL] [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT] [-d DIR] action
 
 tool to convert novels to epub
 
 positional arguments:
-  novel                 either id (only for webnovels) or url of novel
+  action             novel url for downloading novels; 'config' to change configurations
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -tc THREADS, --threads THREADS
-                        number of download threads
-  -to TIMEOUT, --timeout TIMEOUT
-                        webdriver timeout
+  -h, --help         show this help message and exit
+  --threads THREADS  number of download threads
+  --timeout TIMEOUT  webdriver timeout
+  --limit LIMIT      amount of chapters to download
 
 actions:
-  -u, --update          update novel details
-  -p, --pending         download pending chapters
-  -c, --create          create epub from downloaded chapters
+  -u, --update       update novel details
+  -p, --pending      download pending chapters
+  -c, --create       create epub from downloaded chapters
+  --force-cover      download and overwrite the existing cover
 
 credentials:
-  --email EMAIL         webnovel email
+  --email EMAIL      webnovel email
 
+config:
+  -d DIR, --dir DIR  directory for saving novels
 ```
 
 ## Manual

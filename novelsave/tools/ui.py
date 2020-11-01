@@ -36,3 +36,15 @@ class UiTools:
                 brush.desc = desc
 
         return bytes
+
+    @staticmethod
+    def print_success(*args):
+        print('[✓]', *args)
+
+    @staticmethod
+    def print_error(*args):
+        print('[✗]', *args)
+
+    @staticmethod
+    def print_var(name, value):
+        print(f'[-] {name} = {value}')

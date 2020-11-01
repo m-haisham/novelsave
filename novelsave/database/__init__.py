@@ -1,3 +1,3 @@
-from .base import DIR, NovelData
-from .file import slugify
+from .base import NovelData
 from .webnovel import WebNovelData
+from .config import UserConfig

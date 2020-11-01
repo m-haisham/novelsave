@@ -31,3 +31,7 @@ class StringTools:
     @staticmethod
     def from_float(f: float) -> str:
         return ('%f' % f).rstrip('0').rstrip('.')
+
+    @staticmethod
+    def slugify(s):
+        return re.sub(r'[\\/:*"\'<>|.%$^&£?]', '', s)

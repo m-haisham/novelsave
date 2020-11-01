@@ -6,7 +6,6 @@ from webnovel.models import Novel
 from webnovel.tools import UrlTools
 
 from .concurrent import ConcurrentActionsController
-from .database import DIR
 from .database import WebNovelData
 from .epub import Epub
 from .template import NovelSaveTemplate
@@ -19,8 +18,8 @@ class WebNovelSave(NovelSaveTemplate):
 
     _api: ParsedApi = None
 
-    def __init__(self, url, username=None, password=None):
-        super(WebNovelSave, self).__init__(url, username, password)
+    def __init__(self, url, username=None, password=None, directory=None):
+        super(WebNovelSave, self).__init__(url, username, password, directory)
 
         self.novel_id = UrlTools.from_novel_url(url)
 
@@ -42,7 +41,7 @@ class WebNovelSave(NovelSaveTemplate):
 
         # # #
         # update data
-        data = WebNovelData(self.novel_id)
+        data = self.open_db()
 
         with Loader('Update novel'):
             data.info_access.set_info(novel)
@@ -64,7 +63,7 @@ class WebNovelSave(NovelSaveTemplate):
         """
         Download remaining chapters
         """
-        data = WebNovelData(self.novel_id)
+        data = self.open_db()
         pending_ids = data.pending_access.all()
         if len(pending_ids) <= 0:
             print('[✗] No pending chapters')
@@ -107,7 +106,7 @@ class WebNovelSave(NovelSaveTemplate):
         """
         Create epub with current data
         """
-        data = WebNovelData(self.novel_id)
+        data = self.open_db()
 
         with Loader('Create epub'):
             Epub().create(
@@ -143,6 +142,9 @@ class WebNovelSave(NovelSaveTemplate):
 
         return self._api
 
+    def open_db(self):
+        return WebNovelData(self.path())
+
     def should_signin(self):
         return self.username is not None and self.password is not None
 
@@ -150,7 +152,7 @@ class WebNovelSave(NovelSaveTemplate):
         return self.path() / Path('cover.jpg')
 
     def path(self):
-        path = DIR / Path(f'n{self.novel_id}')
+        path = Path(self.user.directory.get()) / Path(f'n{self.novel_id}')
         path.mkdir(parents=True, exist_ok=True)
 
         return path

@@ -22,7 +22,8 @@ setup(
         'webnovelbot',
         'bs4',
         'lxml',
-        'requests'
+        'requests',
+        'appdirs'
     ],
 
     classifiers=[
@@ -36,6 +37,11 @@ setup(
     url='https://github.com/mHaisham/novelsave',
     project_urls={
         'Source code': 'https://github.com/mHaisham/novelsave'
+    },
+    entry_points={
+        'console_scripts': [
+            'novelsave = novelsave.__main__:main'
+        ]
     },
     packages=find_packages(),
     python_requires='>=3.6'

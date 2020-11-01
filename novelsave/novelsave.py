@@ -19,8 +19,8 @@ class NovelSave:
                     arguments[arg] = None
 
         if Webnovel.of(url):
-            cls = WebNovelSave(arguments['url'], arguments['username'], arguments['password'])
+            cls = WebNovelSave(arguments['url'], arguments['username'], arguments['password'], arguments['directory'])
         else:
-            cls = SourceNovelSave(arguments['url'])
+            cls = SourceNovelSave(arguments['url'], arguments['directory'])
 
         return cls

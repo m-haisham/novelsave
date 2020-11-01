@@ -10,8 +10,8 @@ from .ui import Loader
 
 
 class SourceNovelSave(NovelSaveTemplate):
-    def __init__(self, url):
-        super(SourceNovelSave, self).__init__(url, None, None)
+    def __init__(self, url, directory=None):
+        super(SourceNovelSave, self).__init__(url, None, None, directory)
 
         self.db = self.open_db()
         self.source = self.parse_source()
@@ -99,7 +99,12 @@ class SourceNovelSave(NovelSaveTemplate):
             )
 
     def open_db(self):
-        return NovelData(self.url)
+        # trailing slash adds nothing
+        url = self.url.rstrip('/')
+        folder_name = StringTools.slugify(url.split('/')[-1])
+        directory = Path(self.user.directory.get()) / Path(folder_name)
+
+        return NovelData(directory)
 
     def cover_path(self):
         return self.db.path.parent / Path('cover.jpg')

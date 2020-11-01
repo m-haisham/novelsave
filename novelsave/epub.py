@@ -5,8 +5,6 @@ from ebooklib import epub
 from .tools import StringTools
 from yattag import Doc
 
-from .database import slugify
-
 
 class Epub:
     def create(self, novel, cover, volumes, chapters, save_path):
@@ -63,7 +61,7 @@ class Epub:
 
         book.spine = [c for volume in book_chapters.values() for c in volume]
 
-        epub.write_epub(save_path / Path(f'{slugify(novel.title)}.epub').resolve(), book, {})
+        epub.write_epub(save_path / Path(f'{StringTools.slugify(novel.title)}.epub').resolve(), book, {})
 
     def _epub_chapter(self, chapter):
         """

@@ -100,7 +100,7 @@ class SourceNovelSave(NovelSaveTemplate):
 
     def open_db(self):
         # trailing slash adds nothing
-        url = self.url.rstrip('/')
+        url = self.url.rstrip('/ ')
         folder_name = StringTools.slugify(url.split('/')[-1])
         directory = Path(self.user.directory.get()) / Path(folder_name)
 

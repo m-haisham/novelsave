@@ -29,12 +29,13 @@ class BoxNovel(Source):
         )
 
         chapters = []
-        for element in soup.find_all('li', {'class': 'wp-manga-chapter'}):
+        for i, element in enumerate(soup.find_all('li', {'class': 'wp-manga-chapter'})):
             title_element = element.find('a')
 
             no, title = self._parse_title(title_element.text.strip())
 
             chapter = Chapter(
+                index=i,
                 no=no,
                 title=title,
                 url=title_element['href']

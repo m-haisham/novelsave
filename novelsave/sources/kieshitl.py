@@ -33,8 +33,9 @@ class KieshiTl(Source):
         )
 
         chapters = []
-        for a in soup.select('.entry-content > ul a'):
+        for i, a in enumerate(soup.select('.entry-content > ul a')):
             chapter = Chapter(
+                index=i,
                 url=a['href']
             )
 

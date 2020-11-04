@@ -32,7 +32,7 @@ class InsanityCave(Source):
         )
 
         chapters = []
-        for a in entry_content.find_all('a'):
+        for i, a in enumerate(entry_content.find_all('a')):
 
             result = self.chapter_title_regex.search(a.text.strip())
 
@@ -40,6 +40,7 @@ class InsanityCave(Source):
                 continue
 
             chapter = Chapter(
+                index=i,
                 no=int(result.group(1)),
                 title=result.group(2).strip(),
                 url=a['href']

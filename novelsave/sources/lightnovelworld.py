@@ -26,10 +26,11 @@ class LightNovelWorld(Source):
         )
 
         chapters = []
-        for li in soup.find('ul', {'class': 'chapter-list'}).children:
+        for i, li in enumerate(soup.find('ul', {'class': 'chapter-list'}).children):
             a = li.find('a')
 
             chapter = Chapter(
+                index=i,
                 no=int(float(li['data-chapterno'])),
                 url=f"{LightNovelWorld.base}{a['href']}"
             )

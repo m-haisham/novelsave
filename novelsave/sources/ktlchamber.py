@@ -34,6 +34,7 @@ class Ktlchamber(Source):
             url=url,
         )
 
+        offset = 0
         chapters = []
         prefix = f"{url}{'' if url[-1] == '/' else '/'}"
         for a in entry_content.find_all('a'):
@@ -42,18 +43,21 @@ class Ktlchamber(Source):
                 result = self.chapter_regex.search(text)
 
                 chapter = Chapter(
+                    index=offset,
                     no=int(result.group(1)),
                     title=result.group(2),
                     url=f"{prefix}{a['href']}"
                 )
 
                 chapters.append(chapter)
+                offset += 1
 
-        for li in entry_content.find('ul', recursive=False).children:
+        for i, li in enumerate(entry_content.find('ul', recursive=False).children):
             a = li.find('a')
 
             result = self.chapter_regex.search(a.text)
             chapter = Chapter(
+                index=offset + i,
                 no=int(result.group(1)),
                 title=result.group(2),
                 url=a['href']

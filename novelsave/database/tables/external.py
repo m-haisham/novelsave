@@ -20,7 +20,8 @@ class MultiClassExternalTable(MultiClassTable):
             cls: T,
             fields: List[str],
             identifier: str,
-            naming_scheme: Callable[[T], str]
+            naming_scheme: Callable[[T], str],
+            on_missing: Callable[[T], None] = None,
     ):
         super(MultiClassExternalTable, self).__init__(db, table, cls, fields, identifier)
 
@@ -28,6 +29,7 @@ class MultiClassExternalTable(MultiClassTable):
         self.path.mkdir(parents=True, exist_ok=True)
 
         self.naming_scheme = naming_scheme
+        self.on_missing = on_missing
 
     def insert(self, obj):
         doc, path = self._save(obj)
@@ -56,6 +58,10 @@ class MultiClassExternalTable(MultiClassTable):
                 )
             except FileNotFoundError:
                 self.remove(doc[self.identifier])
+
+                # external file missing callback
+                if self.on_missing is not None:
+                    self.on_missing(self._from_dict(doc))
                 continue
 
             objs.append(obj)

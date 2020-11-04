@@ -47,12 +47,20 @@ class MultiClassExternalTable(MultiClassTable):
             self.put(obj)
 
     def all(self) -> List:
-        return [
-            self._load(
-                Path(self.path / doc[self.PATH_KEY])
-            )
-            for doc in self.table.all()
-        ]
+        objs = []
+        for doc in self.table.all():
+
+            try:
+                obj = self._load(
+                    Path(self.path / doc[self.PATH_KEY])
+                )
+            except FileNotFoundError:
+                self.remove(doc[self.identifier])
+                continue
+
+            objs.append(obj)
+
+        return objs
 
     def all_basic(self) -> List[T]:
         return [self._from_dict(o) for o in self.table.all()]

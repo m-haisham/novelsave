@@ -1,11 +1,3 @@
-import atexit
-from pathlib import Path
-from typing import Tuple
-
-from tinydb import TinyDB
-from tinydb.storages import JSONStorage
-from tinydb.middlewares import CachingMiddleware
-
 from .chapters import ChaptersAccess
 from .info import InfoAccess
 from .pending import PendingAccess

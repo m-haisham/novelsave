@@ -64,12 +64,7 @@ class SourceNovelSave(NovelSaveTemplate):
                 controller.add(url)
 
             # start downloading
-            controller.start()
-
-            # wait until downloads are done
-            while not controller.done:
-                chapter = controller.queue_out.get()
-
+            for chapter in controller.iter():
                 # debug
                 # brush.print(controller.queue_out.qsize())
                 # brush.print(f'{chapter.no} {chapter.title}')
@@ -85,8 +80,6 @@ class SourceNovelSave(NovelSaveTemplate):
 
                 # at last remove chapter from pending
                 self.db.pending.remove(chapter.url)
-
-                controller.queue_out.task_done()
 
     def create_epub(self):
         with Loader('Create epub'):

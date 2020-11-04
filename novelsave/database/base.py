@@ -1,11 +1,7 @@
-import atexit
-
 from pathlib import Path
 from typing import Tuple
 
 from tinydb import TinyDB
-from tinydb.storages import JSONStorage
-from tinydb.middlewares import CachingMiddleware
 
 from .tables import SingleClassTable, SequenceTable, MultiClassTable
 from ..models import Novel, Chapter
@@ -33,4 +29,4 @@ class NovelData(Database):
         self.novel = SingleClassTable(self.db, 'novel', Novel, ['title', 'author', 'thumbnail', 'url'])
         self.pending = SequenceTable(self.db, 'pending', key='url')
         self.chapters = MultiClassTable(self.db, 'chapters', Chapter,
-                                        ['index', 'no', 'title', 'paragraphs', 'url', 'bulk'], 'url')
+                                        ['index', 'no', 'title', 'paragraphs', 'url'], 'url')

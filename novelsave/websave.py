@@ -83,11 +83,7 @@ class WebNovelSave(NovelSaveTemplate):
                 controller.add(self.novel_id, id)
 
             # start downloading
-            controller.start()
-
-            while not controller.done:
-                chapter = controller.queue_out.get()
-
+            for chapter in controller.iter():
                 # update brush
                 brush.value += 1
 
@@ -99,8 +95,6 @@ class WebNovelSave(NovelSaveTemplate):
 
                 # at last
                 data.pending_access.remove(chapter.id)
-
-                controller.queue_out.task_done()
 
     def create_epub(self):
         """

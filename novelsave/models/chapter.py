@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
 @dataclass
@@ -8,9 +8,8 @@ class Chapter:
     index: int = None
     no: float = None
     title: str = None
-    paragraphs: List[str] = None
+    paragraphs: Union[str, List[str]] = None
     url: str = None
-    bulk: bool = False
 
     @property
     def order(self) -> Tuple[int, float]:

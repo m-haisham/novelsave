@@ -79,9 +79,15 @@ class Epub:
         with tag('h1'):
             text(title)
 
-        for para in chapter.paragraphs:
-            with tag('p'):
-                text(para)
+        # for the more neatly scraped
+        if type(chapter.paragraphs) == list:
+            for para in chapter.paragraphs:
+                with tag('p'):
+                    text(para)
+
+        # those that are scraped as a single blob
+        elif type(chapter.paragraphs) == str:
+            doc.asis(chapter.paragraphs)
 
         epub_chapter.content = doc.getvalue()
         return epub_chapter

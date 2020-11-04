@@ -47,3 +47,15 @@ class ConcurrentActionsController:
             q_out = self.queue_out.unfinished_tasks == 0
 
         return q_in and q_out
+
+    def iter(self):
+        """
+        :return: generator that returns all the outputs
+        """
+        # start all the threads
+        self.start()
+
+        # wait for outputs from each thread
+        while not self.done:
+            yield self.queue_out.get()
+            self.queue_out.task_done()

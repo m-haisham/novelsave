@@ -5,7 +5,7 @@ from typing import List, Tuple, Union
 
 @dataclass
 class Chapter:
-    index: int = None
+    index: int = -1
     no: float = None
     title: str = None
     paragraphs: Union[str, List[str]] = None
@@ -14,3 +14,6 @@ class Chapter:
     @property
     def order(self) -> Tuple[int, float]:
         return self.index, self.no
+
+    def __hash__(self):
+        return hash(self.url)

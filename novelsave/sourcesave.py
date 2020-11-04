@@ -32,17 +32,14 @@ class SourceNovelSave(NovelSaveTemplate):
             self.db.novel.set(novel)
 
         # update_pending
-        with Loader('Update pending'):
-            saved_urls = [chapter.url for chapter in self.db.chapters.all()]
+        with Loader('Update pending') as brush:
+            saved = self.db.chapters.all_basic()
+            pending = list(set(chapters).difference(saved))
 
-            # so that downloads are ascending
-            pending = list({chapter.url for chapter in chapters}.difference(saved_urls))
+            brush.desc += f' ({len(pending)})'
 
             self.db.pending.truncate()
-            self.db.pending.insert_all(
-                pending,
-                check=False
-            )
+            self.db.pending.put_all(pending)
 
     def download(self, thread_count=4, limit=None):
         pending = self.db.pending.all()
@@ -50,18 +47,18 @@ class SourceNovelSave(NovelSaveTemplate):
             print('[✗] No pending chapters')
             return
 
-        pending.sort(key=StringTools.collect_integers)
+        pending.sort(key=lambda c: c.order)
 
         # limiting number of chapters downloaded
         if limit is not None and limit < len(pending):
             pending = pending[:limit]
 
-        with Loader('Populating tasks', value=0, total=len(pending)) as brush:
+        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending)) as brush:
 
             # initialize controller
-            controller = ConcurrentActionsController(thread_count, task=self.source.chapter)
-            for url in pending:
-                controller.add(url)
+            controller = ConcurrentActionsController(thread_count, task=self.task)
+            for chapter in pending:
+                controller.add(chapter)
 
             # start downloading
             for chapter in controller.iter():
@@ -71,9 +68,7 @@ class SourceNovelSave(NovelSaveTemplate):
 
                 # update brush
                 brush.value += 1
-
-                prefix = f'[{brush.value}/{brush.total}]'
-                brush.desc = f'{prefix} {chapter.url}'
+                brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
 
                 # get data
                 self.db.chapters.insert(chapter)
@@ -113,3 +108,9 @@ class SourceNovelSave(NovelSaveTemplate):
                 return source()
 
         raise ValueError(f'"{self.url}" does not belong to any available source')
+
+    def task(self, partialc):
+        ch = self.source.chapter(partialc.url)
+        ch.index = partialc.index
+
+        return ch

@@ -1,8 +1,8 @@
-from .chapters import ChaptersAccess
 from .info import InfoAccess
-from .pending import PendingAccess
 from .volumes import VolumesAccess
 from ..base import Database
+from ..tables import MultiClassTable, MultiClassExternalTable
+from ...models import Chapter
 
 
 class WebNovelData(Database):
@@ -10,7 +10,12 @@ class WebNovelData(Database):
         super(WebNovelData, self).__init__(directory)
 
         # set accessors
-        self.info_access = InfoAccess(self.db)
-        self.volumes_access = VolumesAccess(self.db)
-        self.chapters_access = ChaptersAccess(self.db)
-        self.pending_access = PendingAccess(self.db)
+        self.info = InfoAccess(self.db)
+        self.volumes = VolumesAccess(self.db)
+        self.pending = MultiClassTable(self.db, 'pending', Chapter, ['index', 'no', 'url'], 'url')
+        self.chapters = MultiClassExternalTable(
+            self.db, self.path.parent, 'chapters', Chapter,
+            ['index', 'no', 'title', 'paragraphs', 'url'], 'index',
+            naming_scheme=lambda c: str(c.index),
+            on_missing=lambda c: self.pending.put(c),
+        )

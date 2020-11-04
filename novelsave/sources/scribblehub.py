@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import List, Tuple
 
 import requests
@@ -7,7 +8,7 @@ from .source import Source
 from ..models import Chapter, Novel
 
 
-class ScribbleHub(Source):
+class ScribbleHub(Source, ABC):
     base = 'https://www.scribblehub.com/'
 
     @staticmethod

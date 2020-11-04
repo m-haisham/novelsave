@@ -9,7 +9,7 @@ from yattag import Doc
 class Epub:
     def create(self, novel, cover, volumes, chapters, save_path):
         # prepare data
-        chapters.sort(key=lambda c: c.no)
+        chapters.sort(key=lambda c: c.order)
 
         book = epub.EpubBook()
 

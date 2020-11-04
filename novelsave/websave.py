@@ -8,6 +8,7 @@ from webnovel.tools import UrlTools
 from .concurrent import ConcurrentActionsController
 from .database import WebNovelData
 from .epub import Epub
+from .models import Chapter
 from .template import NovelSaveTemplate
 from .tools import UiTools
 from .ui import Loader
@@ -44,57 +45,58 @@ class WebNovelSave(NovelSaveTemplate):
         data = self.open_db()
 
         with Loader('Update novel'):
-            data.info_access.set_info(novel)
+            data.info.set_info(novel)
 
         with Loader('Update volumes'):
             for volume, chapters in toc.items():
-                data.volumes_access.set_volume(volume, [c.id for c in chapters])
+                data.volumes.set_volume(volume, [c.id for c in chapters])
 
-        with Loader('Update pending'):
-            all_saved_ids = [c.id for c in data.chapters_access.all()]
+        with Loader('Update pending') as brush:
+            saved = data.chapters.all()
+            pending = list({self.to_chapter(c) for v in toc.values() for c in v if not c.locked}.difference(saved))
 
-            data.pending_access.truncate()
-            data.pending_access.insert_all(
-                list({c.id for v in toc.values() for c in v if not c.locked}.difference(all_saved_ids)),
-                check=False
-            )
+            brush.desc += f' ({len(pending)})'
+
+            data.pending.truncate()
+            data.pending.put_all([c for c in pending])
 
     def download(self, thread_count=4, limit=None):
         """
         Download remaining chapters
         """
         data = self.open_db()
-        pending_ids = data.pending_access.all()
-        if len(pending_ids) <= 0:
+        pending = data.pending.all()
+        if len(pending) <= 0:
             print('[✗] No pending chapters')
             return
 
         # limiting number of chapters downloaded
-        if limit is not None and limit < len(pending_ids):
-            pending_ids = pending_ids[:limit]
+        if limit is not None and limit < len(pending):
+            pending = pending[:limit]
 
         api = self.get_api()
 
-        with Loader('Populating tasks', value=0, total=len(pending_ids)) as brush:
+        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending)) as brush:
+
+            def task(novel_id, chapter_id):
+                return self.to_chapter(api.chapter(novel_id, chapter_id))
 
             # initialize controller
-            controller = ConcurrentActionsController(thread_count, task=api.chapter)
-            for id in pending_ids:
-                controller.add(self.novel_id, id)
+            controller = ConcurrentActionsController(thread_count, task=task)
+            for chapter in pending:
+                controller.add(self.novel_id, chapter.index)
 
             # start downloading
             for chapter in controller.iter():
                 # update brush
                 brush.value += 1
-
-                prefix = f'[{brush.value}/{brush.total}]'
-                brush.desc = f'{prefix} {chapter.id}'
+                brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
 
                 # get data
-                data.chapters_access.insert(chapter)
+                data.chapters.insert(chapter)
 
                 # at last
-                data.pending_access.remove(chapter.id)
+                data.pending.remove(chapter.index)
 
     def create_epub(self):
         """
@@ -104,10 +106,10 @@ class WebNovelSave(NovelSaveTemplate):
 
         with Loader('Create epub'):
             Epub().create(
-                novel=data.info_access.get_info(),
+                novel=data.info.get_info(),
                 cover=self.cover_path(),
-                volumes=data.volumes_access.all(),
-                chapters=data.chapters_access.all(),
+                volumes=data.volumes.all(),
+                chapters=data.chapters.all(),
                 save_path=self.path()
             )
 
@@ -150,3 +152,12 @@ class WebNovelSave(NovelSaveTemplate):
         path.mkdir(parents=True, exist_ok=True)
 
         return path
+
+    def to_chapter(self, wchapter):
+        return Chapter(
+            index=wchapter.id,
+            no=wchapter.no,
+            title=wchapter.title,
+            paragraphs=wchapter.paragraphs,
+            url=wchapter.url
+        )

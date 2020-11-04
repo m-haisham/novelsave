@@ -25,10 +25,11 @@ class WuxiaCo(Source):
         )
 
         chapters = []
-        for item in soup.find_all('a', {'class': 'chapter-item'}):
+        for i, item in enumerate(soup.find_all('a', {'class': 'chapter-item'})):
             no, title = self._parse_title(item.find('p').text)
 
             chapter = Chapter(
+                index=i,
                 no=int(no),
                 title=title,
                 url=f"{self.base}{item['href']}"

@@ -36,12 +36,15 @@ class ReadLightNovel(Source):
         )
 
         chapters = []
-        for element in soup.find('div', {'class': 'tab-content'}).find_all('ul', {'class': 'chapter-chs'}):
+        for i, element in enumerate(
+                soup.find('div', {'class': 'tab-content'}).find_all('ul', {'class': 'chapter-chs'})
+        ):
             children = list(element.find_all('a'))
             if not children:
                 continue
 
-            for link in children:
+            offset = len(children) * i
+            for j, link in enumerate(children):
                 text = link.text
                 trail = text.split(' ', maxsplit=2)[1]
 
@@ -51,6 +54,7 @@ class ReadLightNovel(Source):
                     continue
 
                 chapter = Chapter(
+                    index=offset + j,
                     no=int(trail),
                     title=text.strip(),
                     url=link['href']

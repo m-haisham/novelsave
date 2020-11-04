@@ -15,8 +15,9 @@ class ActionThread(Thread):
         while self.feed_in.qsize() != 0:
             # run task using params from feeder
             # push output to feed out sink
+            ipt = self.feed_in.get()
             self.feed_out.put(
-                self.target(*self.feed_in.get())
+                self.target(*ipt[0], **ipt[1])
             )
 
             # call that a task has been done

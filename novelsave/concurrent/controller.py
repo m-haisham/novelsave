@@ -19,14 +19,14 @@ class ConcurrentActionsController:
             for i in range(count)
         ]
 
-    def add(self, *args, block=False):
+    def add(self, *args, block=False, **kwargs):
         """
         put params to queue, equivalent to adding a task
 
         :param args: params for the task
         :param block: whether to do the operating while blocking
         """
-        self.queue_in.put(args, block=block)
+        self.queue_in.put((args, kwargs), block=block)
 
     def start(self):
         """

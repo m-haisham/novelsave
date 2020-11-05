@@ -52,7 +52,7 @@ class WebNovelSave(NovelSaveTemplate):
                 data.volumes.set_volume(volume, [c.id for c in chapters])
 
         with Loader('Update pending') as brush:
-            saved = data.chapters.all()
+            saved = data.chapters.all_basic()
             pending = list({self.to_chapter(c) for v in toc.values() for c in v if not c.locked}.difference(saved))
 
             brush.desc += f' ({len(pending)})'

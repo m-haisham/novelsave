@@ -17,3 +17,6 @@ class Chapter:
 
     def __hash__(self):
         return hash(self.url)
+
+    def __eq__(self, other):
+        return self.url == other.url

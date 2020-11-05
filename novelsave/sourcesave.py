@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import requests
+
 from . import Epub
 from .concurrent import ConcurrentActionsController
 from .database import NovelData
@@ -17,29 +19,31 @@ class SourceNovelSave(NovelSaveTemplate):
         self.source = self.parse_source()
 
     def update(self, force_cover=False):
-        # scrape website, get novel info and toc
-        with Loader('Scraping novel'):
-            novel, chapters = self.source.novel(self.url)
+
+        UiTools.print_info('Retrieving novel info...')
+        UiTools.print_info(self.url)
+        novel, chapters = self.source.novel(self.url)
+
+        UiTools.print_success(f'Found {len(chapters)} chapters')
 
         if force_cover or not self.cover_path().exists():
             # download cover
-            data = UiTools.download(novel.thumbnail, desc=f'Downloading cover {novel.thumbnail}')
+            response = requests.get(novel.thumbnail)
             with self.cover_path().open('wb') as f:
-                f.write(data.getbuffer())
+                f.write(response.content)
 
         # update novel information
-        with Loader('Update novel'):
-            self.db.novel.set(novel)
+        self.db.novel.set(novel)
 
         # update_pending
-        with Loader('Update pending') as brush:
-            saved = self.db.chapters.all_basic()
-            pending = list(set(chapters).difference(saved))
+        saved = self.db.chapters.all_basic()
+        pending = list(set(chapters).difference(saved))
 
-            brush.desc += f' ({len(pending)})'
+        self.db.pending.truncate()
+        self.db.pending.put_all(pending)
 
-            self.db.pending.truncate()
-            self.db.pending.put_all(pending)
+        UiTools.print_info(f'Pending {len(pending)} chapters',
+                           f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
 
     def download(self, thread_count=4, limit=None):
         pending = self.db.pending.all()

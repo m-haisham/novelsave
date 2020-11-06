@@ -46,9 +46,14 @@ class SourceNovelSave(NovelSaveTemplate):
                            f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
 
     def download(self, thread_count=4, limit=None):
+
+        # parameter validation
+        if limit <= 0:
+            UiTools.print_error("'limit' must be greater than 0")
+
         pending = self.db.pending.all()
         if not pending:
-            print('[✗] No pending chapters')
+            UiTools.print_error('No pending chapters')
             return
 
         pending.sort(key=lambda c: c.order)
@@ -56,6 +61,15 @@ class SourceNovelSave(NovelSaveTemplate):
         # limiting number of chapters downloaded
         if limit is not None and limit < len(pending):
             pending = pending[:limit]
+
+        # some useful information
+        if not self.verbose:
+            if len(pending) == 1:
+                additive = str(pending[0].index)
+            else:
+                additive = f'{pending[0].index} - {pending[-1].index}'
+
+            UiTools.print_info(f'Downloading {len(pending)} chapters | {additive}...')
 
         with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.verbose) as brush:
 

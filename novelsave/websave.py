@@ -79,6 +79,15 @@ class WebNovelSave(NovelSaveTemplate):
 
         api = self.get_api()
 
+        # some useful information
+        if not self.verbose:
+            if len(pending) == 1:
+                additive = str(pending[0].index)
+            else:
+                additive = f'{pending[0].index} - {pending[-1].index}'
+
+            UiTools.print_info(f'Downloading {len(pending)} chapters | {additive}...')
+
         with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.verbose) as brush:
 
             # initialize controller

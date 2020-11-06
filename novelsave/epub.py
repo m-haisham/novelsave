@@ -8,6 +8,10 @@ from yattag import Doc
 
 class Epub:
     def create(self, novel, cover, volumes, chapters, save_path) -> Path:
+        # parameter validation
+        if not chapters:
+            raise ValueError("'chapters' may not be 'None'")
+
         # prepare data
         chapters.sort(key=lambda c: c.order)
 

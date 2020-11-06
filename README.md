@@ -44,6 +44,7 @@ positional arguments:
 
 optional arguments:
   -h, --help         show this help message and exit
+  -v, --verbose      enable animations
   --threads THREADS  number of download threads
   --timeout TIMEOUT  webdriver timeout
   --limit LIMIT      amount of chapters to download

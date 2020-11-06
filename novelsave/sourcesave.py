@@ -46,11 +46,11 @@ class SourceNovelSave(NovelSaveTemplate):
                            f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
 
     def download(self, thread_count=4, limit=None):
-
         # parameter validation
         if limit and limit <= 0:
             UiTools.print_error("'limit' must be greater than 0")
 
+        self.db.chapters.check()  # check if any external files are missing
         pending = self.db.pending.all()
         if not pending:
             UiTools.print_error('No pending chapters')

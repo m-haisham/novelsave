@@ -72,9 +72,10 @@ class WebNovelSave(NovelSaveTemplate):
             UiTools.print_error("'limit' must be greater than 0")
 
         data = self.open_db()
+        data.chapters.check()  # check if any external files are missing
         pending = data.pending.all()
         if len(pending) <= 0:
-            print('[✗] No pending chapters')
+            UiTools.print_error('No pending chapters')
             return
 
         # limiting number of chapters downloaded
@@ -115,7 +116,7 @@ class WebNovelSave(NovelSaveTemplate):
                 data.chapters.insert(chapter)
 
                 # at last
-                data.pending.remove(chapter.index)
+                data.pending.remove(chapter.url)
 
     def create_epub(self):
         """

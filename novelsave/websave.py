@@ -79,21 +79,24 @@ class WebNovelSave(NovelSaveTemplate):
 
         api = self.get_api()
 
-        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending)) as brush:
-
-            def task(novel_id, chapter_id):
-                return self.to_chapter(api.chapter(novel_id, chapter_id))
+        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.verbose) as brush:
 
             # initialize controller
-            controller = ConcurrentActionsController(thread_count, task=task)
+            controller = ConcurrentActionsController(
+                thread_count,
+                task=lambda nid, cid: self.to_chapter(api.chapter(nid, cid))
+            )
             for chapter in pending:
                 controller.add(self.novel_id, chapter.index)
 
             # start downloading
             for chapter in controller.iter():
                 # update brush
-                brush.value += 1
-                brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
+                if self.verbose:
+                    brush.value += 1
+                    brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
+                else:
+                    print(f'[{chapter.index}] Downloaded {chapter.url}')
 
                 # get data
                 data.chapters.insert(chapter)

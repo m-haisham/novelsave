@@ -57,7 +57,7 @@ class SourceNovelSave(NovelSaveTemplate):
         if limit is not None and limit < len(pending):
             pending = pending[:limit]
 
-        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending)) as brush:
+        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.verbose) as brush:
 
             # initialize controller
             controller = ConcurrentActionsController(thread_count, task=self.task)
@@ -71,8 +71,11 @@ class SourceNovelSave(NovelSaveTemplate):
                 # brush.print(f'{chapter.no} {chapter.title}')
 
                 # update brush
-                brush.value += 1
-                brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
+                if self.verbose:
+                    brush.value += 1
+                    brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
+                else:
+                    print(f'[{str(chapter.index).zfill(4)}] Downloaded {chapter.url}')
 
                 # get data
                 self.db.chapters.insert(chapter)
@@ -81,14 +84,16 @@ class SourceNovelSave(NovelSaveTemplate):
                 self.db.pending.remove(chapter.url)
 
     def create_epub(self):
-        with Loader('Create epub'):
-            Epub().create(
-                novel=self.db.novel.parse(),
-                cover=self.cover_path(),
-                volumes={},
-                chapters=self.db.chapters.all(),
-                save_path=self.db.path.parent
-            )
+        UiTools.print_info('Packing epub...')
+        path = Epub().create(
+            novel=self.db.novel.parse(),
+            cover=self.cover_path(),
+            volumes={},
+            chapters=self.db.chapters.all(),
+            save_path=self.db.path.parent
+        )
+
+        UiTools.print_success(f'Saved to {path}')
 
     def open_db(self):
         # trailing slash adds nothing

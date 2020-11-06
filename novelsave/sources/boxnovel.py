@@ -29,7 +29,8 @@ class BoxNovel(Source):
         )
 
         chapters = []
-        for i, element in enumerate(soup.find_all('li', {'class': 'wp-manga-chapter'})):
+        chapter_elements = soup.find_all('li', {'class': 'wp-manga-chapter'})
+        for i, element in enumerate(reversed(chapter_elements)):
             title_element = element.find('a')
 
             no, title = self._parse_title(title_element.text.strip())

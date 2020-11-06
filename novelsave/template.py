@@ -5,6 +5,8 @@ from .tools import UiTools
 
 
 class NovelSaveTemplate:
+    verbose = False
+
     def __init__(self, url, username, password, directory=None):
         self.url = url
         self.username = username

@@ -26,6 +26,7 @@ def main():
     parser.add_argument('--threads', type=int, help='number of download threads', default=4)
     parser.add_argument('--timeout', type=int, help='webdriver timeout', default=60)
     parser.add_argument('--limit', type=int, help='amount of chapters to download')
+    parser.add_argument('-v', '--verbose', help='enable animations', action='store_true')
 
     config = parser.add_argument_group(title='config')
     config.add_argument('-d', '--dir', help='directory for saving novels')
@@ -66,6 +67,7 @@ def main():
 
     novelsave = NovelSave(args.action, directory=args.dir)
     novelsave.timeout = args.timeout
+    novelsave.verbose = args.verbose
 
     # get credentials
     if args.email is not None:

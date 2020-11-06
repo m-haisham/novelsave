@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import requests
+
 from . import Epub
 from .concurrent import ConcurrentActionsController
 from .database import NovelData
@@ -17,34 +19,41 @@ class SourceNovelSave(NovelSaveTemplate):
         self.source = self.parse_source()
 
     def update(self, force_cover=False):
-        # scrape website, get novel info and toc
-        with Loader('Scraping novel'):
-            novel, chapters = self.source.novel(self.url)
+
+        UiTools.print_info('Retrieving novel info...')
+        UiTools.print_info(self.url)
+        novel, chapters = self.source.novel(self.url)
+
+        UiTools.print_success(f'Found {len(chapters)} chapters')
 
         if force_cover or not self.cover_path().exists():
             # download cover
-            data = UiTools.download(novel.thumbnail, desc=f'Downloading cover {novel.thumbnail}')
+            response = requests.get(novel.thumbnail)
             with self.cover_path().open('wb') as f:
-                f.write(data.getbuffer())
+                f.write(response.content)
 
         # update novel information
-        with Loader('Update novel'):
-            self.db.novel.set(novel)
+        self.db.novel.set(novel)
 
         # update_pending
-        with Loader('Update pending') as brush:
-            saved = self.db.chapters.all_basic()
-            pending = list(set(chapters).difference(saved))
+        saved = self.db.chapters.all_basic()
+        pending = list(set(chapters).difference(saved))
 
-            brush.desc += f' ({len(pending)})'
+        self.db.pending.truncate()
+        self.db.pending.put_all(pending)
 
-            self.db.pending.truncate()
-            self.db.pending.put_all(pending)
+        UiTools.print_info(f'Pending {len(pending)} chapters',
+                           f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
 
     def download(self, thread_count=4, limit=None):
+
+        # parameter validation
+        if limit <= 0:
+            UiTools.print_error("'limit' must be greater than 0")
+
         pending = self.db.pending.all()
         if not pending:
-            print('[✗] No pending chapters')
+            UiTools.print_error('No pending chapters')
             return
 
         pending.sort(key=lambda c: c.order)
@@ -53,7 +62,16 @@ class SourceNovelSave(NovelSaveTemplate):
         if limit is not None and limit < len(pending):
             pending = pending[:limit]
 
-        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending)) as brush:
+        # some useful information
+        if not self.verbose:
+            if len(pending) == 1:
+                additive = str(pending[0].index)
+            else:
+                additive = f'{pending[0].index} - {pending[-1].index}'
+
+            UiTools.print_info(f'Downloading {len(pending)} chapters | {additive}...')
+
+        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.verbose) as brush:
 
             # initialize controller
             controller = ConcurrentActionsController(thread_count, task=self.task)
@@ -67,8 +85,11 @@ class SourceNovelSave(NovelSaveTemplate):
                 # brush.print(f'{chapter.no} {chapter.title}')
 
                 # update brush
-                brush.value += 1
-                brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
+                if self.verbose:
+                    brush.value += 1
+                    brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
+                else:
+                    print(f'[{str(chapter.index).zfill(4)}] Downloaded {chapter.url}')
 
                 # get data
                 self.db.chapters.insert(chapter)
@@ -77,14 +98,16 @@ class SourceNovelSave(NovelSaveTemplate):
                 self.db.pending.remove(chapter.url)
 
     def create_epub(self):
-        with Loader('Create epub'):
-            Epub().create(
-                novel=self.db.novel.parse(),
-                cover=self.cover_path(),
-                volumes={},
-                chapters=self.db.chapters.all(),
-                save_path=self.db.path.parent
-            )
+        UiTools.print_info('Packing epub...')
+        path = Epub().create(
+            novel=self.db.novel.parse(),
+            cover=self.cover_path(),
+            volumes={},
+            chapters=self.db.chapters.all(),
+            save_path=self.db.path.parent
+        )
+
+        UiTools.print_success(f'Saved to {path}')
 
     def open_db(self):
         # trailing slash adds nothing

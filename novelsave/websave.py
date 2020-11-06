@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import requests
 from webnovel import WebnovelBot
 from webnovel.api import ParsedApi
 from webnovel.models import Novel
@@ -28,37 +29,39 @@ class WebNovelSave(NovelSaveTemplate):
         # get api
         api = self.get_api()
 
-        with Loader('Scraping novel'):
-            novel = Novel.from_url(UrlTools.to_novel_url(self.novel_id))
+        UiTools.print_info('Retrieving novel info...')
+        UiTools.print_info(self.url)
+        novel = Novel.from_url(UrlTools.to_novel_url(self.novel_id))
 
-            # obtain table of contents
-            toc = api.toc(self.novel_id)
+        # obtain table of contents
+        toc = api.toc(self.novel_id)
+
+        UiTools.print_success(f'Found {len([c for v in toc.values() for c in v if not c.locked])} chapters')
 
         if force_cover or not self.cover_path().exists():
             # download cover
-            cover_data = UiTools.download(novel.cover_url, desc=f'Downloading cover {novel.cover_url}')
+            response = requests.get(novel.cover_url)
             with self.cover_path().open('wb') as f:
-                f.write(cover_data.getbuffer())
+                f.write(response.content)
 
         # # #
         # update data
         data = self.open_db()
 
-        with Loader('Update novel'):
-            data.info.set_info(novel)
+        # info and volume
+        data.info.set_info(novel)
+        for volume, chapters in toc.items():
+            data.volumes.set_volume(volume, [c.id for c in chapters])
 
-        with Loader('Update volumes'):
-            for volume, chapters in toc.items():
-                data.volumes.set_volume(volume, [c.id for c in chapters])
+        # update pending
+        saved = data.chapters.all_basic()
+        pending = list({self.to_chapter(c) for v in toc.values() for c in v if not c.locked}.difference(saved))
 
-        with Loader('Update pending') as brush:
-            saved = data.chapters.all_basic()
-            pending = list({self.to_chapter(c) for v in toc.values() for c in v if not c.locked}.difference(saved))
+        data.pending.truncate()
+        data.pending.put_all([c for c in pending])
 
-            brush.desc += f' ({len(pending)})'
-
-            data.pending.truncate()
-            data.pending.put_all([c for c in pending])
+        UiTools.print_info(f'Pending {len(pending)} chapters',
+                           f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
 
     def download(self, thread_count=4, limit=None):
         """
@@ -76,21 +79,33 @@ class WebNovelSave(NovelSaveTemplate):
 
         api = self.get_api()
 
-        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending)) as brush:
+        # some useful information
+        if not self.verbose:
+            if len(pending) == 1:
+                additive = str(pending[0].index)
+            else:
+                additive = f'{pending[0].index} - {pending[-1].index}'
 
-            def task(novel_id, chapter_id):
-                return self.to_chapter(api.chapter(novel_id, chapter_id))
+            UiTools.print_info(f'Downloading {len(pending)} chapters | {additive}...')
+
+        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.verbose) as brush:
 
             # initialize controller
-            controller = ConcurrentActionsController(thread_count, task=task)
+            controller = ConcurrentActionsController(
+                thread_count,
+                task=lambda nid, cid: self.to_chapter(api.chapter(nid, cid))
+            )
             for chapter in pending:
                 controller.add(self.novel_id, chapter.index)
 
             # start downloading
             for chapter in controller.iter():
                 # update brush
-                brush.value += 1
-                brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
+                if self.verbose:
+                    brush.value += 1
+                    brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
+                else:
+                    print(f'[{chapter.index}] Downloaded {chapter.url}')
 
                 # get data
                 data.chapters.insert(chapter)
@@ -104,14 +119,16 @@ class WebNovelSave(NovelSaveTemplate):
         """
         data = self.open_db()
 
-        with Loader('Create epub'):
-            Epub().create(
-                novel=data.info.get_info(),
-                cover=self.cover_path(),
-                volumes=data.volumes.all(),
-                chapters=data.chapters.all(),
-                save_path=self.path()
-            )
+        UiTools.print_info('Packing epub...')
+        path = Epub().create(
+            novel=data.info.get_info(),
+            cover=self.cover_path(),
+            volumes=data.volumes.all(),
+            chapters=data.chapters.all(),
+            save_path=self.path()
+        )
+
+        UiTools.print_success(f'Saved to {path}')
 
     def get_api(self) -> ParsedApi:
         """

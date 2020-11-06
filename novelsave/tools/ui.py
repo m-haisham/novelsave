@@ -48,3 +48,7 @@ class UiTools:
     @staticmethod
     def print_var(name, value):
         print(f'[-] {name} = {value}')
+
+    @staticmethod
+    def print_info(*args):
+        print('[-]', *args)

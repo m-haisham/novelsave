@@ -67,6 +67,10 @@ class WebNovelSave(NovelSaveTemplate):
         """
         Download remaining chapters
         """
+        # parameter validation
+        if limit and limit <= 0:
+            UiTools.print_error("'limit' must be greater than 0")
+
         data = self.open_db()
         pending = data.pending.all()
         if len(pending) <= 0:

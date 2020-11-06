@@ -48,7 +48,7 @@ class SourceNovelSave(NovelSaveTemplate):
     def download(self, thread_count=4, limit=None):
 
         # parameter validation
-        if limit <= 0:
+        if limit and limit <= 0:
             UiTools.print_error("'limit' must be greater than 0")
 
         pending = self.db.pending.all()

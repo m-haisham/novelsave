@@ -77,9 +77,9 @@ class Epub:
         :param chapter: novel chapter
         :return: chapter xhtml
         """
-        prefix = f'{f"{StringTools.from_float(chapter.no)} " if chapter.no > 0 else ""}'
+        prefix = f'{f"{StringTools.from_float(chapter.no)} " if chapter.no and chapter.no > 0 else ""}'
         title = f'{prefix}{chapter.title}'
-        epub_chapter = epub.EpubHtml(title=title, file_name=f'chapter_{chapter.no}.xhtml', lang='en')
+        epub_chapter = epub.EpubHtml(title=title, file_name=f'{chapter.index}.xhtml', lang='en')
 
         # html content
         doc, tag, text = Doc().tagtext()

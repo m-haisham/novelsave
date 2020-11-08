@@ -4,7 +4,7 @@ from typing import List, Tuple
 import requests
 from bs4 import BeautifulSoup
 
-from .source import Source
+from .source import Source, header
 from ..models import Chapter, Novel
 
 
@@ -29,34 +29,38 @@ class ScribbleHub(Source, ABC):
         )
 
         id = int(url.split('/')[4])
-        max_page = int(soup.find('ul', id='pagination-mesh-toc').find_all('li')[-2].text)
-
-        chapters = []
-        for page in range(1, max_page + 1):
-            chapters.extend(self.toc(id, page))
+        chapters = self.parse_toc(id)
 
         return novel, chapters
 
-    def toc(self, id: int, page: int) -> List[Chapter]:
+    def chapter(self, url: str) -> Chapter:
+        soup = self.soup(url)
+
+        return Chapter(
+            title=soup.select_one('.chapter-title').text.strip(),
+            paragraphs=str(soup.select_one('#chp_raw')),
+            url=url,
+        )
+
+    def parse_toc(self, id: int) -> List[Chapter]:
 
         response = requests.post(
             'https://www.scribblehub.com/wp-admin/admin-ajax.php',
             data={
-                'action': 'wi_getreleases_pagination',
-                'pagenum': page,
-                'mypostid': id
-            }
+                'action': 'wi_gettocchp',
+                'strSID': id,
+            },
         )
 
         soup = BeautifulSoup(response.content, 'lxml')
-        chapter_elements = soup.find('ol', {'class': 'toc_ol'}).children
+        chapter_elements = soup.find_all('li')
 
         chapters = []
-        for element in chapter_elements:
+        for i, element in enumerate(reversed(chapter_elements)):
             a = element.find('a')
 
             chapter = Chapter(
-                no=element['order'],
+                index=i,
                 title=a.text.strip(),
                 url=a['href']
             )

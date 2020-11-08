@@ -1,6 +1,6 @@
 from .source import Source
 from .boxnovel import BoxNovel
-# from .scribblehub import ScribbleHub
+from .scribblehub import ScribbleHub
 from .insanitycave import InsanityCave
 from .kieshitl import KieshiTl
 from .ktlchamber import Ktlchamber
@@ -16,5 +16,6 @@ sources = [
     InsanityCave,
     Ktlchamber,
     LightNovelWorld,
-    KieshiTl
+    KieshiTl,
+    ScribbleHub
 ]

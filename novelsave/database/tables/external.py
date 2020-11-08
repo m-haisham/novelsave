@@ -63,7 +63,8 @@ class MultiClassExternalTable(MultiClassTable):
                 obj = self._load(
                     Path(self.path / doc[self.PATH_KEY])
                 )
-            except FileNotFoundError:
+            # if file doesnt exist or file is not proper json
+            except (FileNotFoundError, json.JSONDecodeError):
                 self.remove(doc[self.identifier])
 
                 # external file missing callback

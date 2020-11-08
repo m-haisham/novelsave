@@ -1,13 +1,10 @@
 from typing import List, Tuple
-
-import requests
-from bs4 import BeautifulSoup
-
 from urllib.parse import urlparse
 
 from .source import Source
 from ..models import Chapter, Novel
 from ..tools import StringTools
+
 
 class Fanfiction(Source):
     base = 'https://www.fanfiction.net/'

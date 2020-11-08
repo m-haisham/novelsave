@@ -2,8 +2,9 @@ import hashlib
 from pathlib import Path
 
 from ebooklib import epub
-from .tools import StringTools
 from yattag import Doc
+
+from .tools import StringTools
 
 
 class Epub:

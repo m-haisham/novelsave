@@ -1,5 +1,4 @@
 import re
-import unicodedata
 from typing import Tuple, List
 
 from .source import Source

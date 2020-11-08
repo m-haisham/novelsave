@@ -10,54 +10,31 @@ from novelsave.database import UserConfig
 from novelsave.tools import UiTools
 
 
-def main():
-    parser = argparse.ArgumentParser(description='tool to convert novels to epub')
-    parser.add_argument('action', type=str, help="novel url for downloading novels; 'config' to change configurations")
+def setup_config(args):
+    user = UserConfig()
 
-    actions = parser.add_argument_group(title='actions')
-    actions.add_argument('-u', '--update', action='store_true', help='update novel details')
-    actions.add_argument('-p', '--pending', action='store_true', help='download pending chapters')
-    actions.add_argument('-c', '--create', action='store_true', help='create epub from downloaded chapters')
-    actions.add_argument('--force-cover', action='store_true', help='download and overwrite the existing cover')
+    # updating storage directory
+    if args.dir:
 
-    credentials = parser.add_argument_group(title='credentials')
-    credentials.add_argument('--email', type=str, help='webnovel email')
+        # could throw an OSError: illegal directory names
+        args.dir = Path(args.dir).resolve().absolute()
 
-    parser.add_argument('-v', '--verbose', help='enable animations', action='store_true')
-    parser.add_argument('--threads', type=int, help='number of download threads', default=4)
-    parser.add_argument('--timeout', type=int, help='webdriver timeout', default=60)
-    parser.add_argument('--limit', type=int, help='amount of chapters to download')
+        try:
+            user.directory.put(str(args.dir))
+            UiTools.print_success(f'Updated {user.directory.name}')
+        except ValueError as e:  # check for validation failures
+            UiTools.print_error(e)
 
-    config = parser.add_argument_group(title='config')
-    config.add_argument('-d', '--dir', help='directory for saving novels')
+        # breathe,
+        print()
 
-    args = parser.parse_args()
+    # show the final results
+    print('-' * 15)
+    user.print_configs()
+    print('-' * 15)
 
-    # Configurations
-    if args.action == 'config':
-        user = UserConfig()
 
-        if args.dir:
-            args.dir = Path(args.dir).resolve().absolute()
-
-            if not args.dir.exists():
-                args.dir.mkdir(parents=True)
-                UiTools.print_success(f'Created dir {args.dir}')
-
-            try:
-                user.directory.put(str(args.dir))
-                UiTools.print_success(f'Updated {user.directory.name}')
-            except ValueError as e:
-                UiTools.print_error(e)
-
-            print()
-
-        print('-' * 15)
-        user.print_configs()
-        print('-' * 15)
-
-        sys.exit()
-
+def process_task(args):
     # soup novel url
     if 'https://' not in args.action:
         args.action = UrlTools.to_novel_url(args.action)
@@ -87,6 +64,36 @@ def main():
 
     if args.create:
         novelsave.create_epub()
+
+
+def main():
+    parser = argparse.ArgumentParser(description='tool to convert novels to epub')
+    parser.add_argument('action', type=str, help="novel url for downloading novels; 'config' to change configurations")
+
+    actions = parser.add_argument_group(title='actions')
+    actions.add_argument('-u', '--update', action='store_true', help='update novel details')
+    actions.add_argument('-p', '--pending', action='store_true', help='download pending chapters')
+    actions.add_argument('-c', '--create', action='store_true', help='create epub from downloaded chapters')
+    actions.add_argument('--force-cover', action='store_true', help='download and overwrite the existing cover')
+
+    credentials = parser.add_argument_group(title='credentials')
+    credentials.add_argument('--email', type=str, help='webnovel email')
+
+    parser.add_argument('-v', '--verbose', help='enable animations; only in pending', action='store_true')
+    parser.add_argument('--threads', type=int, help='number of download threads', default=4)
+    parser.add_argument('--timeout', type=int, help='webdriver timeout', default=60)
+    parser.add_argument('--limit', type=int, help='amount of chapters to download')
+
+    config = parser.add_argument_group(title='config')
+    config.add_argument('-d', '--dir', help='directory for saving novels')
+
+    args = parser.parse_args()
+
+    # Configurations
+    if args.action == 'config':
+        setup_config(args)
+    else:
+        process_task(args)
 
 
 if __name__ == '__main__':

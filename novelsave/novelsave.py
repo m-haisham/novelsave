@@ -10,6 +10,7 @@ class NovelSave:
     def __new__(cls, *args, **kwargs):
         url = args[0] if args else kwargs['url']
 
+        # make the arguments more accessible
         arguments = kwargs.copy()
         for i, arg in enumerate(inspect.getfullargspec(NovelSaveTemplate.__init__).args[1:]):
             try:

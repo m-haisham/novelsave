@@ -1,8 +1,8 @@
 from pathlib import Path
+from typing import Tuple, List
 
 from appdirs import user_config_dir
 from tinydb import TinyDB
-from typing import Tuple, List
 
 from .element import ConfigElement
 from ..tables import KeyValueTable

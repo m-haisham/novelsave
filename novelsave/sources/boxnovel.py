@@ -7,11 +7,11 @@ from ..tools import StringTools
 
 
 class BoxNovel(Source):
-    base = 'https://boxnovel.com'
+    base = 'https://boxnovel.com/'
 
     @staticmethod
     def of(url: str) -> bool:
-        return url[:len(BoxNovel.base)] == BoxNovel.base
+        return StringTools.startswith(url, BoxNovel.base)
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)

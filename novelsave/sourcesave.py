@@ -130,7 +130,7 @@ class SourceNovelSave(NovelSaveTemplate):
             if source.of(self.url):
                 return source()
 
-        raise ValueError(f'"{self.url}" does not belong to any available source')
+        raise TypeError(f'"{self.url}" does not belong to any available source')
 
     def task(self, partialc):
         ch = self.source.chapter(partialc.url)

@@ -26,7 +26,7 @@ class SourceNovelSave(NovelSaveTemplate):
 
         UiTools.print_success(f'Found {len(chapters)} chapters')
 
-        if force_cover or not self.cover_path().exists():
+        if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
             # download cover
             response = requests.get(novel.thumbnail)
             with self.cover_path().open('wb') as f:

@@ -9,6 +9,7 @@ from .readlightnovel import ReadLightNovel
 from .webnovel import Webnovel
 from .wuxiaco import WuxiaCo
 from .mtlnovel import MtlNovel
+from .fanfiction import Fanfiction
 
 sources = [
     WuxiaCo,
@@ -19,5 +20,6 @@ sources = [
     LightNovelWorld,
     KieshiTl,
     ScribbleHub,
-    MtlNovel
+    MtlNovel,
+    Fanfiction
 ]

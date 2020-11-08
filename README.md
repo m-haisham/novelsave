@@ -80,3 +80,4 @@ Creating an epub is easy as calling a function. `novelsave.Epub().create()`
 - [ktlchamber.wordpress](https://ktlchamber.wordpress.com)
 - [kieshitl.wordpress](https://kieshitl.wordpress.com)
 - [scribblehub.com](https://www.scribblehub.com)
+- [www.mtlnovel.com](https://www.mtlnovel.com/)

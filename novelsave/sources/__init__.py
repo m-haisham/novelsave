@@ -8,6 +8,7 @@ from .lightnovelworld import LightNovelWorld
 from .readlightnovel import ReadLightNovel
 from .webnovel import Webnovel
 from .wuxiaco import WuxiaCo
+from .mtlnovel import MtlNovel
 
 sources = [
     WuxiaCo,
@@ -17,5 +18,6 @@ sources = [
     Ktlchamber,
     LightNovelWorld,
     KieshiTl,
-    ScribbleHub
+    ScribbleHub,
+    MtlNovel
 ]

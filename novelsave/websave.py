@@ -109,8 +109,6 @@ class WebNovelSave(NovelSaveTemplate):
                 if self.verbose:
                     brush.value += 1
                     brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
-                else:
-                    print(f'[{chapter.index}] Downloaded {chapter.url}')
 
                 # get data
                 data.chapters.insert(chapter)

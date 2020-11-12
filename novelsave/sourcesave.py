@@ -88,8 +88,6 @@ class SourceNovelSave(NovelSaveTemplate):
                 if self.verbose:
                     brush.value += 1
                     brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
-                else:
-                    print(f'[{str(chapter.index).zfill(4)}] Downloaded {chapter.url}')
 
                 # get data
                 self.db.chapters.insert(chapter)

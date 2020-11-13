@@ -24,6 +24,7 @@ class WebNovelSave(NovelSaveTemplate):
         super(WebNovelSave, self).__init__(url, username, password, directory)
 
         self.novel_id = UrlTools.from_novel_url(url)
+        self.netloc_slug = "www_webnovel_com"
 
     def update(self, force_cover=False):
         # get api
@@ -168,7 +169,7 @@ class WebNovelSave(NovelSaveTemplate):
         return self.path() / Path('cover.jpg')
 
     def path(self):
-        path = Path(self.user.directory.get()) / Path(f'n{self.novel_id}')
+        path = Path(self.user.directory.get()) / Path(self.netloc_slug) / Path(f'n{self.novel_id}')
         path.mkdir(parents=True, exist_ok=True)
 
         return path

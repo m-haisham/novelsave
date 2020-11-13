@@ -1,10 +1,11 @@
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 
-from . import Epub
 from .concurrent import ConcurrentActionsController
 from .database import NovelData
+from .epub import Epub
 from .sources import sources
 from .template import NovelSaveTemplate
 from .tools import StringTools, UiTools
@@ -15,8 +16,9 @@ class SourceNovelSave(NovelSaveTemplate):
     def __init__(self, url, directory=None):
         super(SourceNovelSave, self).__init__(url, None, None, directory)
 
-        self.db = self.open_db()
         self.source = self.parse_source()
+        self.netloc_slug = StringTools.slugify(urlparse(self.source.base).netloc, replace='_')
+        self.db = self.open_db()
 
     def update(self, force_cover=False):
 
@@ -111,7 +113,7 @@ class SourceNovelSave(NovelSaveTemplate):
         # trailing slash adds nothing
         url = self.url.rstrip('/ ')
         folder_name = StringTools.slugify(url.split('/')[-1])
-        directory = Path(self.user.directory.get()) / Path(folder_name)
+        directory = Path(self.user.directory.get()) / Path(self.netloc_slug) / Path(folder_name)
 
         return NovelData(directory)
 

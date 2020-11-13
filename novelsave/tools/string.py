@@ -33,5 +33,5 @@ class StringTools:
         return ('%f' % f).rstrip('0').rstrip('.')
 
     @staticmethod
-    def slugify(s):
-        return re.sub(r'[\\/:*"\'<>|.%$^&£?]', '', s)
+    def slugify(s, replace=''):
+        return re.sub(r'[\\/:*"\'<>|.%$^&£?]', replace, s)

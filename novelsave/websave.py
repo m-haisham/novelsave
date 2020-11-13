@@ -111,8 +111,7 @@ class WebNovelSave(NovelSaveTemplate):
                     brush.value += 1
                     brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
 
-                # get data
-                data.chapters.insert(chapter)
+                data.chapters.put(chapter)
 
                 # at last
                 data.pending.remove(chapter.url)

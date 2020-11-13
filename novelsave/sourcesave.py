@@ -91,8 +91,10 @@ class SourceNovelSave(NovelSaveTemplate):
                     brush.value += 1
                     brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
 
-                # get data
-                self.db.chapters.insert(chapter)
+                # using .put instead of .insert
+                # as insert has a chance to create duplicate entries
+                # might be slower that .insert
+                self.db.chapters.put(chapter)
 
                 # at last remove chapter from pending
                 self.db.pending.remove(chapter.url)

@@ -5,6 +5,9 @@ import novelsave
 with open('README.md', 'r') as f:
     long_description = f.read()
 
+with open('requirements.txt', 'r') as f:
+    requirements = f.readlines()
+
 setup(
     name='novelsave',
     version=novelsave.__version__,
@@ -13,19 +16,7 @@ setup(
     author_email='mhaisham79@gmail.com',
     long_description=long_description,
     long_description_content_type='text/markdown',
-
-    install_requires=[
-        'tinydb',
-        'yattag',
-        'ebooklib',
-        'requests',
-        'webnovelbot',
-        'bs4',
-        'lxml',
-        'requests',
-        'appdirs'
-    ],
-
+    install_requires=requirements,
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.8',

@@ -8,7 +8,7 @@ from webnovel.tools import UrlTools
 
 from .concurrent import ConcurrentActionsController
 from .database import WebNovelData
-from .epub import Epub
+from .epub import NovelEpub
 from .models import Chapter
 from .template import NovelSaveTemplate
 from .tools import UiTools
@@ -104,6 +104,9 @@ class WebNovelSave(NovelSaveTemplate):
             for chapter in pending:
                 controller.add(self.novel_id, chapter.index)
 
+            # set new downloads flag to true
+            data.misc.put(self.IS_CHAPTERS_UPDATED, True)
+
             # start downloading
             for chapter in controller.iter():
                 # update brush
@@ -116,14 +119,14 @@ class WebNovelSave(NovelSaveTemplate):
                 # at last
                 data.pending.remove(chapter.url)
 
-    def create_epub(self):
+    def create_epub(self, force=False):
         """
         Create epub with current data
         """
         data = self.open_db()
 
         UiTools.print_info('Packing epub...')
-        path = Epub().create(
+        epub = NovelEpub(
             novel=data.info.get_info(),
             cover=self.cover_path(),
             volumes=data.volumes.all(),
@@ -131,7 +134,20 @@ class WebNovelSave(NovelSaveTemplate):
             save_path=self.path()
         )
 
-        UiTools.print_success(f'Saved to {path}')
+        # get new downloads flag
+        is_updated = data.misc.get(self.IS_CHAPTERS_UPDATED, default=False)
+
+        # check flags and whether the epub already exists
+        if not is_updated and not force and epub.path.exists():
+            UiTools.print_info('Aborted. No changes to chapter database')
+            return
+
+        epub.create()
+
+        # reset new downloads flag
+        data.misc.put(self.IS_CHAPTERS_UPDATED, False)
+
+        UiTools.print_success(f'Saved to {epub.path}')
 
     def get_api(self) -> ParsedApi:
         """

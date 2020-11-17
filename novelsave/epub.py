@@ -7,36 +7,43 @@ from yattag import Doc
 from .tools import StringTools
 
 
-class Epub:
-    def create(self, novel, cover, volumes, chapters, save_path) -> Path:
-        # parameter validation
-        if not chapters:
+class NovelEpub:
+    def __init__(self, novel, cover, volumes, chapters, save_path):
+        self.novel = novel
+        self.cover = cover
+        self.volumes = volumes
+        self.chapters = chapters
+        self.save_path = save_path
+
+    def create(self):
+        # attribute validation
+        if not self.chapters:
             raise ValueError("'chapters' may not be 'None'")
 
         # prepare data
-        chapters.sort(key=lambda c: c.order)
+        self.chapters.sort(key=lambda c: c.order)
 
         book = epub.EpubBook()
 
         # id
-        book.set_identifier(str(novel.id if hasattr(novel, 'id') else hashlib.md5(novel.title.encode('utf-8')).hexdigest()))
-        book.set_title(novel.title)
-        book.add_author(novel.author)
+        book.set_identifier(str(self.novel.id if hasattr(self.novel, 'id') else hashlib.md5(self.novel.title.encode('utf-8')).hexdigest()))
+        book.set_title(self.novel.title)
+        book.add_author(self.novel.author)
 
         # cover
-        with cover.open('rb') as f:
+        with self.cover.open('rb') as f:
             book.set_cover('cover.jpg', f.read())
 
         # volume mapper
         volume_map = {}
-        for volume_key in volumes.keys():
-            chs = volumes[volume_key]
+        for volume_key in self.volumes.keys():
+            chs = self.volumes[volume_key]
             for ch in chs:
                 volume_map[ch] = volume_key
 
         # create chapters
         book_chapters = {}
-        for chapter in chapters:
+        for chapter in self.chapters:
             epub_chapter = self._epub_chapter(chapter)
             book.add_item(epub_chapter)
 
@@ -66,10 +73,11 @@ class Epub:
 
         book.spine = [c for volume in book_chapters.values() for c in volume]
 
-        path = save_path / Path(f'{StringTools.slugify(novel.title)}.epub').resolve()
-        epub.write_epub(path, book, {})
+        epub.write_epub(self.path, book, {})
 
-        return path
+    @property
+    def path(self):
+        return self.save_path / Path(f'{StringTools.slugify(self.novel.title)}.epub').resolve()
 
     def _epub_chapter(self, chapter):
         """

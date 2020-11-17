@@ -53,7 +53,7 @@ def process_task(args):
         print()  # some breathing room
         novelsave.password = getpass('[-] password: ')
 
-    if not any([args.update, args.pending, args.create]):
+    if not any([args.update, args.pending, args.create, args.force_create]):
         UiTools.print_error('No actions selected')
 
     if args.update:
@@ -62,8 +62,8 @@ def process_task(args):
     if args.pending:
         novelsave.download(thread_count=args.threads, limit=args.limit)
 
-    if args.create:
-        novelsave.create_epub()
+    if args.create or args.force_create:
+        novelsave.create_epub(force=args.force_create)
 
 
 def main():
@@ -74,6 +74,7 @@ def main():
     actions.add_argument('-u', '--update', action='store_true', help='update novel details')
     actions.add_argument('-p', '--pending', action='store_true', help='download pending chapters')
     actions.add_argument('-c', '--create', action='store_true', help='create epub from downloaded chapters')
+    actions.add_argument('-fc', '--force-create', action='store_true', help='force create epub')
     actions.add_argument('--force-cover', action='store_true', help='download and overwrite the existing cover')
 
     credentials = parser.add_argument_group(title='credentials')

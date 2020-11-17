@@ -7,6 +7,8 @@ from .tools import UiTools
 class NovelSaveTemplate:
     verbose = False
 
+    IS_CHAPTERS_UPDATED = 'is_cu'
+
     def __init__(self, url, username, password, directory=None):
         self.url = url
         self.username = username
@@ -42,7 +44,7 @@ class NovelSaveTemplate:
         """
         raise NotImplementedError
 
-    def create_epub(self):
+    def create_epub(self, force=False):
         """
         create epub from current data
         """

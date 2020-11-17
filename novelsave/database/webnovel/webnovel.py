@@ -1,7 +1,7 @@
 from .info import InfoAccess
 from .volumes import VolumesAccess
 from ..base import Database
-from ..tables import MultiClassTable, MultiClassExternalTable
+from ..tables import KeyValueTable, MultiClassTable, MultiClassExternalTable
 from ...models import Chapter
 
 
@@ -19,3 +19,4 @@ class WebNovelData(Database):
             naming_scheme=lambda c: str(c.index),
             on_missing=lambda c: self.pending.put(c),
         )
+        self.misc = KeyValueTable(self.db, 'misc')

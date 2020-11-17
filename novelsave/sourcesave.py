@@ -5,7 +5,7 @@ import requests
 
 from .concurrent import ConcurrentActionsController
 from .database import NovelData
-from .epub import Epub
+from .epub import NovelEpub
 from .sources import sources
 from .template import NovelSaveTemplate
 from .tools import StringTools, UiTools
@@ -80,6 +80,9 @@ class SourceNovelSave(NovelSaveTemplate):
             for chapter in pending:
                 controller.add(chapter)
 
+            # set new downloads flag to true
+            self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
+
             # start downloading
             for chapter in controller.iter():
                 # debug
@@ -99,9 +102,10 @@ class SourceNovelSave(NovelSaveTemplate):
                 # at last remove chapter from pending
                 self.db.pending.remove(chapter.url)
 
-    def create_epub(self):
+    def create_epub(self, force=False):
         UiTools.print_info('Packing epub...')
-        path = Epub().create(
+
+        epub = NovelEpub(
             novel=self.db.novel.parse(),
             cover=self.cover_path(),
             volumes={},
@@ -109,7 +113,20 @@ class SourceNovelSave(NovelSaveTemplate):
             save_path=self.db.path.parent
         )
 
-        UiTools.print_success(f'Saved to {path}')
+        # get new downloads flag
+        is_updated = self.db.misc.get(self.IS_CHAPTERS_UPDATED, default=False)
+
+        # check flags and whether the epub already exists
+        if not is_updated and not force and epub.path.exists():
+            UiTools.print_info('Aborted. No changes to chapter database')
+            return
+
+        epub.create()
+
+        # reset new downloads flag
+        self.db.misc.put(self.IS_CHAPTERS_UPDATED, False)
+
+        UiTools.print_success(f'Saved to {epub.path}')
 
     def open_db(self):
         # trailing slash adds nothing

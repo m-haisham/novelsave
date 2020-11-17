@@ -3,7 +3,7 @@ from typing import Tuple
 
 from tinydb import TinyDB
 
-from .tables import SingleClassTable, MultiClassTable, MultiClassExternalTable
+from .tables import KeyValueTable, SingleClassTable, MultiClassTable, MultiClassExternalTable
 from ..models import Novel, Chapter
 
 
@@ -34,3 +34,4 @@ class NovelData(Database):
             naming_scheme=lambda c: str(c.index).zfill(4),
             on_missing=lambda c: self.pending.put(c),
         )
+        self.misc = KeyValueTable(self.db, 'misc')

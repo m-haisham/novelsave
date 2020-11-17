@@ -10,6 +10,12 @@ Tool to convert novels to epub
 pip install novelsave
 ```
 
+or
+
+```
+pip install git+https://github.com/mHaisham/novelsave.git
+```
+
 ## Commandline
 
 ### Example
@@ -37,31 +43,32 @@ Novels are saved to folder `novels` in user home
 ### Help
 
 ```batch
-usage: __main__.py [-h] [-u] [-p] [-c] [--force-cover] [--email EMAIL] [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT] [-d DIR] action
+usage: __main__.py [-h] [-u] [-p] [-c] [-fc] [--force-cover] [--email EMAIL] [-v] [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT] [-d DIR] action
 
 tool to convert novels to epub
 
 positional arguments:
-  action             novel url for downloading novels; 'config' to change configurations
+  action               novel url for downloading novels; 'config' to change configurations
 
 optional arguments:
-  -h, --help         show this help message and exit
-  -v, --verbose      enable animations; only in pending
-  --threads THREADS  number of download threads
-  --timeout TIMEOUT  webdriver timeout
-  --limit LIMIT      amount of chapters to download
+  -h, --help           show this help message and exit
+  -v, --verbose        enable animations; only in pending
+  --threads THREADS    number of download threads
+  --timeout TIMEOUT    webdriver timeout
+  --limit LIMIT        amount of chapters to download
 
 actions:
-  -u, --update       update novel details
-  -p, --pending      download pending chapters
-  -c, --create       create epub from downloaded chapters
-  --force-cover      download and overwrite the existing cover
+  -u, --update         update novel details
+  -p, --pending        download pending chapters
+  -c, --create         create epub from downloaded chapters
+  -fc, --force-create  force create epub
+  --force-cover        download and overwrite the existing cover
 
 credentials:
-  --email EMAIL      webnovel email
+  --email EMAIL        webnovel email
 
 config:
-  -d DIR, --dir DIR  directory for saving novels
+  -d DIR, --dir DIR    directory for saving novels
 ```
 
 ## Manual

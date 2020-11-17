@@ -1,5 +1,7 @@
 # NovelSave
 
+[![GitHub version](https://badge.fury.io/gh/mHaisham%2Fnovelsave.svg)](https://badge.fury.io/gh/mHaisham%2Fnovelsave) [![PyPI version](https://badge.fury.io/py/novelsave.svg)](https://badge.fury.io/py/novelsave) 
+
 Tool to convert novels to epub
 
 ## Install

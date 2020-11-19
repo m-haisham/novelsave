@@ -1,12 +1,10 @@
-import json
+import logging
 from pathlib import Path
 from queue import Queue
-from typing import List, TypeVar, Callable, Dict, Tuple
+from typing import List, TypeVar, Callable
 
-from tinydb import where
-
-from .multi import MultiClassTable
 from .iothread import IOThread
+from .multi import MultiClassTable
 
 T = TypeVar('T')
 
@@ -66,9 +64,8 @@ class MultiClassExternalTable(MultiClassTable):
         while not self.tasks_done():
             command, path, error = self.queue_out.get()
 
-            # TODO add logging info
             if error:
-                print(error)
+                logging.error(f'{command}: {path} - {repr(error)}')
 
             self.queue_out.task_done()
 

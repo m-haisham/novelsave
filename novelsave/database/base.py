@@ -30,8 +30,7 @@ class NovelData(Database):
         self.pending = MultiClassTable(self.db, 'pending', Chapter, ['index', 'no', 'url'], 'url')
         self.chapters = MultiClassExternalTable(
             self.db, self.path.parent, 'chapters', Chapter,
-            ['index', 'no', 'title', 'paragraphs', 'url'], ['index'], 'url',
+            ['index', 'no', 'title', 'paragraphs', 'url'], 'url',
             naming_scheme=lambda c: str(c.index).zfill(4),
-            on_missing=lambda c: self.pending.put(c),
         )
         self.misc = KeyValueTable(self.db, 'misc')

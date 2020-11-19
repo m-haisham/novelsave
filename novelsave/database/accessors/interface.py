@@ -6,6 +6,7 @@ from tinydb.table import Document, Table
 
 class IAccessor:
     db: TinyDB
+    _table: Table
     _table_name: str = None
 
     def __init__(self, db: TinyDB):

@@ -38,7 +38,7 @@ class ConcurrentActionsController:
     @property
     def done(self):
         """
-        :return: whether all the tasks are done
+        :return: whether all the tasks are tasks_done
         """
         with self.queue_in.all_tasks_done:
             q_in = self.queue_in.unfinished_tasks == 0

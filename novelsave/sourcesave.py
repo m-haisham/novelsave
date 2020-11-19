@@ -38,7 +38,7 @@ class SourceNovelSave(NovelSaveTemplate):
         self.db.novel.set(novel)
 
         # update_pending
-        saved = self.db.chapters.all_basic()
+        saved = self.db.chapters.all()
         pending = list(set(chapters).difference(saved))
 
         self.db.pending.truncate()
@@ -52,7 +52,6 @@ class SourceNovelSave(NovelSaveTemplate):
         if limit and limit <= 0:
             UiTools.print_error("'limit' must be greater than 0")
 
-        self.db.chapters.check()  # check if any external files are missing
         pending = self.db.pending.all()
         if not pending:
             UiTools.print_error('No pending chapters')
@@ -94,13 +93,13 @@ class SourceNovelSave(NovelSaveTemplate):
                     brush.value += 1
                     brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
 
-                # using .put instead of .insert
-                # as insert has a chance to create duplicate entries
-                # might be slower that .insert
                 self.db.chapters.put(chapter)
 
                 # at last remove chapter from pending
                 self.db.pending.remove(chapter.url)
+
+        # ensure all operations are done
+        self.db.chapters.flush()
 
     def create_epub(self, force=False):
         UiTools.print_info('Packing epub...')

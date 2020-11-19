@@ -1,4 +1,6 @@
+import logging
 from pathlib import Path
+from datetime import datetime
 
 from .database.config import UserConfig
 from .tools import UiTools
@@ -25,6 +27,15 @@ class NovelSaveTemplate:
 
             self.user.directory.put(str(path))
 
+        # initialize logger
+        logfile = self.user.directory.get() / Path('logs') / f"{datetime.today().strftime('%Y-%m-%d')}.log"
+        logfile.parent.mkdir(parents=True, exist_ok=True)
+        logging.basicConfig(
+            filename=logfile,
+            filemode='a',
+            format='%(asctime)s %(levelname)s - %(message)s',
+        )
+
     def update(self, force_cover=False):
         """
         Update novel data
@@ -47,6 +58,8 @@ class NovelSaveTemplate:
     def create_epub(self, force=False):
         """
         create epub from current data
+
+        :param force: force create and overwrite the existing epub
         """
         raise NotImplementedError
 

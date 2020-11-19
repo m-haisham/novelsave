@@ -20,5 +20,5 @@ class ActionThread(Thread):
                 self.target(*ipt[0], **ipt[1])
             )
 
-            # call that a task has been done
+            # call that a task has been tasks_done
             self.on_complete()

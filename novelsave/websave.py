@@ -55,7 +55,7 @@ class WebNovelSave(NovelSaveTemplate):
             data.volumes.set_volume(volume, [c.id for c in chapters])
 
         # update pending
-        saved = data.chapters.all_basic()
+        saved = data.chapters.all()
         pending = list({self.to_chapter(c) for v in toc.values() for c in v if not c.locked}.difference(saved))
 
         data.pending.truncate()
@@ -73,7 +73,6 @@ class WebNovelSave(NovelSaveTemplate):
             UiTools.print_error("'limit' must be greater than 0")
 
         data = self.open_db()
-        data.chapters.check()  # check if any external files are missing
         pending = data.pending.all()
         if len(pending) <= 0:
             UiTools.print_error('No pending chapters')
@@ -118,6 +117,9 @@ class WebNovelSave(NovelSaveTemplate):
 
                 # at last
                 data.pending.remove(chapter.url)
+
+        # ensure all tasks are done
+        data.chapters.flush()
 
     def create_epub(self, force=False):
         """

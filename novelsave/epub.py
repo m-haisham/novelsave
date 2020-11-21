@@ -31,8 +31,9 @@ class NovelEpub:
         book.add_author(self.novel.author)
 
         # cover
-        with self.cover.open('rb') as f:
-            book.set_cover('cover.jpg', f.read())
+        if self.cover.exists() and self.cover.is_file():
+            with self.cover.open('rb') as f:
+                book.set_cover('cover.jpg', f.read())
 
         # volume mapper
         volume_map = {}

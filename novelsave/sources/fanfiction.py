@@ -7,7 +7,7 @@ from ..tools import StringTools
 
 
 class Fanfiction(Source):
-    base = 'https://www.fanfiction.net/'
+    base = 'https://www.fanfiction.net'
 
     @staticmethod
     def of(url: str) -> bool:

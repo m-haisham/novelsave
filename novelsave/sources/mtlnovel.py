@@ -6,7 +6,7 @@ from ..tools import StringTools
 
 
 class MtlNovel(Source):
-    base = 'https://www.mtlnovel.com/'
+    base = 'https://www.mtlnovel.com'
 
     @staticmethod
     def of(url: str) -> bool:

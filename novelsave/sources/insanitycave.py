@@ -6,7 +6,7 @@ from ..models import Chapter, Novel
 
 
 class InsanityCave(Source):
-    base = 'https://insanitycave.poetry.blog/'
+    base = 'https://insanitycave.poetry.blog'
 
     novel_author_regex = re.compile(r'written by(.+)\.')
     chapter_title_regex = re.compile(r'chapter[  ]([0-9]+)[  ]*.[  ](.+)', flags=re.IGNORECASE)

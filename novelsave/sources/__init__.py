@@ -10,6 +10,7 @@ from .webnovel import Webnovel
 from .wuxiaco import WuxiaCo
 from .mtlnovel import MtlNovel
 from .fanfiction import Fanfiction
+from .novelfull import NovelFull
 
 sources = [
     WuxiaCo,
@@ -21,5 +22,6 @@ sources = [
     KieshiTl,
     ScribbleHub,
     MtlNovel,
-    Fanfiction
+    Fanfiction,
+    NovelFull,
 ]

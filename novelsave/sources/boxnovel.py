@@ -7,7 +7,7 @@ from ..tools import StringTools
 
 
 class BoxNovel(Source):
-    base = 'https://boxnovel.com/'
+    base = 'https://boxnovel.com'
 
     @staticmethod
     def of(url: str) -> bool:

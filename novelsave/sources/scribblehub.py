@@ -8,7 +8,7 @@ from ..models import Chapter, Novel
 
 
 class ScribbleHub(Source):
-    base = 'https://www.scribblehub.com/'
+    base = 'https://www.scribblehub.com'
 
     @staticmethod
     def of(url: str) -> bool:

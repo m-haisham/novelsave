@@ -1,8 +1,5 @@
 from typing import List, Tuple
 
-import requests
-from bs4 import BeautifulSoup
-
 from .source import Source
 from ..models import Chapter, Novel
 

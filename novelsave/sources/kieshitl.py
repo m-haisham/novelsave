@@ -2,7 +2,6 @@ from typing import Tuple, List
 
 from .source import Source
 from ..models import Novel, Chapter
-from ..tools import StringTools
 
 
 class KieshiTl(Source):
@@ -10,7 +9,7 @@ class KieshiTl(Source):
 
     @staticmethod
     def of(url: str) -> bool:
-        return StringTools.startswith(url, KieshiTl.base)
+        return url.startswith(KieshiTl.base)
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
@@ -20,7 +19,7 @@ class KieshiTl(Source):
         author = ''
         for p in entry_content.find_all('p'):
             text: str = p.text
-            if StringTools.startswith(text, 'Author:'):
+            if text.startswith('Author:'):
                 author = text.replace('Author:', '')
                 break
 

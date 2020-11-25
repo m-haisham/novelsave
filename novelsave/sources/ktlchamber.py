@@ -3,7 +3,6 @@ from typing import Tuple, List
 
 from .source import Source
 from ..models import Novel, Chapter
-from ..tools import StringTools
 
 
 class Ktlchamber(Source):
@@ -13,7 +12,7 @@ class Ktlchamber(Source):
 
     @staticmethod
     def of(url: str) -> bool:
-        return StringTools.startswith(url, Ktlchamber.base)
+        return url.startswith(Ktlchamber.base)
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
@@ -23,7 +22,7 @@ class Ktlchamber(Source):
         author = ''
         for p in entry_content.find_all('p'):
             text = p.text
-            if StringTools.startswith(text, 'Author: '):
+            if text.startswith('Author: '):
                 author = text.split(': ', maxsplit=1)[1]
 
         novel = Novel(
@@ -38,7 +37,7 @@ class Ktlchamber(Source):
         prefix = f"{url}{'' if url[-1] == '/' else '/'}"
         for a in entry_content.find_all('a'):
             text = a.text
-            if StringTools.startswith(text, 'Chapter'):
+            if text.startswith('Chapter'):
                 result = self.chapter_regex.search(text)
 
                 chapter = Chapter(

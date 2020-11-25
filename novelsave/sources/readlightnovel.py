@@ -3,7 +3,6 @@ from typing import Tuple, List
 
 from .source import Source
 from ..models import Novel, Chapter
-from ..tools import StringTools
 
 
 class ReadLightNovel(Source):
@@ -101,7 +100,7 @@ class ReadLightNovel(Source):
         paragraphs = []
 
         def add_paragraph(s: str):
-            if s and not StringTools.startswith(s, 'Translator:') and not StringTools.startswith(s, 'Chapter '):
+            if s and not s.startswith('Translator:') and not s.startswith('Chapter '):
 
                 paragraphs.append(
                     self.format_paragraph(s)

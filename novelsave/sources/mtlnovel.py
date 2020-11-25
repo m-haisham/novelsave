@@ -2,7 +2,6 @@ from typing import List, Tuple
 
 from .source import Source
 from ..models import Chapter, Novel
-from ..tools import StringTools
 
 
 class MtlNovel(Source):
@@ -10,7 +9,7 @@ class MtlNovel(Source):
 
     @staticmethod
     def of(url: str) -> bool:
-        return StringTools.startswith(url, MtlNovel.base)
+        return url.startswith(MtlNovel.base)
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
@@ -19,7 +18,7 @@ class MtlNovel(Source):
         info_element = soup.select_one('.info > tbody')
         for element in info_element.select('tr'):
             text = element.text
-            if StringTools.startswith(text, 'Author:'):
+            if text.startswith('Author:'):
                 author = text[7:]
                 break
         

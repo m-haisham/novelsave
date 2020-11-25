@@ -3,7 +3,6 @@ from typing import Tuple, List
 
 from .source import Source
 from ..models import Novel, Chapter
-from ..tools import StringTools
 
 
 class LightNovelWorld(Source):
@@ -13,7 +12,7 @@ class LightNovelWorld(Source):
 
     @staticmethod
     def of(url: str) -> bool:
-        return StringTools.startswith(url, LightNovelWorld.base)
+        return url.startswith(LightNovelWorld.base)
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)

@@ -3,7 +3,6 @@ from urllib.parse import urlparse
 
 from .source import Source
 from ..models import Chapter, Novel
-from ..tools import StringTools
 
 
 class Fanfiction(Source):
@@ -11,7 +10,7 @@ class Fanfiction(Source):
 
     @staticmethod
     def of(url: str) -> bool:
-        return StringTools.startswith(url, Fanfiction.base)
+        return url.startswith(Fanfiction.base)
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)

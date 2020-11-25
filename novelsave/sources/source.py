@@ -1,7 +1,8 @@
+import re
 from typing import Tuple, List
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 
 from ..models import Novel, Chapter
 
@@ -44,3 +45,57 @@ class Source:
             return BeautifulSoup(response.content, 'lxml')
         else:
             raise Exception(f'{response.status_code}: {url}')
+
+    # ---- Inspired from https://github.com/dipu-bd/lightnovel-crawler ----
+
+    bad_tags = [
+        'noscript', 'script', 'iframe', 'form', 'hr', 'img', 'ins',
+        'button', 'input', 'amp-auto-ads', 'pirate'
+    ]
+
+    blacklist_patterns = [
+        r'^[\W\D]*(volume|chapter)[\W\D]+\d+[\W\D]*$',
+    ]
+
+    def is_blacklisted(self, text):
+        """
+        :return: whether the text is black listed
+        """
+        for pattern in self.blacklist_patterns:
+            if re.search(pattern, text, re.IGNORECASE):
+                return True
+
+        return False
+
+    def clean_contents(self, contents):
+        if not contents:
+            return contents
+
+        contents.attrs = {}
+        for element in contents.find_all(True):
+            # remove comments
+            if isinstance(element, Comment):
+                element.extract()
+
+            elif element.name == 'br':
+                next_element = getattr(element, 'next_sibling')
+                if next_element and next_element.name == 'br':
+                    element.extract()
+
+            # Remove bad tags
+            elif element.name in self.bad_tags:
+                element.extract()
+
+            # Remove empty elements
+            elif not element.text.strip():
+                element.extract()
+
+            # Remove blacklisted elements
+            elif self.is_blacklisted(element.text):
+                element.extract()
+
+            # Remove attributes
+            elif hasattr(element, 'attrs'):
+                element.attrs = {}
+
+        return contents

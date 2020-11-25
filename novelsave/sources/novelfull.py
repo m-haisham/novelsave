@@ -7,6 +7,15 @@ from ..models import Chapter, Novel
 class NovelFull(Source):
     base = 'https://novelfull.com'
 
+    blacklist_patterns = [
+        r'^\s*Translator:',
+        r'^\s*Editor:',
+        r'^\s*Atlas Studios',
+        r'Read more chapter on NovelFull',
+        r'full thich ung',
+        r'If you find any errors \( broken links.*let us know < report chapter >',
+    ]
+
     @staticmethod
     def of(url: str) -> bool:
         return url.startswith(NovelFull.base)
@@ -59,8 +68,10 @@ class NovelFull(Source):
         soup = self.soup(url)
 
         content = soup.select_one('div#chapter-content')
+
+        self.clean_contents(content)
         for ads in content.select('h3, h2, .adsbygoogle, script, ins, .ads, .ads-holder'):
-            ads.decompose()
+            ads.extract()
 
         return Chapter(
             title=soup.select_one('.chapter-text').find(text=True, recursive=False).strip(),

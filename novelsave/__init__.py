@@ -4,4 +4,4 @@ from .sourcesave import SourceNovelSave
 from .template import NovelSaveTemplate
 from .websave import WebNovelSave
 
-__version__ = '0.5.3'
+__version__ = '0.5.4'

@@ -11,6 +11,7 @@ from .wuxiaco import WuxiaCo
 from .mtlnovel import MtlNovel
 from .fanfiction import Fanfiction
 from .novelfull import NovelFull
+from .wuxiacom import WuxiaCom
 
 sources = [
     WuxiaCo,
@@ -24,4 +25,5 @@ sources = [
     MtlNovel,
     Fanfiction,
     NovelFull,
+    WuxiaCom
 ]

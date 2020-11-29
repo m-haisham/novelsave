@@ -12,7 +12,7 @@ class ScribbleHub(Source):
 
     @staticmethod
     def of(url: str) -> bool:
-        return url[:len(ScribbleHub.base)] == ScribbleHub.base
+        return url.startswith(ScribbleHub.base)
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)

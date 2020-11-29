@@ -47,6 +47,7 @@ class Source:
             raise Exception(f'{response.status_code}: {url}')
 
     # ---- Inspired from https://github.com/dipu-bd/lightnovel-crawler ----
+    # ----      And almost a perfect copy of the functions below       ----
 
     bad_tags = [
         'noscript', 'script', 'iframe', 'form', 'hr', 'img', 'ins',

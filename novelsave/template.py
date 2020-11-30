@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .database.config import UserConfig
 from .tools import UiTools
-
+from .logger import NovelLogger
 
 class NovelSaveTemplate:
     verbose = False
@@ -28,13 +28,7 @@ class NovelSaveTemplate:
             self.user.directory.put(str(path))
 
         # initialize logger
-        logfile = self.user.directory.get() / Path('logs') / f"{datetime.today().strftime('%Y-%m-%d')}.log"
-        logfile.parent.mkdir(parents=True, exist_ok=True)
-        logging.basicConfig(
-            filename=logfile,
-            filemode='a',
-            format='%(asctime)s %(levelname)s - %(message)s',
-        )
+        NovelLogger.instance = NovelLogger(self.user.directory.get())
 
     def update(self, force_cover=False):
         """

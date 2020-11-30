@@ -29,7 +29,7 @@ class UserConfig:
 
         self.directory = ConfigElement(
             self.table,
-            'directory',
+            name='directory',
             default=Path.home() / Path('novels'),
             validate=vallidate_dir,
         )

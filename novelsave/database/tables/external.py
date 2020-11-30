@@ -1,10 +1,10 @@
-import logging
 from pathlib import Path
 from queue import Queue
 from typing import List, TypeVar, Callable
 
 from .iothread import IOThread
 from .multi import MultiClassTable
+from ...logger import NovelLogger
 
 T = TypeVar('T')
 
@@ -65,7 +65,7 @@ class MultiClassExternalTable(MultiClassTable):
             command, path, error = self.queue_out.get()
 
             if error:
-                logging.error(f'{command}: {path} - {repr(error)}')
+                NovelLogger.instance.logger.error(f'{"READ" if command == IOThread.READ else "WRITE"}: {path} - {repr(error)}')
 
             self.queue_out.task_done()
 

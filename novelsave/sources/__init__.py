@@ -12,6 +12,7 @@ from .mtlnovel import MtlNovel
 from .fanfiction import Fanfiction
 from .novelfull import NovelFull
 from .wuxiacom import WuxiaCom
+from .royalroad import RoyalRoad
 
 sources = [
     WuxiaCo,
@@ -25,5 +26,6 @@ sources = [
     MtlNovel,
     Fanfiction,
     NovelFull,
-    WuxiaCom
+    WuxiaCom,
+    RoyalRoad,
 ]

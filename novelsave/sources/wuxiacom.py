@@ -52,21 +52,21 @@ class WuxiaCom(Source):
     def chapter(self, url: str) -> Chapter:
         soup = self.soup(url)
 
-        body = soup.select_one('#chapterContent')
-        if not body:
-            body = soup.select_one('#chapter-content')
-        if not body:
-            body = soup.select_one('.panel-default .fr-view')
-        if not body:
+        contents = soup.select_one('#chapterContent')
+        if not contents:
+            contents = soup.select_one('#chapter-content')
+        if not contents:
+            contents = soup.select_one('.panel-default .fr-view')
+        if not contents:
             raise ValueError(f'Unable to read chapter content from {url}')
 
-        for nav in (body.select('.chapter-nav') or []):
+        for nav in (contents.select('.chapter-nav') or []):
             nav.extract()
 
-        self.clean_contents(body)
+        self.clean_contents(contents)
 
         return Chapter(
             title=soup.select_one('#chapter-outer  h4').text.strip(),
-            paragraphs=str(body),
+            paragraphs=str(contents),
             url=url,
         )

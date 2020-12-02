@@ -21,7 +21,7 @@ class NovelEpub:
             raise ValueError("'chapters' may not be 'None'")
 
         # prepare data
-        self.chapters.sort(key=lambda c: c.order)
+        self.chapters.sort(key=lambda c: c.index)
 
         book = epub.EpubBook()
 

@@ -57,7 +57,7 @@ class SourceNovelSave(NovelSaveTemplate):
             UiTools.print_error('No pending chapters')
             return
 
-        pending.sort(key=lambda c: c.order)
+        pending.sort(key=lambda c: c.index)
 
         # limiting number of chapters downloaded
         if limit is not None and limit < len(pending):

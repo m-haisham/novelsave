@@ -11,10 +11,6 @@ class Chapter:
     paragraphs: Union[str, List[str]] = None
     url: str = None
 
-    @property
-    def order(self) -> Tuple[int, float]:
-        return self.index, self.no
-
     def __hash__(self):
         return hash(self.url)
 

@@ -1,5 +1,8 @@
+import math
+
 WIDTH: int = 5
 CURSOR_WIDTH: int = 3
+HALF_FILL: str = '-'
 FILL: str = '='
 EMPTY: str = ' '
 
@@ -65,10 +68,16 @@ class LoaderBar:
         :param value: float between 0 (inclusive) and 1 (inclusive)
         :return: string denoting the amount loaded
         """
-        value = max(0.0, value)
-        value = min(1.0, value)
+        value = min(1.0, max(0.0, value))
         filled = int(value * WIDTH)
-        return f'{PREFIX}{FILL * filled}{EMPTY * (WIDTH - filled)}{POSTFIX}'
+        bar = [FILL] * filled + [EMPTY] * (WIDTH - filled)
+
+        # half fill logic
+        value *= 10
+        if math.floor(value) % 2 == 1:
+            bar[filled] = HALF_FILL
+
+        return f'{PREFIX}{"".join(bar)}{POSTFIX}'
 
     def update(self, value: int):
         """

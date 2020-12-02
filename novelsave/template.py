@@ -1,10 +1,9 @@
-import logging
-from datetime import datetime
 from pathlib import Path
 
 from .database.config import UserConfig
-from .tools import UiTools
 from .logger import NovelLogger
+from .tools import UiTools
+
 
 class NovelSaveTemplate:
     verbose = False

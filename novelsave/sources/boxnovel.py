@@ -123,6 +123,6 @@ class BoxNovel(Source):
 
         return no, title
 
-    def _parse_chapter_title(self, s) -> Tuple[int, str]:
+    def _parse_chapter_title(self, s) -> Tuple[float, str]:
         match = re.match(r'Chapter (\d+):? ?(.+)', s, re.IGNORECASE)
         return float(match.group(1)), match.group(2).strip()

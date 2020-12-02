@@ -1,4 +1,3 @@
-import re
 from typing import Tuple, List
 
 from .source import Source

@@ -1,4 +1,3 @@
-import sys
 import argparse
 from getpass import getpass
 from pathlib import Path

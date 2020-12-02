@@ -18,7 +18,7 @@ class NovelEpub:
     def create(self):
         # attribute validation
         if not self.chapters:
-            raise ValueError("'chapters' may not be 'None'")
+            raise ValueError("'chapters' cannot be 'None'")
 
         # prepare data
         self.chapters.sort(key=lambda c: c.index)

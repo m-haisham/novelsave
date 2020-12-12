@@ -1,3 +1,4 @@
+import re
 import unicodedata
 from typing import Tuple, List
 
@@ -39,23 +40,12 @@ class ReadLightNovel(Source):
                 soup.find('div', {'class': 'tab-content'}).find_all('ul', {'class': 'chapter-chs'})
         ):
             children = list(element.find_all('a'))
-            if not children:
-                continue
-
             offset = len(children) * i
             for j, link in enumerate(children):
-                text = link.text
-                trail = text.split(' ', maxsplit=2)[1]
-
-                # readlightnovel has a weird chapter link that doesnt point to anywhere
-                # and a repeat of the last chapter
-                if trail == '' or '.end' in trail:
-                    continue
 
                 chapter = Chapter(
                     index=offset + j,
-                    no=int(trail),
-                    title=text.strip(),
+                    title=link.text.strip(),
                     url=link['href']
                 )
 
@@ -69,82 +59,31 @@ class ReadLightNovel(Source):
         content = soup.find('div', {'class': 'chapter-content3'}).find('div', {'class': 'desc'})
 
         title_element = content.find('h3')
+
+        title = None
         if title_element is not None:
-            # those that have and actual title
-
             # title can have some unicode characters in them
-            text = unicodedata.normalize("NFKD", title_element.text)
-            order, title = text.split(': ', maxsplit=1)
-
-            no = int(order.split(' ', maxsplit=2)[1])
-        else:
-            title = no = None
-            for text in reversed(content.find_all(text=True, recursive=False, limit=20)):
-                text = text.strip()
-                if text[:8] == 'Chapter ':
-                    if ': ' in text:
-                        text, title = text.split(': ', maxsplit=1)
-                    else:
-                        title = text
-
-                    order = text.split(' ', maxsplit=1)[-1]
-                    if title == order:
-                        title = f'Chapter {order}'
-                    if '(END)' in order:
-                        order = order.split(' ', maxsplit=1)[0]
-
-                    no = int(order)
-                    break
+            title = unicodedata.normalize("NFKD", title_element.text)
 
         # paragraphs
         paragraphs = []
 
-        def add_paragraph(s: str):
-            if s and not s.startswith('Translator:') and not s.startswith('Chapter '):
-
-                paragraphs.append(
-                    self.format_paragraph(s)
-                )
-
         if content.find('p') is None:
             # no <p> elements
             for text in content.find_all(text=True, recursive=False):
-                add_paragraph(text.strip())
+                paragraphs.append(text)
         else:
             para_elements = content.find_all('p', recursive=False)
             for element in para_elements:
                 text = element.text.strip()
-                add_paragraph(text)
+                paragraphs.append(text)
+
+        # fixing the formatting issue
+        for i in range(len(paragraphs)):
+            paragraphs[i] = re.sub(r' \. ?', '. ', paragraphs[i]).strip()
 
         return Chapter(
-            no=no,
             title=title,
             paragraphs=paragraphs,
             url=url
         )
-
-    def format_paragraph(self, p: str):
-
-        construct = list(p)
-        indexes = []
-        for i, c in enumerate(construct):
-            if c == '.':
-                if construct[i-1] == ' ':
-                    indexes.append(i-1)
-
-                try:
-                    if construct[i+1] == ' ' and not construct[i+2]:
-                        indexes.append(i+1)
-                except IndexError:
-                    pass
-
-        # no need for changes
-        if len(indexes) == 0:
-            return p
-
-        paragraph = ''
-        for i, c in enumerate(construct):
-            if i not in indexes:
-                paragraph += c
-
-        return paragraph

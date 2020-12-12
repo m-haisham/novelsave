@@ -30,7 +30,6 @@ class LightNovelWorld(Source):
 
             chapter = Chapter(
                 index=i,
-                no=int(float(li['data-chapterno'])),
                 url=f"{LightNovelWorld.base}{a['href']}"
             )
 
@@ -49,7 +48,6 @@ class LightNovelWorld(Source):
             title = title_element.text.strip()
 
         chapter = Chapter(
-            no=int(float(result.group(1))),
             title=title,
             paragraphs=[],
             url=url,

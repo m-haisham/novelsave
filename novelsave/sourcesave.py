@@ -154,4 +154,7 @@ class SourceNovelSave(NovelSaveTemplate):
         ch = self.source.chapter(partialc.url)
         ch.index = partialc.index
 
+        if ch.title is None:
+            ch.title = partialc.title
+
         return ch

@@ -21,12 +21,25 @@ class Source:
         """
         raise NotImplementedError
 
+    def __init__(self):
+        self.session = requests.Session()
+
+    def login(self, email: str, password: str):
+        """
+        Login to the source and assign the required cookies
+
+        :param email: email or username
+        :param password: credential key
+        :return: None
+        """
+        raise NotImplementedError
+
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         """
         soup novel information from url
 
         :param url: link pointing to novel
-        :return: novel and table of content (chapters with only field no, title and url)
+        :return: novel, table of content (chapters with only field no, title and url), and volumes
         """
         raise NotImplementedError
 
@@ -40,7 +53,13 @@ class Source:
         raise NotImplementedError
 
     def soup(self, url: str) -> BeautifulSoup:
-        response = requests.get(url, headers=header)
+        """
+        Download website html and create a bs4 object
+
+        :param url: website to be downloaded
+        :return: created bs4 object
+        """
+        response = self.session.get(url, headers=header)
         if response.status_code == 200:
             return BeautifulSoup(response.content, 'lxml')
         else:

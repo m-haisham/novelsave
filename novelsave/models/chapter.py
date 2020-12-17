@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from typing import List, Tuple, Union
+from typing import List, Union, Tuple
 
 
 @dataclass
@@ -9,6 +9,7 @@ class Chapter:
     no: float = None
     title: str = None
     paragraphs: Union[str, List[str]] = None
+    volume: Tuple[int, str] = None
     url: str = None
 
     def __hash__(self):

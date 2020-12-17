@@ -8,10 +8,9 @@ from .tools import StringTools
 
 
 class NovelEpub:
-    def __init__(self, novel, cover, volumes, chapters, save_path):
+    def __init__(self, novel, cover, chapters, save_path):
         self.novel = novel
         self.cover = cover
-        self.volumes = volumes
         self.chapters = chapters
         self.save_path = save_path
 
@@ -35,13 +34,6 @@ class NovelEpub:
             with self.cover.open('rb') as f:
                 book.set_cover('cover.jpg', f.read())
 
-        # volume mapper
-        volume_map = {}
-        for volume_key in self.volumes.keys():
-            chs = self.volumes[volume_key]
-            for ch in chs:
-                volume_map[ch] = volume_key
-
         # create chapters
         book_chapters = {}
         for chapter in self.chapters:
@@ -49,9 +41,9 @@ class NovelEpub:
             book.add_item(epub_chapter)
 
             try:
-                volume = volume_map[chapter.id]
-            except (AttributeError, KeyError):
-                volume = '_default'
+                volume = tuple(chapter.volume) or (-1, '_default')
+            except (AttributeError, TypeError, IndexError):
+                volume = (-1, '_default')
 
             if volume in book_chapters.keys():
                 book_chapters[volume].append(epub_chapter)
@@ -64,8 +56,8 @@ class NovelEpub:
             book.toc = list(book_chapters.values())[0]
         else:
             book.toc = (
-                (epub.Section(name), tuple(chapters))
-                for name, chapters in book_chapters.items()
+                (epub.Section(volume[1]), tuple(book_chapters[volume]))
+                for volume in sorted(book_chapters.keys(), key=lambda k: k[0])
             )
 
         # add default NCX and Nav file

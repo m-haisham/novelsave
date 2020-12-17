@@ -128,7 +128,6 @@ class NovelSave:
         epub = NovelEpub(
             novel=self.db.novel.parse(),
             cover=self.cover_path(),
-            volumes={},
             chapters=self.db.chapters.all(),
             save_path=self.db.path.parent
         )

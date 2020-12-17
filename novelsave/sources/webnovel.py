@@ -74,3 +74,6 @@ class Webnovel(Source):
             paragraphs=wchapter.paragraphs,
             url=url,
         )
+
+    def novel_folder_name(self, url):
+        return f'n{UrlTools.from_novel_url(url)}'

@@ -1,10 +1,12 @@
 import re
 from typing import Tuple, List
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup, Comment
 
 from ..models import Novel, Chapter
+from ..tools import StringTools
 
 header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) '
                         'Chrome/39.0.2171.95 Safari/537.36'}
@@ -64,6 +66,19 @@ class Source:
             return BeautifulSoup(response.content, 'lxml')
         else:
             raise Exception(f'{response.status_code}: {url}')
+
+    def source_folder_name(self):
+        """
+        :return: suitable folder name from netloc
+        """
+        return StringTools.slugify(urlparse(self.base).netloc, replace='_')
+
+    def novel_folder_name(self, url):
+        """
+        :param url: novel url
+        :return: suitable novel folder name
+        """
+        return StringTools.slugify(url.rsplit('/')[-1])
 
     # ---- Inspired from https://github.com/dipu-bd/lightnovel-crawler ----
     # ----      And almost a perfect copy of the functions below       ----

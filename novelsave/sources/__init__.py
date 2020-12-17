@@ -1,4 +1,5 @@
 from .source import Source
+from .webnovel import Webnovel
 from .boxnovel import BoxNovel
 from .scribblehub import ScribbleHub
 from .insanitycave import InsanityCave
@@ -15,6 +16,7 @@ from .wuxiacom import WuxiaCom
 from .royalroad import RoyalRoad
 
 sources = [
+    Webnovel,
     WuxiaCo,
     BoxNovel,
     ReadLightNovel,

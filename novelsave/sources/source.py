@@ -78,7 +78,7 @@ class Source:
         :param url: novel url
         :return: suitable novel folder name
         """
-        return StringTools.slugify(url.rsplit('/')[-1])
+        return StringTools.slugify(url.strip('/ ').split('/')[-1])
 
     # ---- Inspired from https://github.com/dipu-bd/lightnovel-crawler ----
     # ----      And almost a perfect copy of the functions below       ----

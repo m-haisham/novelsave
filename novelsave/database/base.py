@@ -27,10 +27,10 @@ class NovelData(Database):
         super(NovelData, self).__init__(directory)
 
         self.novel = SingleClassTable(self.db, 'novel', Novel, ['title', 'author', 'thumbnail', 'url'])
-        self.pending = MultiClassTable(self.db, 'pending', Chapter, ['index', 'no', 'url'], 'url')
+        self.pending = MultiClassTable(self.db, 'pending', Chapter, ['index', 'volume', 'url'], 'url')
         self.chapters = MultiClassExternalTable(
-            self.db, self.path.parent, 'chapters', Chapter,
-            ['index', 'no', 'title', 'paragraphs', 'url'], 'url',
+            self.db, self.path.parent, 'chapters',
+            Chapter, ['index', 'title', 'paragraphs', 'volume', 'url'], 'url',
             naming_scheme=lambda c: str(c.index).zfill(4),
         )
         self.misc = KeyValueTable(self.db, 'misc')

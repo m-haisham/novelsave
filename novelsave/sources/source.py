@@ -1,10 +1,12 @@
 import re
 from typing import Tuple, List
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup, Comment
 
 from ..models import Novel, Chapter
+from ..tools import StringTools
 
 header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) '
                         'Chrome/39.0.2171.95 Safari/537.36'}
@@ -21,12 +23,25 @@ class Source:
         """
         raise NotImplementedError
 
+    def __init__(self):
+        self.session = requests.Session()
+
+    def login(self, email: str, password: str):
+        """
+        Login to the source and assign the required cookies
+
+        :param email: email or username
+        :param password: credential key
+        :return: None
+        """
+        raise NotImplementedError
+
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         """
         soup novel information from url
 
         :param url: link pointing to novel
-        :return: novel and table of content (chapters with only field no, title and url)
+        :return: novel, table of content (chapters with only field no, title and url), and volumes
         """
         raise NotImplementedError
 
@@ -40,11 +55,30 @@ class Source:
         raise NotImplementedError
 
     def soup(self, url: str) -> BeautifulSoup:
-        response = requests.get(url, headers=header)
+        """
+        Download website html and create a bs4 object
+
+        :param url: website to be downloaded
+        :return: created bs4 object
+        """
+        response = self.session.get(url, headers=header)
         if response.status_code == 200:
             return BeautifulSoup(response.content, 'lxml')
         else:
             raise Exception(f'{response.status_code}: {url}')
+
+    def source_folder_name(self):
+        """
+        :return: suitable folder name from netloc
+        """
+        return StringTools.slugify(urlparse(self.base).netloc, replace='_')
+
+    def novel_folder_name(self, url):
+        """
+        :param url: novel url
+        :return: suitable novel folder name
+        """
+        return StringTools.slugify(url.rsplit('/')[-1])
 
     # ---- Inspired from https://github.com/dipu-bd/lightnovel-crawler ----
     # ----      And almost a perfect copy of the functions below       ----

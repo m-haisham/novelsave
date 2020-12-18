@@ -24,7 +24,11 @@ class Source:
         raise NotImplementedError
 
     def __init__(self):
+        # public
         self.session = requests.Session()
+
+        # private
+        self._soup_cache = {}
 
     def login(self, email: str, password: str):
         """
@@ -62,6 +66,27 @@ class Source:
         :return: created bs4 object
         """
         response = self.session.get(url, headers=header)
+        return self._parse_response(response)
+
+    def cached_soup(self, url):
+        """
+        either return the cache response or
+        if there is no cache, download anew
+
+        :param url: website to be downloaded
+        :return: created bs4 object
+        """
+        try:
+            # get response from cache
+            response = self._soup_cache[url]
+        except KeyError:
+            # make a new request and cache the result
+            response = self.session.get(url, headers=header)
+            self._soup_cache[url] = response
+
+        return self._parse_response(response)
+
+    def _parse_response(self, response):
         if response.status_code == 200:
             return BeautifulSoup(response.content, 'lxml')
         else:

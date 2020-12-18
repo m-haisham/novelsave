@@ -14,6 +14,7 @@ from .fanfiction import Fanfiction
 from .novelfull import NovelFull
 from .wuxiacom import WuxiaCom
 from .royalroad import RoyalRoad
+from .spacebattles import Spacebattles
 
 sources = [
     Webnovel,
@@ -30,4 +31,5 @@ sources = [
     NovelFull,
     WuxiaCom,
     RoyalRoad,
+    Spacebattles,
 ]

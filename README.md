@@ -94,3 +94,4 @@ Creating an epub is easy as calling a function. `novelsave.Epub().create()`
 - [novelfull.com](https://novelfull.com)
 - [wuxiaworld.com](https://www.wuxiaworld.com)
 - [royalroad.com](https://www.royalroad.com)
+- [forums.spacebattles.com](https://forums.spacebattles.com/)

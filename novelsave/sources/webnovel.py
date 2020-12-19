@@ -53,7 +53,6 @@ class Webnovel(Source):
         chapters = []
         for i, title in enumerate(toc.keys()):
             for wchapter in toc[title]:
-
                 # translate from Webnovel.Chapter to Chapter
                 chapter = Chapter(
                     index=wchapter.id,
@@ -68,9 +67,15 @@ class Webnovel(Source):
 
     def chapter(self, url: str) -> Chapter:
         wchapter = self.api.chapter(*UrlTools.from_chapter_url(url))
+
+        if wchapter.no > 0:
+            title = f'{wchapter.no} {wchapter.title}'
+        else:
+            title = wchapter.title
+
         return Chapter(
             index=wchapter.id,
-            title=wchapter.title,
+            title=title,
             paragraphs=wchapter.paragraphs,
             url=url,
         )

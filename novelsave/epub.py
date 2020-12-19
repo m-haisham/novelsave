@@ -27,7 +27,16 @@ class NovelEpub:
         # id
         book.set_identifier(str(self.novel.id if hasattr(self.novel, 'id') else hashlib.md5(self.novel.title.encode('utf-8')).hexdigest()))
         book.set_title(self.novel.title)
+        book.set_language('en')
         book.add_author(self.novel.author)
+
+        # metadata
+        if self.novel.synopsis:
+            book.add_metadata('meta', 'synopsis', self.novel.synopsis)
+
+        for namespace, data in self.novel.metadata.items():
+            for name, value in data.items():
+                book.add_metadata(namespace, name, value)
 
         # cover
         if self.cover.exists() and self.cover.is_file():

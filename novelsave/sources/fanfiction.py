@@ -23,9 +23,21 @@ class Fanfiction(Source):
         novel = Novel(
             title=soup.select_one('#profile_top b.xcontrast_txt, #content b').text.strip(),
             author=soup.select_one('#profile_top, #content').select_one('a[href*="/u/"]').text.strip(),
+            synopsis=soup.select_one('#profile_top > div').text.strip(),
             thumbnail=cover,
             url=url,
         )
+
+        # metadata
+        pre_story_links = soup.select('#pre_story_links a')
+        if len(pre_story_links) == 2:
+            novel.metadata['fanfiction'] = {
+                pre_story_links[0].text.strip(): pre_story_links[1].text.strip(),
+            }
+        else:
+            novel.metadata['fanfiction'] = {
+                'Crossover': pre_story_links[0].text.rstrip(' Crossover'),
+            }
 
         id = urlparse(url).path.split('/')[2]
 

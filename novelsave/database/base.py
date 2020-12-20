@@ -3,7 +3,7 @@ from typing import Tuple
 
 from tinydb import TinyDB
 
-from .tables import KeyValueTable, SingleClassTable, MultiClassTable, MultiClassExternalTable
+from .tables import KeyValueTable, SingleClassTable, MultiClassTable, MultiClassExternalTable, MultiClassDecoupledTable
 from ..models import Novel, Chapter
 
 
@@ -12,7 +12,7 @@ class Database:
         self.db, self.path = self.open_db(directory)
 
     def open_db(self, directory) -> Tuple[TinyDB, Path]:
-        path = directory / Path('data.db')
+        path = directory / Path('data') / Path('meta.db')
         path.parent.mkdir(parents=True, exist_ok=True)
 
         if not path.exists() and not path.is_file():
@@ -28,7 +28,7 @@ class NovelData(Database):
 
         self.novel = SingleClassTable(self.db, 'novel', Novel,
                                       ['title', 'author', 'synopsis', 'thumbnail', 'metadata', 'url'])
-        self.pending = MultiClassTable(self.db, 'pending', Chapter, ['index', 'volume', 'url'], 'url')
+        self.pending = MultiClassDecoupledTable(self.db, self.path.parent, 'pending', Chapter, ['index', 'volume', 'url'], 'url')
         self.chapters = MultiClassExternalTable(
             self.db, self.path.parent, 'chapters',
             Chapter, ['index', 'title', 'paragraphs', 'volume', 'url'], 'url',

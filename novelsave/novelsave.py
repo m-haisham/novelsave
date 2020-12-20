@@ -39,7 +39,7 @@ class NovelSave:
 
         self.source = self.parse_source()
         self.netloc_slug = self.source.source_folder_name()
-        self.db = self.open_db()
+        self.db, self.path = self.open_db()
 
     def update(self, force_cover=False):
 
@@ -129,7 +129,7 @@ class NovelSave:
             novel=self.db.novel.parse(),
             cover=self.cover_path(),
             chapters=self.db.chapters.all(),
-            save_path=self.db.path.parent
+            save_path=self.path,
         )
 
         # get new downloads flag
@@ -149,9 +149,9 @@ class NovelSave:
 
     def open_db(self):
         # trailing slash adds nothing
-        directory = Path(self.user.directory.get()) / Path(self.netloc_slug) / self.source.novel_folder_name(self.url)
+        path = Path(self.user.directory.get()) / Path(self.netloc_slug) / self.source.novel_folder_name(self.url)
 
-        return NovelData(directory)
+        return NovelData(path), path
 
     def cover_path(self):
         return self.db.path.parent / Path('cover.jpg')

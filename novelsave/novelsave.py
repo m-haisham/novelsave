@@ -8,6 +8,7 @@ from .database.config import UserConfig
 from .epub import NovelEpub
 from .logger import NovelLogger
 from .sources import sources
+from .metasources import meta_sources
 from .tools import UiTools
 from .ui import Loader
 
@@ -71,6 +72,27 @@ class NovelSave:
 
         UiTools.print_info(f'Pending {len(pending)} chapters',
                            f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
+
+    def metadata(self, url, force=False):
+        # normalize url
+        url = url.rstrip('/')
+
+        # check caching
+        novel = self.db.novel.parse()
+        if not force and novel.meta_source == url:
+            return
+
+        # set meta_source for novel
+        novel.meta_source = url
+        self.db.novel.set(novel)
+
+        UiTools.print_info('Retrieving metadata...')
+        UiTools.print_info(url)
+
+        # update metadata
+        meta_source = self.parse_metasource(url)
+        for metadata in meta_source.retrieve(url):
+            self.db.metadata.put(vars(metadata))
 
     def download(self, thread_count=4, limit=None):
         # parameter validation
@@ -175,6 +197,18 @@ class NovelSave:
                 return source()
 
         raise TypeError(f'"{self.url}" does not belong to any available source')
+
+    def parse_metasource(self, url):
+        """
+        create neta source object to which the url belongs to
+
+        :return: meta source object
+        """
+        for source in meta_sources:
+            if source.of(url):
+                return source()
+
+        raise TypeError(f'"{self.url}" does not belong to any available meta source')
 
     def task(self, partialc):
         ch = self.source.chapter(partialc.url)

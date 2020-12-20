@@ -6,20 +6,28 @@ from ..accessors import IAccessor
 
 
 class SetTable(IAccessor):
-    def __init__(self, db, table, field1, field2):
+    def __init__(self, db, table, field1, field2, field3):
         super(SetTable, self).__init__(db)
         self.table_name = table
         self.field1 = field1
         self.field2 = field2
+        self.field3 = field3
 
     def put(self, obj: dict):
-        self.table.upsert(obj, (where(self.field1) == obj[self.field1]) & (where(self.field2) == obj[self.field2]))
+        self.table.upsert(
+            obj,
+            (where(self.field1) == obj[self.field1])
+            & (where(self.field2) == obj[self.field2])
+            & (where(self.field3) == obj[self.field3])
+        )
 
     def all(self) -> List[dict]:
         return self.table.all()
 
-    def remove(self, value1, value2):
+    def remove(self, value1, value2, value3):
         self.table.remove(
-            (where(self.field1) == value1) & (where(self.field2) == value2)
+            (where(self.field1) == value1)
+            & (where(self.field2) == value2)
+            & (where(self.field3) == value3)
         )
 

@@ -34,8 +34,10 @@ class NovelEpub:
         if self.novel.synopsis:
             book.add_metadata('meta', 'synopsis', self.novel.synopsis)
 
-        for metadata in self.novel.meta:
-            book.add_metadata(**vars(metadata))
+        for data in self.novel.meta:
+            book.add_metadata(data['namespace'], data['name'], data['value'], data['others'])
+
+        book.add_metadata(None, 'source', self.novel.url)
 
         # cover
         if self.cover.exists() and self.cover.is_file():

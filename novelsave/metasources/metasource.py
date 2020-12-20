@@ -25,7 +25,10 @@ class MetaSource:
 
     def soup(self, url):
         response = requests.get(url)
+        return BeautifulSoup(self._verify_response(response), 'lxml')
+
+    def _verify_response(self, response):
         if response.status_code == 200:
-            return BeautifulSoup(response.content, 'lxml')
+            return response
         else:
             raise Exception(f'{response.status_code}: {response.url}')

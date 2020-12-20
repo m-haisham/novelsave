@@ -67,7 +67,7 @@ class Source:
         :return: created bs4 object
         """
         response = self.session.get(url)
-        return self._parse_response(response)
+        return BeautifulSoup(self._verify_response(response), 'lxml')
 
     def cached_soup(self, url):
         """
@@ -85,11 +85,11 @@ class Source:
             response = self.session.get(url)
             self._soup_cache[url] = response
 
-        return self._parse_response(response)
+        return BeautifulSoup(self._verify_response(response), 'lxml')
 
-    def _parse_response(self, response):
+    def _verify_response(self, response):
         if response.status_code == 200:
-            return BeautifulSoup(response.content, 'lxml')
+            return response
         else:
             raise Exception(f'{response.status_code}: {response.url}')
 

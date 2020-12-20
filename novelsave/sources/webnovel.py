@@ -45,6 +45,7 @@ class Webnovel(Source):
         novel = Novel(
             title=wnovel.title,
             author=wnovel.author,
+            synopsis=wnovel.synopsis,
             thumbnail=wnovel.cover_url,
             url=url,
         )

@@ -58,6 +58,10 @@ class NovelSave:
         # update novel information
         self.db.novel.set(novel)
 
+        # update metadata
+        for metadata in novel.meta:
+            self.db.metadata.put(metadata)
+
         # update_pending
         saved = self.db.chapters.all()
         pending = list(set(chapters).difference(saved))
@@ -125,8 +129,12 @@ class NovelSave:
     def create_epub(self, force=False):
         UiTools.print_info('Packing epub...')
 
+        # retrieve metadata
+        novel = self.db.novel.parse()
+        novel.meta = self.db.metadata.all()
+
         epub = NovelEpub(
-            novel=self.db.novel.parse(),
+            novel=novel,
             cover=self.cover_path(),
             chapters=self.db.chapters.all(),
             save_path=self.path,

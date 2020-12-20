@@ -26,7 +26,7 @@ class Source:
     def __init__(self):
         # public
         self.session = requests.Session()
-        self.headers = header
+        # self.headers = header
 
         # private
         self._soup_cache = {}

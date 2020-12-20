@@ -3,7 +3,8 @@ from typing import Tuple
 
 from tinydb import TinyDB
 
-from .tables import KeyValueTable, SingleClassTable, MultiClassTable, MultiClassExternalTable, MultiClassDecoupledTable
+from .tables import KeyValueTable, SingleClassTable, MultiClassTable, MultiClassExternalTable, MultiClassDecoupledTable, \
+    SetTable
 from ..models import Novel, Chapter
 
 
@@ -27,7 +28,8 @@ class NovelData(Database):
         super(NovelData, self).__init__(directory)
 
         self.novel = SingleClassTable(self.db, 'novel', Novel,
-                                      ['title', 'author', 'synopsis', 'thumbnail', 'metadata', 'url'])
+                                      ['title', 'author', 'synopsis', 'thumbnail', 'meta_source', 'url'])
+        self.metadata = SetTable(self.db, 'metadata', 'namespace', 'name')
         self.pending = MultiClassDecoupledTable(self.db, self.path.parent, 'pending', Chapter, ['index', 'volume', 'url'], 'url')
         self.chapters = MultiClassExternalTable(
             self.db, self.path.parent, 'chapters',

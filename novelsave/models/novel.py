@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
+from typing import List
 
-from typing import Dict
 
 @dataclass
 class Novel:
@@ -8,5 +8,18 @@ class Novel:
     author: str = None
     synopsis: str = None
     thumbnail: str = None
-    metadata: Dict[str, Dict[str, str]] = field(default_factory=lambda: {})
     url: str = None
+    meta_source: str = None
+
+    meta: List[dict] = field(default_factory=lambda: {})
+
+    def add_meta(self, name: str, value: str, namespace: str = None, others=None):
+        if others is None:
+            others = {}
+
+        self.meta.append({
+            'namespace': namespace,
+            'name': name,
+            'value': value,
+            'others': others
+        })

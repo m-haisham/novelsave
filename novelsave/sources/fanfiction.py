@@ -31,13 +31,17 @@ class Fanfiction(Source):
         # metadata
         pre_story_links = soup.select('#pre_story_links a')
         if len(pre_story_links) == 2:
-            novel.metadata['fanfiction'] = {
-                pre_story_links[0].text.strip(): pre_story_links[1].text.strip(),
-            }
+            novel.add_meta(
+                namespace='fanfiction',
+                name=pre_story_links[0].text.strip(),
+                value=pre_story_links[1].text.strip(),
+            )
         else:
-            novel.metadata['fanfiction'] = {
-                'Crossover': pre_story_links[0].text.rstrip(' Crossover'),
-            }
+            novel.add_meta(
+                namespace='fanfiction',
+                name='Crossover',
+                value=pre_story_links[0].text.rstrip(' Crossover'),
+            )
 
         id = urlparse(url).path.split('/')[2]
 

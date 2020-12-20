@@ -77,6 +77,8 @@ class NovelSave:
         # normalize url
         url = url.rstrip('/')
 
+        meta_source = self.parse_metasource(url)
+
         # check caching
         novel = self.db.novel.parse()
         if not force and novel.meta_source == url:
@@ -90,7 +92,6 @@ class NovelSave:
         UiTools.print_info(url)
 
         # update metadata
-        meta_source = self.parse_metasource(url)
         for metadata in meta_source.retrieve(url):
             self.db.metadata.put(vars(metadata))
 
@@ -208,7 +209,7 @@ class NovelSave:
             if source.of(url):
                 return source()
 
-        raise TypeError(f'"{self.url}" does not belong to any available meta source')
+        raise TypeError(f'"{url}" does not belong to any available metadata source')
 
     def task(self, partialc):
         ch = self.source.chapter(partialc.url)

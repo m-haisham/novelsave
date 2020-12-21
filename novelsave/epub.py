@@ -4,6 +4,7 @@ from pathlib import Path
 from ebooklib import epub
 from yattag import Doc
 
+from .models import MetaData
 from .tools import StringTools
 
 
@@ -32,12 +33,12 @@ class NovelEpub:
 
         # metadata
         if self.novel.synopsis:
-            book.add_metadata('meta', 'synopsis', self.novel.synopsis)
+            book.add_metadata(MetaData.DEFAULT_NAMESPACE, 'synopsis', self.novel.synopsis)
 
         for data in self.novel.meta:
             book.add_metadata(data['namespace'], data['name'], data['value'], data['others'])
 
-        book.add_metadata(None, 'source', self.novel.url)
+        book.add_metadata(MetaData.DEFAULT_NAMESPACE, 'source', self.novel.url)
 
         # cover
         if self.cover.exists() and self.cover.is_file():

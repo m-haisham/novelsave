@@ -28,7 +28,7 @@ class NovelData(Database):
         super(NovelData, self).__init__(directory)
 
         self.novel = SingleClassTable(self.db, 'novel', Novel,
-                                      ['title', 'author', 'synopsis', 'thumbnail', 'meta_source', 'url'])
+                                      ['title', 'author', 'synopsis', 'thumbnail', 'lang', 'meta_source', 'url'])
         self.metadata = SetTable(self.db, 'metadata', 'namespace', 'name', 'value')
         self.pending = MultiClassDecoupledTable(self.db, self.path.parent, 'pending', Chapter, ['index', 'volume', 'url'], 'url')
         self.chapters = MultiClassExternalTable(

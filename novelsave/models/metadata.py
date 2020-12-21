@@ -6,5 +6,7 @@ from typing import Union
 class MetaData:
     name: str
     value: str
-    namespace: Union[str, None] = None
     others: dict = field(default_factory=lambda: {})
+    namespace: str = 'DC'
+
+    DEFAULT_NAMESPACE = 'DC'

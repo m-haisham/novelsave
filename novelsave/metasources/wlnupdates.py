@@ -26,11 +26,11 @@ class WlnUpdates(MetaSource):
             if name == data['title']:
                 continue
 
-            metadata.append(MetaData('title', name, None, others={'type': 'alternate'}))
+            metadata.append(MetaData('title', name, others={'type': 'alternate'}))
 
         # illustrators
         for obj in data['illustrators']:
-            metadata.append(MetaData('contributor', obj['illustrator'], None, others={'role': 'ill'}))
+            metadata.append(MetaData('contributor', obj['illustrator'], others={'role': 'ill'}))
 
         # publishers
         for obj in data['publishers']:
@@ -40,17 +40,17 @@ class WlnUpdates(MetaSource):
         for obj in data['genres']:
             metadata.append(MetaData('subject', obj['genre']))
 
-        # tags
-        for obj in data['tags']:
-            metadata.append(MetaData('tag', obj['tag']))
+        # tags [tags are not needed]
+        # for obj in data['tags']:
+        #     metadata.append(MetaData('tag', obj['tag']))
 
         # original language
         if data['orig_lang']:
-            metadata.append(MetaData('lang', data['orig_lang'], None, others={'id': 'original language'}))
+            metadata.append(MetaData('lang', data['orig_lang'], others={'id': 'original language'}))
 
         # publication
         if data['pub_date']:
-            metadata.append(MetaData('date', data['pub_date'], None, others={'role': 'publication'}))
+            metadata.append(MetaData('date', data['pub_date'], others={'role': 'publication'}))
 
         return metadata
 

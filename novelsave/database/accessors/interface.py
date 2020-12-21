@@ -17,7 +17,7 @@ class IAccessor:
         else:
             self._table = self.db.table(self._table_name, cache_size=None)
 
-    def where(self, key, value) -> List[Document]:
+    def search_where(self, key, value) -> List[Document]:
         """
         search minified
         
@@ -26,6 +26,16 @@ class IAccessor:
         :return: where the key of document has value provided
         """
         return self.table.search(where(key) == value)
+
+    def remove_where(self, key, value):
+        """
+        remove minified
+
+        :param key: identifier
+        :param value: corresponding value to key
+        :return: None
+        """
+        self.table.remove(where(key) == value)
 
     def truncate(self):
         self.table.truncate()

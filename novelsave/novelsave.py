@@ -91,9 +91,16 @@ class NovelSave:
         UiTools.print_info('Retrieving metadata...')
         UiTools.print_info(url)
 
+        # remove previous external metadata
+        self.db.metadata.remove_where('src', 'ext')
+
         # update metadata
         for metadata in meta_source.retrieve(url):
-            self.db.metadata.put(vars(metadata))
+            # convert to object and mark as external metadata
+            obj = vars(metadata)
+            obj['src'] = 'ext'
+
+            self.db.metadata.put(obj)
 
     def download(self, thread_count=4, limit=None):
         # parameter validation

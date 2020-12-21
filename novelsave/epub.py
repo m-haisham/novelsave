@@ -28,7 +28,7 @@ class NovelEpub:
         # id
         book.set_identifier(str(self.novel.id if hasattr(self.novel, 'id') else hashlib.md5(self.novel.title.encode('utf-8')).hexdigest()))
         book.set_title(self.novel.title)
-        book.set_language('en')
+        book.set_language(self.novel.lang)
         book.add_author(self.novel.author)
 
         # metadata

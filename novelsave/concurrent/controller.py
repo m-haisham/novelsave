@@ -1,10 +1,12 @@
 from queue import Queue
 
+from typing import Callable
+
 from .action import ActionThread
 
 
 class ConcurrentActionsController:
-    def __init__(self, count, task):
+    def __init__(self, count: int, task: Callable):
         self.queue_in = Queue()
         self.queue_out = Queue()
 

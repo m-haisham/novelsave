@@ -4,6 +4,7 @@ from pathlib import Path
 from ebooklib import epub
 from yattag import Doc
 
+from .models import MetaData
 from .tools import StringTools
 
 
@@ -24,10 +25,19 @@ class NovelEpub:
 
         book = epub.EpubBook()
 
-        # id
+        # metadata
         book.set_identifier(str(self.novel.id if hasattr(self.novel, 'id') else hashlib.md5(self.novel.title.encode('utf-8')).hexdigest()))
         book.set_title(self.novel.title)
+        book.set_language(self.novel.lang)
         book.add_author(self.novel.author)
+
+        if self.novel.synopsis:
+            book.add_metadata(MetaData.DEFAULT_NAMESPACE, 'synopsis', self.novel.synopsis)
+
+        for data in self.novel.meta:
+            book.add_metadata(data['namespace'], data['name'], data['value'], data['others'])
+
+        book.add_metadata(MetaData.DEFAULT_NAMESPACE, 'source', self.novel.url)
 
         # cover
         if self.cover.exists() and self.cover.is_file():
@@ -51,8 +61,7 @@ class NovelEpub:
                 book_chapters[volume] = [epub_chapter]
 
         # table of contents
-        if len(book_chapters.keys()) == 1:
-            # no volume sections
+        if len(book_chapters.keys()) == 1:  # no volume sections
             book.toc = list(book_chapters.values())[0]
         else:
             book.toc = (

@@ -7,6 +7,8 @@ from .database import NovelData
 from .database.config import UserConfig
 from .epub import NovelEpub
 from .logger import NovelLogger
+from .metasources import meta_sources
+from .models import MetaData
 from .sources import sources
 from .tools import UiTools
 from .ui import Loader
@@ -39,7 +41,7 @@ class NovelSave:
 
         self.source = self.parse_source()
         self.netloc_slug = self.source.source_folder_name()
-        self.db = self.open_db()
+        self.db, self.path = self.open_db()
 
     def update(self, force_cover=False):
 
@@ -47,7 +49,7 @@ class NovelSave:
         UiTools.print_info(self.url)
         novel, chapters = self.source.novel(self.url)
 
-        UiTools.print_success(f'Found {len(chapters)} chapters')
+        UiTools.print_info(f'Found {len(chapters)} chapters')
 
         if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
             # download cover
@@ -58,6 +60,10 @@ class NovelSave:
         # update novel information
         self.db.novel.set(novel)
 
+        # update metadata
+        for metadata in novel.meta:
+            self.db.metadata.put(metadata)
+
         # update_pending
         saved = self.db.chapters.all()
         pending = list(set(chapters).difference(saved))
@@ -65,8 +71,43 @@ class NovelSave:
         self.db.pending.truncate()
         self.db.pending.put_all(pending)
 
-        UiTools.print_info(f'Pending {len(pending)} chapters',
-                           f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
+        UiTools.print_success(f'Pending {len(pending)} chapters',
+                              f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
+
+    def metadata(self, url, force=False):
+        # normalize url
+        url = url.rstrip('/')
+
+        meta_source = self.parse_metasource(url)
+
+        # check caching
+        novel = self.db.novel.parse()
+        if not force and novel.meta_source == url:
+            return
+
+        # set meta_source for novel
+        self.db.novel.put('meta_source', url)
+
+        UiTools.print_info('Retrieving metadata...')
+        UiTools.print_info(url)
+
+        # remove previous external metadata
+        self.remove_metadata(with_source=False)
+
+        # update metadata
+        for metadata in meta_source.retrieve(url):
+            # convert to object and mark as external metadata
+            metadata.src = MetaData.SOURCE_EXTERNAL
+            obj = vars(metadata)
+
+            self.db.metadata.put(obj)
+
+    def remove_metadata(self, with_source=True):
+        self.db.metadata.remove_where('src', MetaData.SOURCE_EXTERNAL)
+
+        # remove meta source link from novel
+        if with_source:
+            self.db.novel.put('meta_source', None)
 
     def download(self, thread_count=4, limit=None):
         # parameter validation
@@ -125,11 +166,15 @@ class NovelSave:
     def create_epub(self, force=False):
         UiTools.print_info('Packing epub...')
 
+        # retrieve metadata
+        novel = self.db.novel.parse()
+        novel.meta = self.db.metadata.all()
+
         epub = NovelEpub(
-            novel=self.db.novel.parse(),
+            novel=novel,
             cover=self.cover_path(),
             chapters=self.db.chapters.all(),
-            save_path=self.db.path.parent
+            save_path=self.path,
         )
 
         # get new downloads flag
@@ -149,9 +194,9 @@ class NovelSave:
 
     def open_db(self):
         # trailing slash adds nothing
-        directory = Path(self.user.directory.get()) / Path(self.netloc_slug) / self.source.novel_folder_name(self.url)
+        path = Path(self.user.directory.get()) / Path(self.netloc_slug) / self.source.novel_folder_name(self.url)
 
-        return NovelData(directory)
+        return NovelData(path), path
 
     def cover_path(self):
         return self.db.path.parent / Path('cover.jpg')
@@ -167,6 +212,18 @@ class NovelSave:
                 return source()
 
         raise TypeError(f'"{self.url}" does not belong to any available source')
+
+    def parse_metasource(self, url):
+        """
+        create neta source object to which the url belongs to
+
+        :return: meta source object
+        """
+        for source in meta_sources:
+            if source.of(url):
+                return source()
+
+        raise TypeError(f'"{url}" does not belong to any available metadata source')
 
     def task(self, partialc):
         ch = self.source.chapter(partialc.url)

@@ -26,6 +26,7 @@ class Source:
     def __init__(self):
         # public
         self.session = requests.Session()
+        self.headers = header
 
         # private
         self._soup_cache = {}
@@ -65,8 +66,8 @@ class Source:
         :param url: website to be downloaded
         :return: created bs4 object
         """
-        response = self.session.get(url, headers=header)
-        return self._parse_response(response)
+        response = self.session.get(url)
+        return BeautifulSoup(self._verify_response(response).content, 'lxml')
 
     def cached_soup(self, url):
         """
@@ -81,16 +82,16 @@ class Source:
             response = self._soup_cache[url]
         except KeyError:
             # make a new request and cache the result
-            response = self.session.get(url, headers=header)
+            response = self.session.get(url)
             self._soup_cache[url] = response
 
-        return self._parse_response(response)
+        return BeautifulSoup(self._verify_response(response).content, 'lxml')
 
-    def _parse_response(self, response):
+    def _verify_response(self, response):
         if response.status_code == 200:
-            return BeautifulSoup(response.content, 'lxml')
+            return response
         else:
-            raise Exception(f'{response.status_code}: {url}')
+            raise Exception(f'{response.status_code}: {response.url}')
 
     def source_folder_name(self):
         """

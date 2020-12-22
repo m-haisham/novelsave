@@ -64,6 +64,7 @@ actions:
   -p, --pending      download pending chapters
   -c, --create       create epub from downloaded chapters
   --meta META        metadata source url
+  --remove-meta      remove current metadata
   --force-cover      download and overwrite the existing cover
   --force-create     force create epub
   --force-meta       force update metadata

@@ -48,7 +48,7 @@ class NovelSave:
         UiTools.print_info(self.url)
         novel, chapters = self.source.novel(self.url)
 
-        UiTools.print_success(f'Found {len(chapters)} chapters')
+        UiTools.print_info(f'Found {len(chapters)} chapters')
 
         if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
             # download cover
@@ -70,7 +70,7 @@ class NovelSave:
         self.db.pending.truncate()
         self.db.pending.put_all(pending)
 
-        UiTools.print_info(f'Pending {len(pending)} chapters',
+        UiTools.print_success(f'Pending {len(pending)} chapters',
                            f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
 
     def metadata(self, url, force=False):
@@ -92,7 +92,7 @@ class NovelSave:
         UiTools.print_info(url)
 
         # remove previous external metadata
-        self.db.metadata.remove_where('src', 'ext')
+        self.remove_metadata(with_source=False)
 
         # update metadata
         for metadata in meta_source.retrieve(url):
@@ -101,6 +101,13 @@ class NovelSave:
             obj['src'] = 'ext'
 
             self.db.metadata.put(obj)
+
+    def remove_metadata(self, with_source=True):
+        self.db.metadata.remove_where('src', 'ext')
+
+        # remove meta source link from novel
+        if with_source:
+            self.db.novel.put('meta_source', None)
 
     def download(self, thread_count=4, limit=None):
         # parameter validation

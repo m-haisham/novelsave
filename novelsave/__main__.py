@@ -52,11 +52,15 @@ def process_task(args):
         print()  # some breathing room
         novelsave.password = getpass('[-] password: ')
 
-    if not any([args.update, args.meta, args.pending, args.create, args.force_create]):
+    if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
         UiTools.print_error('No actions selected')
 
     if args.update:
         novelsave.update(force_cover=args.force_cover)
+
+    if args.remove_meta:
+        novelsave.remove_metadata(with_source=True)
+        UiTools.print_success('Removed metadata')
 
     if args.meta:
         novelsave.metadata(url=args.meta, force=args.force_meta)
@@ -77,6 +81,7 @@ def main():
     actions.add_argument('-p', '--pending', action='store_true', help='download pending chapters')
     actions.add_argument('-c', '--create', action='store_true', help='create epub from downloaded chapters')
     actions.add_argument('--meta', type=str, help='metadata source url', default=None)
+    actions.add_argument('--remove-meta', action='store_true', help='remove current metadata')
     actions.add_argument('--force-cover', action='store_true', help='download and overwrite the existing cover')
     actions.add_argument('--force-create', action='store_true', help='force create epub')
     actions.add_argument('--force-meta', action='store_true', help='force update metadata')

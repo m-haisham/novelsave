@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Union
 
 
 @dataclass
@@ -8,5 +7,8 @@ class MetaData:
     value: str
     others: dict = field(default_factory=lambda: {})
     namespace: str = 'DC'
+    src: str = 'int'
 
     DEFAULT_NAMESPACE = 'DC'
+    SOURCE_INTERNAL = 'int'
+    SOURCE_EXTERNAL = 'ext'

@@ -22,7 +22,7 @@ class SetTable(IAccessor):
     def all(self) -> List[dict]:
         return self.table.all()
 
-    def remove(self, value1, value2, value3):
+    def remove(self, value1, value2):
         self.table.remove(
             (where(self.field1) == value1)
             & (where(self.field2) == value2)

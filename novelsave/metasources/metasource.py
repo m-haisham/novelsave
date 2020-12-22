@@ -1,6 +1,7 @@
+from typing import List
+
 import requests
 from bs4 import BeautifulSoup
-from typing import List
 
 from ..models import MetaData
 

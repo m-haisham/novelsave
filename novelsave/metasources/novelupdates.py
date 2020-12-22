@@ -1,7 +1,5 @@
 from typing import List
 
-import requests
-
 from .metasource import MetaSource
 from ..models import MetaData
 

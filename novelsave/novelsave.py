@@ -7,8 +7,9 @@ from .database import NovelData
 from .database.config import UserConfig
 from .epub import NovelEpub
 from .logger import NovelLogger
-from .sources import sources
 from .metasources import meta_sources
+from .models import MetaData
+from .sources import sources
 from .tools import UiTools
 from .ui import Loader
 
@@ -71,7 +72,7 @@ class NovelSave:
         self.db.pending.put_all(pending)
 
         UiTools.print_success(f'Pending {len(pending)} chapters',
-                           f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
+                              f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
 
     def metadata(self, url, force=False):
         # normalize url
@@ -85,8 +86,7 @@ class NovelSave:
             return
 
         # set meta_source for novel
-        novel.meta_source = url
-        self.db.novel.set(novel)
+        self.db.novel.put('meta_source', url)
 
         UiTools.print_info('Retrieving metadata...')
         UiTools.print_info(url)
@@ -97,13 +97,13 @@ class NovelSave:
         # update metadata
         for metadata in meta_source.retrieve(url):
             # convert to object and mark as external metadata
+            metadata.src = MetaData.SOURCE_EXTERNAL
             obj = vars(metadata)
-            obj['src'] = 'ext'
 
             self.db.metadata.put(obj)
 
     def remove_metadata(self, with_source=True):
-        self.db.metadata.remove_where('src', 'ext')
+        self.db.metadata.remove_where('src', MetaData.SOURCE_EXTERNAL)
 
         # remove meta source link from novel
         if with_source:

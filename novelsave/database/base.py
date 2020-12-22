@@ -3,7 +3,7 @@ from typing import Tuple
 
 from tinydb import TinyDB
 
-from .tables import KeyValueTable, SingleClassTable, MultiClassTable, MultiClassExternalTable, MultiClassDecoupledTable, \
+from .tables import KeyValueTable, SingleClassTable, MultiClassExternalTable, MultiClassDecoupledTable, \
     SetTable
 from ..models import Novel, Chapter
 

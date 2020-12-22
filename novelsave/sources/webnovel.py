@@ -1,15 +1,13 @@
 import re
-
 from typing import Tuple, List
 
-from .source import Source
-
-from webnovel.bot import BASE_URL
 from webnovel import WebnovelBot
 from webnovel.api import ParsedApi
+from webnovel.bot import BASE_URL
 from webnovel.models import Novel as WebnovelNovel
 from webnovel.tools import UrlTools
 
+from .source import Source
 from ..models import Novel, Chapter
 
 

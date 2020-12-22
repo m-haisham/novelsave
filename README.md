@@ -4,6 +4,8 @@
 
 Tool to convert novels to epub
 
+> **v0.6.+ is not compatible with previous versions**
+
 ## Install
 
 ```
@@ -93,6 +95,7 @@ if __name__ == '__main__':
 
 - ```update(self, force_cover=False):```
 - ```metadata(self, url, force=False):```
+- ```remove_metadata(self, with_source=True):```
 - ```download(self, thread_count=4, limit=None):```
 - ```create_epub(self, force=False):```
 

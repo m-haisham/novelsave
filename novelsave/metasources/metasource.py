@@ -4,6 +4,8 @@ from typing import List
 
 from ..models import MetaData
 
+header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) '
+                        'Chrome/39.0.2171.95 Safari/537.36'}
 
 class MetaSource:
     @staticmethod
@@ -24,8 +26,8 @@ class MetaSource:
         raise NotImplementedError
 
     def soup(self, url):
-        response = requests.get(url)
-        return BeautifulSoup(self._verify_response(response), 'lxml')
+        response = requests.get(url, headers=header)
+        return BeautifulSoup(self._verify_response(response).content, 'lxml')
 
     def _verify_response(self, response):
         if response.status_code == 200:

@@ -123,3 +123,4 @@ you can access the database by using the `db` attribute of `NovelSave`
 ## Metadata Sources
 
 - [wlnupdates.com](https://www.wlnupdates.com)
+- [novelupdates.com](https://www.novelupdates.com)

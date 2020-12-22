@@ -26,7 +26,7 @@ class Source:
     def __init__(self):
         # public
         self.session = requests.Session()
-        # self.headers = header
+        self.headers = header
 
         # private
         self._soup_cache = {}
@@ -67,7 +67,7 @@ class Source:
         :return: created bs4 object
         """
         response = self.session.get(url)
-        return BeautifulSoup(self._verify_response(response), 'lxml')
+        return BeautifulSoup(self._verify_response(response).content, 'lxml')
 
     def cached_soup(self, url):
         """
@@ -85,7 +85,7 @@ class Source:
             response = self.session.get(url)
             self._soup_cache[url] = response
 
-        return BeautifulSoup(self._verify_response(response), 'lxml')
+        return BeautifulSoup(self._verify_response(response).content, 'lxml')
 
     def _verify_response(self, response):
         if response.status_code == 200:

@@ -3,10 +3,10 @@ from urllib.parse import urlparse
 
 from .source import Source
 from ..models import Chapter, Novel
-
+from ..exceptions import ResponseException
 
 class Spacebattles(Source):
-    base = 'https://forums.spacebattles.com/'
+    base = 'https://forums.spacebattles.com'
 
     @staticmethod
     def of(url: str) -> bool:
@@ -20,9 +20,16 @@ class Spacebattles(Source):
 
         # getting a thumbnail
         stripped_baseurl = self.base.rstrip("/")
-        author_soup = self.soup(f'{stripped_baseurl}{author_element["href"]}')
-        avatar = author_soup.select_one('.avatarWrapper > .avatar')
-        thumbnail = f'{stripped_baseurl}{avatar["href"]}'
+
+        # getting writer profile image
+        try:
+            author_soup = self.soup(f'{stripped_baseurl}{author_element["href"]}')
+            avatar = author_soup.select_one('.avatarWrapper > .avatar')
+            thumbnail = f'{stripped_baseurl}{avatar["href"]}'
+        except ResponseException as e:
+            # access to profile denied
+            if e.response.status_code == 403:
+                thumbnail = None
 
         novel = Novel(
             title=soup.select_one('.p-breadcrumbs > li:last-child').text.strip(),

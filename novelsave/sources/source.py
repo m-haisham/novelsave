@@ -1,4 +1,5 @@
 import re
+import time
 from typing import Tuple, List
 from urllib.parse import urlparse
 
@@ -7,6 +8,7 @@ from bs4 import BeautifulSoup, Comment
 
 from ..models import Novel, Chapter
 from ..tools import StringTools
+from ..exceptions import ResponseException
 
 header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) '
                         'Chrome/39.0.2171.95 Safari/537.36'}
@@ -66,8 +68,8 @@ class Source:
         :param url: website to be downloaded
         :return: created bs4 object
         """
-        response = self.session.get(url)
-        return BeautifulSoup(self._verify_response(response).content, 'lxml')
+        response = self.request_get(url)
+        return BeautifulSoup(response.content, 'lxml')
 
     def cached_soup(self, url):
         """
@@ -82,16 +84,26 @@ class Source:
             response = self._soup_cache[url]
         except KeyError:
             # make a new request and cache the result
-            response = self.session.get(url)
+            response = self.request_get(url)
             self._soup_cache[url] = response
 
-        return BeautifulSoup(self._verify_response(response).content, 'lxml')
+        return BeautifulSoup(response.content, 'lxml')
 
-    def _verify_response(self, response):
+    def request_get(self, url):
+        response = self.session.get(url)
         if response.status_code == 200:
             return response
+        elif response.status_code == 429:
+            try:
+                retry_timeout = response.headers['Retry-After'] / 1000
+            except KeyError:
+                # default timeout
+                retry_timeout = 2
+
+            time.sleep(retry_timeout)
+            return self.request_get(url)
         else:
-            raise Exception(f'{response.status_code}: {response.url}')
+            raise ResponseException(response, f'{response.status_code}: {response.url}')
 
     def source_folder_name(self):
         """

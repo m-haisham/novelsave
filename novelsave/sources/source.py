@@ -90,7 +90,7 @@ class Source:
         return BeautifulSoup(response.content, 'lxml')
 
     def request_get(self, url):
-        response = self.session.get(url)
+        response = self.session.get(url, headers=header)
         if response.status_code == 200:
             return response
         elif response.status_code == 429:

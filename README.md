@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
 ### Methods
 
-`NovelSave` has 4 methods
+`NovelSave` has 5 methods
 
 - ```update(self, force_cover=False):```
 - ```metadata(self, url, force=False):```
@@ -123,6 +123,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 - [wuxiaworld.com](https://www.wuxiaworld.com)
 - [royalroad.com](https://www.royalroad.com)
 - [forums.spacebattles.com](https://forums.spacebattles.com/)
+- [wattpad.com](https://www.wattpad.com)
 
 ## Metadata Sources
 

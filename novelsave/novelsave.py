@@ -6,6 +6,7 @@ from .concurrent import ConcurrentActionsController
 from .database import NovelData
 from .database.config import UserConfig
 from .epub import NovelEpub
+from .exceptions import MissingSource
 from .logger import NovelLogger
 from .metasources import meta_sources
 from .models import MetaData
@@ -39,7 +40,7 @@ class NovelSave:
         # initialize logger
         NovelLogger.instance = NovelLogger(self.user.directory.get())
 
-        self.source = self.parse_source()
+        self.source = self.parse_source(self.url)
         self.netloc_slug = self.source.source_folder_name()
         self.db, self.path = self.open_db()
 
@@ -72,7 +73,7 @@ class NovelSave:
         self.db.pending.put_all(pending)
 
         UiTools.print_success(f'Pending {len(pending)} chapters',
-                              f'| {pending[0].no} {pending[0].title}' if len(pending) == 1 else '')
+                              f'| {pending[0].title}' if len(pending) == 1 else '')
 
     def metadata(self, url, force=False):
         # normalize url
@@ -201,21 +202,21 @@ class NovelSave:
     def cover_path(self):
         return self.db.path.parent / Path('cover.jpg')
 
-    def parse_source(self):
+    def parse_source(self, url):
         """
-        create source object to which the url belongs to
+        create source object to which the :param url: belongs to
 
         :return: source object
         """
         for source in sources:
-            if source.of(self.url):
+            if source.of(url):
                 return source()
 
-        raise TypeError(f'"{self.url}" does not belong to any available source')
+        raise MissingSource(url, f'"{url}" does not belong to any available source')
 
     def parse_metasource(self, url):
         """
-        create neta source object to which the url belongs to
+        create neta source object to which the :param url: belongs to
 
         :return: meta source object
         """
@@ -223,7 +224,7 @@ class NovelSave:
             if source.of(url):
                 return source()
 
-        raise TypeError(f'"{url}" does not belong to any available metadata source')
+        raise MissingSource(url, f'"{url}" does not belong to any available metadata source')
 
     def task(self, partialc):
         ch = self.source.chapter(partialc.url)

@@ -11,13 +11,10 @@ from .logger import NovelLogger
 from .metasources import meta_sources
 from .models import MetaData
 from .sources import sources
-from .tools import UiTools
-from .ui import Loader
+from .ui import Loader, ConsolePrinter
 
 
 class NovelSave:
-    verbose = False
-
     IS_CHAPTERS_UPDATED = 'is_cu'
 
     def __init__(self, url, username=None, password=None, directory=None):
@@ -33,24 +30,24 @@ class NovelSave:
 
             if not path.exists():
                 path.mkdir(parents=True)
-                UiTools.print_success(f'Created dir {path}')
 
             self.user.directory.put(str(path))
 
         # initialize logger
         NovelLogger.instance = NovelLogger(self.user.directory.get())
-
+        
+        self.console = ConsolePrinter()
         self.source = self.parse_source(self.url)
         self.netloc_slug = self.source.source_folder_name()
         self.db, self.path = self.open_db()
-
+    
     def update(self, force_cover=False):
 
-        UiTools.print_info('Retrieving novel info...')
-        UiTools.print_info(self.url)
+        self.console.print('Retrieving novel info...')
+        self.console.print(self.url)
         novel, chapters = self.source.novel(self.url)
 
-        UiTools.print_info(f'Found {len(chapters)} chapters')
+        self.console.print(f'Found {len(chapters)} chapters')
 
         if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
             # download cover
@@ -72,8 +69,11 @@ class NovelSave:
         self.db.pending.truncate()
         self.db.pending.put_all(pending)
 
-        UiTools.print_success(f'Pending {len(pending)} chapters',
-                              f'| {pending[0].title}' if len(pending) == 1 else '')
+        self.console.print(
+            f'Pending {len(pending)} chapters',
+            f'| {pending[0].title}' if len(pending) == 1 else '',
+            prefix=ConsolePrinter.P_SUCCESS
+        )
 
     def metadata(self, url, force=False):
         # normalize url
@@ -89,8 +89,8 @@ class NovelSave:
         # set meta_source for novel
         self.db.novel.put('meta_source', url)
 
-        UiTools.print_info('Retrieving metadata...')
-        UiTools.print_info(url)
+        self.console.print('Retrieving metadata...')
+        self.console.print(url)
 
         # remove previous external metadata
         self.remove_metadata(with_source=False)
@@ -113,11 +113,11 @@ class NovelSave:
     def download(self, thread_count=4, limit=None):
         # parameter validation
         if limit and limit <= 0:
-            UiTools.print_error("'limit' must be greater than 0")
+            self.console.print("'limit' must be greater than 0", prefix=ConsolePrinter.P_ERROR)
 
         pending = self.db.pending.all()
         if not pending:
-            UiTools.print_error('No pending chapters')
+            self.console.print('No pending chapters', prefix=ConsolePrinter.P_ERROR)
             return
 
         pending.sort(key=lambda c: c.index)
@@ -127,15 +127,14 @@ class NovelSave:
             pending = pending[:limit]
 
         # some useful information
-        if not self.verbose:
-            if len(pending) == 1:
-                additive = str(pending[0].index)
-            else:
-                additive = f'{pending[0].index} - {pending[-1].index}'
+        if len(pending) == 1:
+            additive = str(pending[0].index)
+        else:
+            additive = f'{pending[0].index} - {pending[-1].index}'
+        self.console.print(f'Downloading {len(pending)} chapters | {additive}...')
 
-            UiTools.print_info(f'Downloading {len(pending)} chapters | {additive}...')
-
-        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.verbose) as brush:
+        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.console.verbose)\
+                as brush:
 
             # initialize controller
             controller = ConcurrentActionsController(thread_count, task=self.task)
@@ -152,7 +151,7 @@ class NovelSave:
                 # brush.print(f'{chapter.no} {chapter.title}')
 
                 # update brush
-                if self.verbose:
+                if self.console.verbose:
                     brush.value += 1
                     brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
 
@@ -165,7 +164,7 @@ class NovelSave:
         self.db.chapters.flush()
 
     def create_epub(self, force=False):
-        UiTools.print_info('Packing epub...')
+        self.console.print('Packing epub...')
 
         # retrieve metadata
         novel = self.db.novel.parse()
@@ -183,7 +182,7 @@ class NovelSave:
 
         # check flags and whether the epub already exists
         if not is_updated and not force and epub.path.exists():
-            UiTools.print_info('Aborted. No changes to chapter database')
+            self.console.print('Aborted. No changes to chapter database')
             return
 
         epub.create()
@@ -191,7 +190,7 @@ class NovelSave:
         # reset new downloads flag
         self.db.misc.put(self.IS_CHAPTERS_UPDATED, False)
 
-        UiTools.print_success(f'Saved to {epub.path}')
+        self.console.print(f'Saved to {epub.path}', prefix=ConsolePrinter.P_SUCCESS)
 
     def open_db(self):
         # trailing slash adds nothing
@@ -226,10 +225,10 @@ class NovelSave:
 
         raise MissingSource(url, f'"{url}" does not belong to any available metadata source')
 
-    def task(self, partialc):
-        ch = self.source.chapter(partialc.url)
-        ch.index = partialc.index
-        ch.title = ch.title or partialc.title
-        ch.volume = partialc.volume
+    def task(self, partial_c):
+        ch = self.source.chapter(partial_c.url)
+        ch.index = partial_c.index
+        ch.title = ch.title or partial_c.title
+        ch.volume = partial_c.volume
 
         return ch

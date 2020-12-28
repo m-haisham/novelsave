@@ -6,7 +6,6 @@ from tinydb import TinyDB
 
 from .element import ConfigElement
 from ..tables import KeyValueTable
-from ...tools import UiTools
 
 appname = 'NovelSave'
 appauthor = 'mHaisham'
@@ -43,7 +42,3 @@ class UserConfig:
         db = TinyDB(directory / Path('config.json'))
 
         return db, KeyValueTable(db, 'config')
-
-    def print_configs(self):
-        for config in self.configs:
-            UiTools.print_var(config.name, config.get())

@@ -6,10 +6,11 @@ from webnovel.tools import UrlTools
 
 from novelsave import NovelSave
 from novelsave.database import UserConfig
-from novelsave.tools import UiTools
+from novelsave.ui import ConsolePrinter
 
 
 def setup_config(args):
+    console = ConsolePrinter(verbose=True)
     user = UserConfig()
 
     # updating storage directory
@@ -20,16 +21,17 @@ def setup_config(args):
 
         try:
             user.directory.put(str(args.dir))
-            UiTools.print_success(f'Updated {user.directory.name}')
+            console.print(f'Updated {user.directory.name}', prefix=ConsolePrinter.P_SUCCESS)
         except ValueError as e:  # check for validation failures
-            UiTools.print_error(e)
+            console.print(e, prefix=ConsolePrinter.P_ERROR)
 
         # breathe,
         print()
 
     # show the final results
     print('-' * 15)
-    user.print_configs()
+    for config in user.configs:
+        console.print(config.name, config.get())
     print('-' * 15)
 
 
@@ -43,7 +45,7 @@ def process_task(args):
 
     novelsave = NovelSave(args.action, directory=args.dir)
     novelsave.timeout = args.timeout
-    novelsave.verbose = args.verbose
+    novelsave.console.verbose = args.verbose
 
     # get credentials
     if args.email is not None:
@@ -53,14 +55,14 @@ def process_task(args):
         novelsave.password = getpass('[-] password: ')
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
-        UiTools.print_error('No actions selected')
+        novelsave.console.print('No actions selected', prefix=ConsolePrinter.P_ERROR)
 
     if args.update:
         novelsave.update(force_cover=args.force_cover)
 
     if args.remove_meta:
         novelsave.remove_metadata(with_source=True)
-        UiTools.print_success('Removed metadata')
+        novelsave.console.print('Removed metadata', prefix=ConsolePrinter.P_SUCCESS)
 
     if args.meta:
         novelsave.metadata(url=args.meta, force=args.force_meta)

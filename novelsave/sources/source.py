@@ -16,6 +16,7 @@ header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWe
 
 class Source:
     base: str
+    retry_count = 5
 
     @staticmethod
     def of(url: str) -> bool:
@@ -89,21 +90,26 @@ class Source:
 
         return BeautifulSoup(response.content, 'lxml')
 
-    def request_get(self, url):
+    def request_get(self, url, _tries=0):
+        # limiting retry requests
+        if _tries >= self.retry_count:
+            return
+
+        # request
         response = self.session.get(url, headers=header)
-        if response.status_code == 200:
+        if response.status_code == 200:  # ok
             return response
-        elif response.status_code == 429:
+        elif response.status_code == 429:  # too many requests
             try:
-                retry_timeout = response.headers['Retry-After'] / 1000
+                retry_timeout = float(response.headers['Retry-After']) / 1000.0
             except KeyError:
                 # default timeout
-                retry_timeout = 2
+                retry_timeout = 1
 
             time.sleep(retry_timeout)
-            return self.request_get(url)
-        else:
-            raise ResponseException(response, f'{response.status_code}: {response.url}')
+            return self.request_get(url, _tries + 1)
+
+        raise ResponseException(response, f'{response.status_code}: {response.url}')
 
     def source_folder_name(self):
         """

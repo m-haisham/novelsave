@@ -137,7 +137,7 @@ class NovelSave:
                 as brush:
 
             # initialize controller
-            controller = ConcurrentActionsController(max(thread_count, len(pending)), task=self.task)
+            controller = ConcurrentActionsController(min(thread_count, len(pending)), task=self.task)
             for chapter in pending:
                 controller.add(chapter)
 

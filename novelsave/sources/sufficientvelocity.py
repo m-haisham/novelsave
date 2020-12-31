@@ -6,12 +6,12 @@ from ..exceptions import ResponseException
 from ..models import Chapter, Novel
 
 
-class Spacebattles(Source):
-    base = 'https://forums.spacebattles.com'
+class SufficientVelocity(Source):
+    base = 'https://forums.sufficientvelocity.com'
 
     @staticmethod
     def of(url: str) -> bool:
-        return url.startswith(Spacebattles.base)
+        return url.startswith(SufficientVelocity.base)
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         threadmarks_url = f'{url.rstrip("/")}/threadmarks'

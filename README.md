@@ -122,8 +122,9 @@ you can access the database by using the `db` attribute of `NovelSave`
 - [novelfull.com](https://novelfull.com)
 - [wuxiaworld.com](https://www.wuxiaworld.com)
 - [royalroad.com](https://www.royalroad.com)
-- [forums.spacebattles.com](https://forums.spacebattles.com/)
 - [wattpad.com](https://www.wattpad.com)
+- [forums.spacebattles.com](https://forums.spacebattles.com/)
+- [forums.sufficientvelocity.com](https://forums.sufficientvelocity.com)
 
 ## Metadata Sources
 

@@ -57,12 +57,14 @@ class Spacebattles(Source):
         soup = self.cached_soup(raw_url)
 
         article = soup.select_one(f'.u-anchorTarget#{parsed_url.fragment}').parent
-
         content = article.select_one('.message-inner .message-userContent .bbWrapper')
-        self.clean_contents(content)
+
+        content.attrs = {}
+        paragraphs = str(content)[5:-6].split('<br/>\n<br/>')
+        paragraphs = [p.strip() for p in paragraphs]
 
         return Chapter(
             title=article.select_one('.message-cell--threadmark-header > span').text.strip(),
-            paragraphs=str(content),
+            paragraphs='<p>' + '</p><p>'.join(paragraphs) + '</p>',
             url=url,
         )

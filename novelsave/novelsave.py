@@ -192,6 +192,9 @@ class NovelSave:
 
         self.console.print(f'Saved to {epub.path}', prefix=ConsolePrinter.P_SUCCESS)
 
+    def login(self):
+        self.source.login(self.username, self.password)
+
     def open_db(self):
         # trailing slash adds nothing
         path = Path(self.user.directory.get()) / Path(self.netloc_slug) / self.source.novel_folder_name(self.url)

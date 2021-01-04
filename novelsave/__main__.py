@@ -47,12 +47,16 @@ def process_task(args):
     novelsave.timeout = args.timeout
     novelsave.console.verbose = args.verbose
 
-    # get credentials
-    if args.email is not None:
-        novelsave.email = args.email
+    # get credentials and login
+    if args.username:
+        novelsave.username = args.username
 
-        print()  # some breathing room
-        novelsave.password = getpass('[-] password: ')
+        if not args.password:
+            novelsave.password = getpass('\n[-] password: ')
+
+        # login
+        if novelsave.password:
+            novelsave.login()
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
         novelsave.console.print('No actions selected', prefix=ConsolePrinter.P_ERROR)
@@ -89,7 +93,8 @@ def main():
     actions.add_argument('--force-meta', action='store_true', help='force update metadata')
 
     credentials = parser.add_argument_group(title='credentials')
-    credentials.add_argument('--email', type=str, help='webnovel email')
+    credentials.add_argument('--username', type=str, help='username or email field')
+    credentials.add_argument('--password', type=str, help='password field')
 
     parser.add_argument('-v', '--verbose', help='enable animations; only in pending', action='store_true')
     parser.add_argument('--threads', type=int, help='number of download threads', default=4)

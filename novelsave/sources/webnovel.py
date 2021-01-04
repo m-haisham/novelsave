@@ -26,7 +26,6 @@ class Webnovel(Source):
     def login(self, email: str, password: str):
         # init selenium bot
         webnovel = WebnovelBot(timeout=120)
-        webnovel.driver.get(BASE_URL)
 
         # signin
         webnovel.signin(email, password)

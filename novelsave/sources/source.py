@@ -17,6 +17,7 @@ header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWe
 class Source:
     base: str
     retry_count = 5
+    cookie_domains = []
 
     @staticmethod
     def of(url: str) -> bool:
@@ -31,6 +32,14 @@ class Source:
         self.session = requests.Session()
         self.headers = header
 
+        # set default cookie domains
+        if not self.cookie_domains:
+            netloc = urlparse(self.base).netloc
+            self.cookie_domains = [
+                netloc,
+                re.search(r'.+?(\..+)', netloc).group(1),  # remove the segment before first dot
+            ]
+
         # private
         self._soup_cache = {}
 
@@ -43,6 +52,14 @@ class Source:
         :return: None
         """
         raise NotImplementedError
+
+    def set_cookiejar(self, cookiejar):
+        """
+        Replaces current cookiejar
+
+        :param cookiejar: new cookiejar
+        """
+        self.session.cookies = cookiejar
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         """
@@ -62,6 +79,7 @@ class Source:
         """
         raise NotImplementedError
 
+    # ---- Helper methods ----
     def soup(self, url: str) -> BeautifulSoup:
         """
         Download website html and create a bs4 object

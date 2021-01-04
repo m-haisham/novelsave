@@ -46,13 +46,7 @@ def process_task(args):
     novelsave = NovelSave(args.action, directory=args.dir)
     novelsave.timeout = args.timeout
     novelsave.console.verbose = args.verbose
-
-    # get credentials
-    if args.email is not None:
-        novelsave.email = args.email
-
-        print()  # some breathing room
-        novelsave.password = getpass('[-] password: ')
+    login(args, novelsave)
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
         novelsave.console.print('No actions selected', prefix=ConsolePrinter.P_ERROR)
@@ -74,6 +68,43 @@ def process_task(args):
         novelsave.create_epub(force=args.force_create)
 
 
+def login(args, novelsave):
+    """
+    login and browser cookie
+    """
+    cookie_browsers = (args.cookies_chrome, args.cookies_firefox)
+
+    # if both login creds and cookie browser provided
+    if any((args.username, args.password)) and any(cookie_browsers):
+        raise ValueError("Choose one option from login and browser cookies")
+
+    # more than one cookie browser provided
+    elif len([b for b in cookie_browsers if b]) > 1:
+        raise ValueError("Select single param from ('--cookies-chrome', '--cookies-firefox')")
+
+    # apply credentials
+    elif len([b for b in cookie_browsers if b]) == 1:
+        browser = None
+        if args.cookies_chrome:
+            browser = 'chrome'
+        elif args.cookies_firefix:
+            browser = 'firefox'
+        assert browser, "'browser' must not be None"
+
+        novelsave.login(cookie_browser=browser)
+
+    # login
+    elif args.username:
+        novelsave.username = args.username
+
+        if not args.password:
+            novelsave.password = getpass('\n[-] password: ')
+
+        # login
+        if novelsave.password:
+            novelsave.login()
+
+
 def main():
     parser = argparse.ArgumentParser(description='tool to convert novels to epub')
     parser.add_argument('action', type=str, help="novel url for downloading novels; 'config' to change configurations")
@@ -88,10 +119,13 @@ def main():
     actions.add_argument('--force-create', action='store_true', help='force create epub')
     actions.add_argument('--force-meta', action='store_true', help='force update metadata')
 
-    credentials = parser.add_argument_group(title='credentials')
-    credentials.add_argument('--email', type=str, help='webnovel email')
+    auth = parser.add_argument_group(title='authentication')
+    auth.add_argument('--username', type=str, help='username or email field')
+    auth.add_argument('--password', type=str, help='password field')
+    auth.add_argument('--cookies-chrome', action='store_true', help='use cookies from chrome')
+    auth.add_argument('--cookies-firefox', action='store_true', help='use cookies from firefox')
 
-    parser.add_argument('-v', '--verbose', help='enable animations; only in pending', action='store_true')
+    parser.add_argument('-v', '--verbose', help='extra information', action='store_true')
     parser.add_argument('--threads', type=int, help='number of download threads', default=4)
     parser.add_argument('--timeout', type=int, help='webdriver timeout', default=60)
     parser.add_argument('--limit', type=int, help='amount of chapters to download')

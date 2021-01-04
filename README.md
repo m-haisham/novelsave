@@ -72,11 +72,42 @@ actions:
   --force-meta       force update metadata
 
 credentials:
-  --email EMAIL      webnovel email
+  --username USERNAME  username or email field
+  --password PASSWORD  password field
+  --cookies-chrome     use cookies from chrome
+  --cookies-firefox    use cookies from firefox
 
 config:
   -d DIR, --dir DIR  directory for saving novels
 ```
+
+#### Login and cookies
+
+Two methods of accessing authenticated content are provided
+
+##### Browser cookies
+
+> Recommended method of access
+
+Uses cookies from available browsers access content
+
+Requires to be Signed in, in the browser of choice
+
+###### Available browsers
+
+- Chrome `--cookies-chrome`
+
+- Firefox `--cookies-firefox`
+
+##### Login
+
+Username and password are sent to the website server to authenticate. 
+Cookies are not persisted, thus requiring individual signin per usage
+
+##### Tested
+
+`webnovel.com`
+
 
 ## Manual
 

@@ -46,17 +46,7 @@ def process_task(args):
     novelsave = NovelSave(args.action, directory=args.dir)
     novelsave.timeout = args.timeout
     novelsave.console.verbose = args.verbose
-
-    # get credentials and login
-    if args.username:
-        novelsave.username = args.username
-
-        if not args.password:
-            novelsave.password = getpass('\n[-] password: ')
-
-        # login
-        if novelsave.password:
-            novelsave.login()
+    login(args, novelsave)
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
         novelsave.console.print('No actions selected', prefix=ConsolePrinter.P_ERROR)
@@ -78,6 +68,43 @@ def process_task(args):
         novelsave.create_epub(force=args.force_create)
 
 
+def login(args, novelsave):
+    """
+    login and browser cookie
+    """
+    cookie_browsers = (args.cookies_chrome, args.cookies_firefox)
+
+    # if both login creds and cookie browser provided
+    if (args.username or args.password) and any(cookie_browsers):
+        raise ValueError("Choose one option from login and browser cookies")
+
+    # more than one cookie browser provided
+    elif len([b for b in cookie_browsers if b]) > 1:
+        raise ValueError("Select single param from ('--cookies-chrome', '--cookies-firefox')")
+
+    # apply credentials
+    elif len([b for b in cookie_browsers if b]) == 1:
+        browser = None
+        if args.cookies_chrome:
+            browser = 'chrome'
+        elif args.cookies_firefix:
+            browser = 'firefox'
+
+        assert browser is not None
+        novelsave.login(cookie_browser=browser)
+
+    # login
+    elif args.username:
+        novelsave.username = args.username
+
+        if not args.password:
+            novelsave.password = getpass('\n[-] password: ')
+
+        # login
+        if novelsave.password:
+            novelsave.login()
+
+
 def main():
     parser = argparse.ArgumentParser(description='tool to convert novels to epub')
     parser.add_argument('action', type=str, help="novel url for downloading novels; 'config' to change configurations")
@@ -95,6 +122,8 @@ def main():
     credentials = parser.add_argument_group(title='credentials')
     credentials.add_argument('--username', type=str, help='username or email field')
     credentials.add_argument('--password', type=str, help='password field')
+    credentials.add_argument('--cookies-chrome', action='store_true', help='use cookies from chrome')
+    credentials.add_argument('--cookies-firefox', action='store_true', help='use cookies from firefox')
 
     parser.add_argument('-v', '--verbose', help='enable animations; only in pending', action='store_true')
     parser.add_argument('--threads', type=int, help='number of download threads', default=4)

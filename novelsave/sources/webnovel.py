@@ -1,9 +1,7 @@
-import re
 from typing import Tuple, List
 
 from webnovel import WebnovelBot
 from webnovel.api import ParsedApi
-from webnovel.bot import BASE_URL
 from webnovel.models import Novel as WebnovelNovel
 from webnovel.tools import UrlTools
 
@@ -13,11 +11,14 @@ from ..models import Novel, Chapter
 
 class Webnovel(Source):
     base = 'https://www.webnovel.com'
-    url_pattern = re.compile(r'https://www\.webnovel\.com')
+    cookie_domains = [
+        '.webnovel.com',
+        'www.webnovel.com',
+    ]
 
     @staticmethod
     def of(url: str) -> bool:
-        return bool(Webnovel.url_pattern.match(url))
+        return url.startswith(Webnovel.base)
 
     def __init__(self):
         super(Webnovel, self).__init__()
@@ -51,6 +52,10 @@ class Webnovel(Source):
         chapters = []
         for i, title in enumerate(toc.keys()):
             for wchapter in toc[title]:
+                # cant access locked chapters
+                if wchapter.locked:
+                    continue
+
                 # translate from Webnovel.Chapter to Chapter
                 chapter = Chapter(
                     index=wchapter.id,
@@ -77,6 +82,11 @@ class Webnovel(Source):
             paragraphs=wchapter.paragraphs,
             url=url,
         )
+
+    def set_cookiejar(self, cookiejar):
+        self.session.cookies = cookiejar
+        self.api.session = self.session
+        self.api.has_cookies = True
 
     def novel_folder_name(self, url):
         return f'n{UrlTools.from_novel_url(url)}'

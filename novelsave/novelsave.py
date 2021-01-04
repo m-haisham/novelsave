@@ -1,5 +1,8 @@
 from pathlib import Path
+from typing import Union
+from requests.cookies import RequestsCookieJar
 
+import browser_cookie3
 import requests
 
 from .concurrent import ConcurrentActionsController
@@ -35,12 +38,12 @@ class NovelSave:
 
         # initialize logger
         NovelLogger.instance = NovelLogger(self.user.directory.get())
-        
+
         self.console = ConsolePrinter()
         self.source = self.parse_source(self.url)
         self.netloc_slug = self.source.source_folder_name()
         self.db, self.path = self.open_db()
-    
+
     def update(self, force_cover=False):
 
         self.console.print('Retrieving novel info...')
@@ -133,7 +136,7 @@ class NovelSave:
             additive = f'{pending[0].index} - {pending[-1].index}'
         self.console.print(f'Downloading {len(pending)} chapters | {additive}...')
 
-        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.console.verbose)\
+        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.console.verbose) \
                 as brush:
 
             # initialize controller
@@ -192,8 +195,28 @@ class NovelSave:
 
         self.console.print(f'Saved to {epub.path}', prefix=ConsolePrinter.P_SUCCESS)
 
-    def login(self):
-        self.source.login(self.username, self.password)
+    def login(self, cookie_browser: Union[str, None] = None):
+
+        # retrieve cookies from browser
+        if cookie_browser:
+            # retrieve cookiejar
+            if cookie_browser in ['chrome', 'firefox']:
+                cookies = getattr(browser_cookie3, cookie_browser)()
+            else:
+                raise ValueError(f"'{cookie_browser}' not recognised; must be of ['chrome', 'firefox']")
+
+            # filter cookie domains
+            cj = RequestsCookieJar()
+            for c in cookies:
+                if c.domain in self.source.cookie_domains:
+                    cj.set(c.name, c.value, domain=c.domain, path=c.path)
+
+            # set cookies jar to be used by source
+            self.source.set_cookiejar(cj)
+            self.console.print(f'Set cookiejar with {len(cj)} cookies', prefix=ConsolePrinter.P_SUCCESS, verbose=True)
+        else:
+            self.source.login(self.username, self.password)
+            self.console.print(f'Login successful', prefix=ConsolePrinter.P_SUCCESS, verbose=True)
 
     def open_db(self):
         # trailing slash adds nothing

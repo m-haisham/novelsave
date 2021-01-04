@@ -75,7 +75,7 @@ def login(args, novelsave):
     cookie_browsers = (args.cookies_chrome, args.cookies_firefox)
 
     # if both login creds and cookie browser provided
-    if (args.username or args.password) and any(cookie_browsers):
+    if any((args.username, args.password)) and any(cookie_browsers):
         raise ValueError("Choose one option from login and browser cookies")
 
     # more than one cookie browser provided
@@ -89,8 +89,8 @@ def login(args, novelsave):
             browser = 'chrome'
         elif args.cookies_firefix:
             browser = 'firefox'
+        assert browser, "'browser' must not be None"
 
-        assert browser is not None
         novelsave.login(cookie_browser=browser)
 
     # login
@@ -119,13 +119,13 @@ def main():
     actions.add_argument('--force-create', action='store_true', help='force create epub')
     actions.add_argument('--force-meta', action='store_true', help='force update metadata')
 
-    credentials = parser.add_argument_group(title='credentials')
-    credentials.add_argument('--username', type=str, help='username or email field')
-    credentials.add_argument('--password', type=str, help='password field')
-    credentials.add_argument('--cookies-chrome', action='store_true', help='use cookies from chrome')
-    credentials.add_argument('--cookies-firefox', action='store_true', help='use cookies from firefox')
+    auth = parser.add_argument_group(title='authentication')
+    auth.add_argument('--username', type=str, help='username or email field')
+    auth.add_argument('--password', type=str, help='password field')
+    auth.add_argument('--cookies-chrome', action='store_true', help='use cookies from chrome')
+    auth.add_argument('--cookies-firefox', action='store_true', help='use cookies from firefox')
 
-    parser.add_argument('-v', '--verbose', help='enable animations; only in pending', action='store_true')
+    parser.add_argument('-v', '--verbose', help='extra information', action='store_true')
     parser.add_argument('--threads', type=int, help='number of download threads', default=4)
     parser.add_argument('--timeout', type=int, help='webdriver timeout', default=60)
     parser.add_argument('--limit', type=int, help='amount of chapters to download')

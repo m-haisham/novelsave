@@ -11,10 +11,6 @@ from ..models import Novel, Chapter
 
 class Webnovel(Source):
     base = 'https://www.webnovel.com'
-    cookie_domains = [
-        '.webnovel.com',
-        'www.webnovel.com',
-    ]
 
     @staticmethod
     def of(url: str) -> bool:
@@ -25,21 +21,19 @@ class Webnovel(Source):
         self.api = ParsedApi()
 
     def login(self, email: str, password: str):
-        # init selenium bot
+        # init and signin
         webnovel = WebnovelBot(timeout=120)
-
-        # signin
         webnovel.signin(email, password)
 
         # recreate api
         self.api = webnovel.create_api()
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
-
         wnovel = WebnovelNovel.from_url(
             # reformatting url so that id retraction works
             UrlTools.to_novel_url(UrlTools.from_novel_url(url))
         )
+
         novel = Novel(
             title=wnovel.title,
             author=wnovel.author,

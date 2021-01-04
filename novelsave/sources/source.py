@@ -32,9 +32,13 @@ class Source:
         self.session = requests.Session()
         self.headers = header
 
-        # default cookie domains
+        # set default cookie domains
         if not self.cookie_domains:
-            self.cookie_domains = [urlparse(self.base).netloc]
+            netloc = urlparse(self.base).netloc
+            self.cookie_domains = [
+                netloc,
+                re.search(r'.+?(\..+)', netloc).group(1),  # remove the segment before first dot
+            ]
 
         # private
         self._soup_cache = {}

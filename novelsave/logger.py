@@ -1,5 +1,5 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 from pathlib import Path
 
 
@@ -31,6 +31,12 @@ class NovelLogger:
             self.console.print('Logger initialised')
 
         return logger
+
+    def info(self, s):
+        self.logger.info(s)
+
+    def error(self, s):
+        self.logger.error(s)
 
     @property
     def logger(self):

@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Union
-from requests.cookies import RequestsCookieJar
 
 import browser_cookie3
 import requests
+from requests.cookies import RequestsCookieJar
 
 from .concurrent import ConcurrentActionsController
 from .database import NovelData
@@ -20,23 +20,15 @@ from .ui import Loader, ConsolePrinter
 class NovelSave:
     IS_CHAPTERS_UPDATED = 'is_cu'
 
-    def __init__(self, url, username=None, password=None, directory=None):
+    def __init__(self, url, username=None, password=None):
 
         self.url = url
         self.username = username
         self.password = password
+
         self.user = UserConfig()
 
-        # change path value
-        if directory is not None:
-            path = Path(directory).resolve().absolute()
-
-            if not path.exists():
-                path.mkdir(parents=True)
-
-            self.user.directory.put(str(path))
-
-        # initialize logger
+        # initialize writers
         self.console = ConsolePrinter()
         NovelLogger.instance = NovelLogger(self.user.path, self.console)
 

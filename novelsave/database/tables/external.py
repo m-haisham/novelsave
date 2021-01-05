@@ -65,7 +65,7 @@ class MultiClassExternalTable(MultiClassTable):
             command, path, error = self.queue_out.get()
 
             if error:
-                NovelLogger.instance.logger.error(f'{"READ" if command == IOThread.READ else "WRITE"}: {path} - {repr(error)}')
+                NovelLogger.instance.error(f'{"READ" if command == IOThread.READ else "WRITE"}: {path} - {repr(error)}')
 
             self.queue_out.task_done()
 

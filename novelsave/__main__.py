@@ -43,7 +43,7 @@ def process_task(args):
     if args.dir:
         args.dir = Path(args.dir).resolve()
 
-    novelsave = NovelSave(args.action, directory=args.dir)
+    novelsave = NovelSave(args.action)
     novelsave.timeout = args.timeout
     novelsave.console.verbose = args.verbose
     login(args, novelsave)

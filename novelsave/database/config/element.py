@@ -1,22 +1,25 @@
 from typing import Callable, Any
 
-from ..tables import KeyValueTable
-
 
 class ConfigElement:
     name: str
-    table: KeyValueTable
     default: Any
     validate: Callable[[Any], bool]
 
-    def __init__(self, table, name, default=None, validate=None):
-        self.table = table
+    def __init__(self, user, name, default=None, validate=None):
+        self.user = user
         self.name = name
         self.default = default
         self.validate = validate
 
     def get(self):
-        return self.table.get(self.name, self.default)
+        try:
+            return self.user.data[self.name]
+        except KeyError as e:
+            if self.default is not None:
+                return self.default
+            else:
+                raise e
 
     def put(self, value):
         valid = True
@@ -24,6 +27,7 @@ class ConfigElement:
             valid = self.validate(value)
 
         if valid:
-            self.table.put(self.name, value)
+            self.user.data[self.name] = value
+            self.user.save()
         else:
             raise ValueError(f"Validation Failed; '{value}' is invalid for config '{self.name}'")

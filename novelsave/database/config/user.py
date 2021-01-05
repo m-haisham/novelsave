@@ -1,13 +1,13 @@
+import json
 from pathlib import Path
-from typing import Tuple, List
+from typing import List
 
 from appdirs import user_config_dir
-from tinydb import TinyDB
 
 from .element import ConfigElement
-from ..tables import KeyValueTable
+from ...logger import NovelLogger
 
-appname = 'NovelSave'
+appname = 'Novelsave'
 appauthor = 'mHaisham'
 
 
@@ -17,17 +17,19 @@ def vallidate_dir(directory):
 
 
 class UserConfig:
-    version = '1.0'
+    version = '2.0'
 
     configs: List[ConfigElement]
 
     def __init__(self):
         # get cross os configuration path
         self.path = Path(user_config_dir(appname, appauthor, self.version))
-        self.db, self.table = self.open_db(self.path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.data = {}
+        self.load()
 
         self.directory = ConfigElement(
-            self.table,
+            self,
             name='directory',
             default=Path.home() / Path('novels'),
             validate=vallidate_dir,
@@ -37,8 +39,22 @@ class UserConfig:
             self.directory
         ]
 
-    def open_db(self, directory) -> Tuple[TinyDB, KeyValueTable]:
-        directory.mkdir(parents=True, exist_ok=True)
-        db = TinyDB(directory / Path('config.json'))
+    def save(self):
+        with self.path.open('w') as f:
+            json.dump(self.data, f)
 
-        return db, KeyValueTable(db, 'config')
+    def load(self):
+        try:
+            with self.path.open('r') as f:
+                self.data = json.load(f)
+
+        # log decoding error
+        except json.JSONDecodeError as e:
+            with self.path.open('r') as f:
+                data = f.read()
+
+            NovelLogger.instance.logger.error(f'{data} - {repr(e)}')
+
+        # treat as empty
+        except FileNotFoundError:
+            pass

@@ -37,9 +37,9 @@ class NovelSave:
             self.user.directory.put(str(path))
 
         # initialize logger
-        NovelLogger.instance = NovelLogger(self.user.directory.get())
-
         self.console = ConsolePrinter()
+        NovelLogger.instance = NovelLogger(self.user.path, self.console)
+
         self.source = self.parse_source(self.url)
         self.netloc_slug = self.source.source_folder_name()
         self.db, self.path = self.open_db()

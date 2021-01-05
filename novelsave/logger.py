@@ -6,8 +6,9 @@ from pathlib import Path
 class NovelLogger:
     instance = None
 
-    def __init__(self, path):
+    def __init__(self, path, console=None):
         self.path = path
+        self.console = console
         self._logger = None
 
     def create_logger(self):
@@ -18,12 +19,16 @@ class NovelLogger:
         logger.setLevel(logging.DEBUG)
 
         # setting stream handler
-        formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s')
-
         sh = logging.StreamHandler(logfile.open('a'))
+
+        formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s')
         sh.setFormatter(formatter)
 
         logger.addHandler(sh)
+
+        # alerting
+        if self.console and self.console.verbose:
+            self.console.print('Logger initialised')
 
         return logger
 

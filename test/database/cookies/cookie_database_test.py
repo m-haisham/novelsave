@@ -1,5 +1,6 @@
 import time
 import unittest
+from datetime import datetime
 
 from requests.cookies import RequestsCookieJar
 
@@ -139,6 +140,53 @@ class TestCookieDatabase(unittest.TestCase):
         self.cookies.delete(('domain1', 'domain2'))
         rows = self._get_rows()
         self.assertEqual(1, len(rows))
+
+    def test_all(self):
+        data = [
+            ('name', 'value', 'domain1', 'path1', int(time.time())),
+            ('name', 'value', 'domain2', 'path1', int(time.time())),
+            ('name4', 'value', 'domain3', 'path1', int(time.time())),
+        ]
+        self.cookies.insert(data)
+
+        rows = self.cookies.all()
+
+        # check cookies amount
+        self.assertEqual(len(data), len(rows))
+
+        # check data
+        try:
+            for cookie in rows:
+                data.remove(tuple(cookie.values()))
+        except ValueError:
+            self.fail('not matching cookie found in rows unexpectedly')
+
+        # check all data removed
+        self.assertEqual(0, len(data))
+
+    def test_check_expired_false(self):
+        now = int(datetime.now().timestamp())
+        now += 24 * 60 * 60  # go forward a days
+        self.cookies.insert([
+            ('name', 'value', 'domain1', 'path1', now),
+            ('name', 'value', 'domain2', 'path1', now),
+        ])
+
+        cookies = self.cookies.all()
+
+        self.assertFalse(self.cookies.check_expired(cookies))
+
+    def test_check_expired_true(self):
+        now = int(datetime.now().timestamp())
+        now -= 2 * 24 * 60 * 60  # go back two days
+        self.cookies.insert([
+            ('name', 'value', 'domain1', 'path1', now),
+            ('name', 'value', 'domain2', 'path1', now),
+        ])
+
+        cookies = self.cookies.all()
+
+        self.assertTrue(self.cookies.check_expired(cookies))
 
     def tearDown(self) -> None:
         self.cookies.close()

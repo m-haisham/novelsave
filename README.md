@@ -71,11 +71,12 @@ actions:
   --force-create     force create epub
   --force-meta       force update metadata
 
-credentials:
+authentication:
   --username USERNAME  username or email field
-  --password PASSWORD  password field
+  --password PASSWORD  password field; not recommended, refer to README for more details
   --cookies-chrome     use cookies from chrome
   --cookies-firefox    use cookies from firefox
+  --force-login        remove existing cookies and login
 
 config:
   -d DIR, --dir DIR  directory for saving novels
@@ -102,12 +103,18 @@ Requires to be Signed in, in the browser of choice
 ##### Login
 
 Username and password are sent to the website server to authenticate. 
-Cookies are not persisted, thus requiring individual signin per usage
+
+Cookies are now persisted and stored at config's location.
+
+Novelsave attempts to use the available cookies unless:
+
+- any of the cookies from relevant domains are expired
+
+- user provides the flag `--force-login`
 
 ##### Tested
 
 `webnovel.com`
-
 
 ## Manual
 
@@ -122,13 +129,14 @@ if __name__ == '__main__':
 
 ### Methods
 
-`NovelSave` has 5 methods
+`NovelSave` has 6 methods
 
 - ```update(self, force_cover=False):```
 - ```metadata(self, url, force=False):```
 - ```remove_metadata(self, with_source=True):```
 - ```download(self, thread_count=4, limit=None):```
 - ```create_epub(self, force=False):```
+- ```def login(self, cookie_browser: Union[str, None] = None, force=False):```
 
 ### Database
 

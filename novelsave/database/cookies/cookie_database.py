@@ -1,8 +1,7 @@
 import sqlite3
-from http.cookiejar import Cookie
-
+from datetime import datetime
 from pathlib import Path
-from typing import Tuple, Union, List, Any, Dict, Iterable, Sized
+from typing import Tuple, Union, List, Any, Dict
 
 from requests.cookies import RequestsCookieJar
 
@@ -139,13 +138,26 @@ class CookieDatabase:
                 );
             """)
 
+    def check_expired(self, cookies: Tuple[dict]):
+        """
+        :param cookies: cookies list to test
+        :return: whether any of the cookies provided are expired
+        """
+        now = datetime.now()
+        for cookie in cookies:
+            expire_time = datetime.fromtimestamp(cookie['expires'])
+            if expire_time < now:
+                return True
+
+        return False
+
     def _parse_row(self, row) -> Dict[str, Any]:
         return {
             'name': row[0],
             'value': row[1],
             'domain': row[2],
             'path': row[3],
-            'expires': row[4],
+            'expires': int(row[4]),
         }
 
     def _parse_result_set(self) -> Tuple[Dict[str, Any]]:
@@ -165,3 +177,4 @@ class CookieDatabase:
             postfix += f" {join} domain=?" * (len(domains) - 1)
 
         return postfix
+

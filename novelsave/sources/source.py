@@ -1,10 +1,11 @@
 import re
 import time
-from typing import Tuple, List
+from typing import Tuple, List, Iterable, Union
 from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup, Comment
+from requests.cookies import RequestsCookieJar
 
 from ..models import Novel, Chapter
 from ..tools import StringTools
@@ -53,13 +54,24 @@ class Source:
         """
         raise NotImplementedError
 
-    def set_cookiejar(self, cookiejar):
+    def set_cookies(self, cookies: Union[RequestsCookieJar, Tuple[dict]]):
         """
-        Replaces current cookiejar
+        Replaces current cookiejar with given cookies
 
-        :param cookiejar: new cookiejar
+        :param cookies: new cookiejar
         """
-        self.session.cookies = cookiejar
+        if type(cookies) == RequestsCookieJar:
+            self.session.cookies = cookies
+        if type(cookies) == tuple:
+            # clear preexisting cookies associated with source
+            for domain in self.cookie_domains:
+                self.session.cookies.clear(domain=domain)
+
+            # add the dict formatted cookies
+            for cookie in cookies:
+                self.session.cookies.set(**cookie)
+        else:
+            raise TypeError(f"Unexpected type received: {type(cookies)}; Require either 'RequestsCookieJar' or 'Tuple[dict]'")
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         """

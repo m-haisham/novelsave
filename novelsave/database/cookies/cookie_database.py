@@ -20,16 +20,23 @@ class CookieDatabase:
             :dir_path None: creates the database in memory
         """
         # parameter validation
-        if type(dir_path) == Path:
+        if isinstance(dir_path, Path):  # May receive WindowsPath or PosixPath which are child classes of Path
             self.path = dir_path / self.name
         elif type(dir_path) == str:
             self.path = Path(dir_path) / self.name
 
-        # connect to database
+        # connect to in memory database
         if dir_path is None or dir_path == ':memory:':
             self.conn = sqlite3.connect(self.memory, uri=True)
-        else:
+
+        # type check, path was defined
+        elif hasattr(self, 'path'):
             self.conn = sqlite3.connect(str(self.path))
+
+        # dir_path was not of any accepted value
+        else:
+            raise TypeError(f"'dir_path' of {dir_path} is not of any acceptable type or value. "
+                            f"see function doc for more info.")
 
         self.cursor = self.conn.cursor()
         self._create_table()
@@ -83,7 +90,7 @@ class CookieDatabase:
             with self.conn:
                 self.cursor.executemany("INSERT INTO cookies VALUES(?, ?, ?, ?, ?)", values)
         except sqlite3.IntegrityError as e:
-            if str(e) == 'UNIQUE constraint failed: cookies.name, cookies.domain':
+            if str(e).startswith('UNIQUE constraint failed'):
                 raise DuplicateCookieError(str(e))
             else:
                 raise e

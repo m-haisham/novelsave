@@ -1,6 +1,6 @@
 # NovelSave
 
-[![GitHub version](https://badge.fury.io/gh/mHaisham%2Fnovelsave.svg)](https://badge.fury.io/gh/mHaisham%2Fnovelsave) [![PyPI version](https://badge.fury.io/py/novelsave.svg)](https://badge.fury.io/py/novelsave) 
+[![GitHub version](https://badge.fury.io/gh/mHaisham%2Fnovelsave.svg)](https://badge.fury.io/gh/mHaisham%2Fnovelsave) [![PyPI version](https://badge.fury.io/py/novelsave.svg)](https://badge.fury.io/py/novelsave)
 
 Tool to convert novels to epub
 
@@ -22,19 +22,19 @@ pip install git+https://github.com/mHaisham/novelsave.git
 
 ### Example
 
-**Update a novel**
+#### Update a novel
 
-```
+```bash
 novelsave https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c
 ```
 
-**Check/Update configurations**
+#### Check/Update configurations
 
-```
+```bash
 novelsave config
 ```
 
-```
+```bash
 novelsave config -d novels
 ```
 
@@ -102,7 +102,7 @@ Requires to be Signed in, in the browser of choice
 
 ##### Login
 
-Username and password are sent to the website server to authenticate. 
+Username and password are sent to the website server to authenticate.
 
 Cookies are now persisted and stored at config's location.
 
@@ -148,24 +148,56 @@ you can access the database by using the `db` attribute of `NovelSave`
 
 ## Sources
 
-- [webnovel.com](https://www.webnovel.com)
-- [wuxiaworld.co](https://www.wuxiaworld.co)
-- [boxnovel.com](https://www.boxnovel.co)
-- [readlightnovel.org](https://www.readlightnovel.org)
-- [insanitycave.poetry](https://insanitycave.poetry.blog)
-- [ktlchamber.wordpress](https://ktlchamber.wordpress.com)
-- [kieshitl.wordpress](https://kieshitl.wordpress.com)
-- [scribblehub.com](https://www.scribblehub.com)
-- [mtlnovel.com](https://www.mtlnovel.com)
-- [fanfiction.net](https://www.fanfiction.net)
-- [novelfull.com](https://novelfull.com)
-- [wuxiaworld.com](https://www.wuxiaworld.com)
-- [royalroad.com](https://www.royalroad.com)
-- [wattpad.com](https://www.wattpad.com)
-- [forums.spacebattles.com](https://forums.spacebattles.com/)
-- [forums.sufficientvelocity.com](https://forums.sufficientvelocity.com)
+> Request a new source by [creating a new issue](https://github.com/mHaisham/novelsave/issues/new/choose)
+
+| Sources | Search | Login |
+| -- | -- | -- |
+| [webnovel.com] |  | ✔ |
+| [wuxiaworld.co] |  |  |
+| [boxnovel.com] |  |  |
+| [readlightnovel.org] |  |  |
+| [insanitycave.poetry] |  |  |
+| [ktlchamber.wordpress] |  |  |
+| [kieshitl.wordpress] |  |  |
+| [scribblehub.com] |  |  |
+| [mtlnovel.com] |  |  |
+| ~~[fanfiction.net]~~ |  |  |
+| [novelfull.com] |  |  |
+| [wuxiaworld.com] |  |  |
+| [royalroad.com] |  |  |
+| [wattpad.com] |  |  |
+| [forums.spacebattles.com] |  |  |
+| [forums.sufficientvelocity.com] |  |  |
 
 ## Metadata Sources
 
-- [wlnupdates.com](https://www.wlnupdates.com)
-- [novelupdates.com](https://www.novelupdates.com)
+> Request a new source by [creating a new issue](https://github.com/mHaisham/novelsave/issues/new/choose)
+
+| Metadata Source | Support |
+| -- | -- |
+| [wlnupdates.com] | ✔ |
+| [novelupdates.com] | ✔ |
+
+<!-- SOURCE LINKS -->
+
+[webnovel.com]: https://www.webnovel.com
+[wuxiaworld.co]: https://www.wuxiaworld.co
+[boxnovel.com]: https://www.boxnovel.co
+[readlightnovel.org]: https://www.readlightnovel.org
+[insanitycave.poetry]: https://insanitycave.poetry.blog
+[ktlchamber.wordpress]: https://ktlchamber.wordpress.com
+[kieshitl.wordpress]: https://kieshitl.wordpress.com
+[scribblehub.com]: https://www.scribblehub.com
+[mtlnovel.com]: https://www.mtlnovel.com
+[fanfiction.net]: https://www.fanfiction.net
+[novelfull.com]: https://novelfull.com
+[wuxiaworld.com]: https://www.wuxiaworld.com
+[royalroad.com]: https://www.royalroad.com
+[wattpad.com]: https://www.wattpad.com
+[forums.spacebattles.com]: https://forums.spacebattles.com/
+[forums.sufficientvelocity.com]: https://forums.sufficientvelocity.com
+
+<!-- META SOURCE LINKS -->
+
+[wlnupdates.com]: https://www.wlnupdates.com
+[novelupdates.com]: https://www.novelupdates.com

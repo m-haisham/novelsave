@@ -89,9 +89,9 @@ def login(args, novelsave):
             browser = 'chrome'
         elif args.cookies_firefix:
             browser = 'firefox'
-        assert browser, "'browser' must not be None"
+        assert browser, "'browser' not recognized"
 
-        novelsave.login(cookie_browser=browser)
+        novelsave.login(cookie_browser=browser, force=args.force_login)
 
     # login
     elif args.username:
@@ -121,9 +121,10 @@ def main():
 
     auth = parser.add_argument_group(title='authentication')
     auth.add_argument('--username', type=str, help='username or email field')
-    auth.add_argument('--password', type=str, help='password field')
+    auth.add_argument('--password', type=str, help='password field; not recommended, refer to README for more details')
     auth.add_argument('--cookies-chrome', action='store_true', help='use cookies from chrome')
     auth.add_argument('--cookies-firefox', action='store_true', help='use cookies from firefox')
+    auth.add_argument('--force-login', action='store_true', help='remove existing cookies and login')
 
     parser.add_argument('-v', '--verbose', help='extra information', action='store_true')
     parser.add_argument('--threads', type=int, help='number of download threads', default=4)

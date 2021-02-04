@@ -6,7 +6,7 @@ import requests
 from requests.cookies import RequestsCookieJar
 
 from .concurrent import ConcurrentActionsController
-from .database import NovelData
+from .database import NovelData, CookieDatabase
 from .database.config import UserConfig
 from .epub import NovelEpub
 from .exceptions import MissingSource
@@ -33,6 +33,7 @@ class NovelSave:
         NovelLogger.instance = NovelLogger(self.user.path, self.console)
 
         self.source = self.parse_source(self.url)
+        self.cookies = CookieDatabase(self.user.path)
         self.netloc_slug = self.source.source_folder_name()
         self.db, self.path = self.open_db()
 
@@ -187,11 +188,11 @@ class NovelSave:
 
         self.console.print(f'Saved to {epub.path}', prefix=ConsolePrinter.P_SUCCESS)
 
-    def login(self, cookie_browser: Union[str, None] = None):
+    def login(self, cookie_browser: Union[str, None] = None, force=False):
 
         # retrieve cookies from browser
         if cookie_browser:
-            # retrieve cookiejar
+            # retrieve cookiejar of the selected browser
             if cookie_browser in ['chrome', 'firefox']:
                 cookies = getattr(browser_cookie3, cookie_browser)()
             else:
@@ -204,11 +205,35 @@ class NovelSave:
                     cj.set(c.name, c.value, domain=c.domain, path=c.path)
 
             # set cookies jar to be used by source
-            self.source.set_cookiejar(cj)
+            self.source.set_cookies(cj)
             self.console.print(f'Set cookiejar with {len(cj)} cookies', prefix=ConsolePrinter.P_SUCCESS, verbose=True)
         else:
-            self.source.login(self.username, self.password)
+            if force:
+                self._login_and_persist()
+            else:
+                # get existing cookies and check if they are expired
+                # expired cookies are discarded
+                existing_cookies = self.cookies.select(self.source.cookie_domains)
+                if self.cookies.check_expired(existing_cookies):
+                    self._login_and_persist()
+                else:
+                    # if they aren't expired add the existing cookies request session
+                    self.source.set_cookies(existing_cookies)
+
             self.console.print(f'Login successful', prefix=ConsolePrinter.P_SUCCESS, verbose=True)
+
+    def _login_and_persist(self):
+        """
+        Delete existing cookies and replace with new received from via fresh login
+        """
+        # remove existing cookies
+        self.cookies.delete(self.source.cookie_domains)
+
+        # source specific login
+        self.source.login(self.username, self.password)
+
+        # set new cookies
+        self.cookies.insert(self.source.session.cookies)
 
     def open_db(self):
         # trailing slash adds nothing

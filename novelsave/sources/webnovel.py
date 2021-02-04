@@ -77,8 +77,8 @@ class Webnovel(Source):
             url=url,
         )
 
-    def set_cookiejar(self, cookiejar):
-        self.session.cookies = cookiejar
+    def set_cookies(self, cookies):
+        self.session.cookies = cookies
         self.api.session = self.session
         self.api.has_cookies = True
 

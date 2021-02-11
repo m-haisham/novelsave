@@ -14,13 +14,13 @@ from .logger import NovelLogger
 from .metasources import meta_sources
 from .models import MetaData
 from .sources import sources
-from .ui import Loader, ConsolePrinter
+from .ui import Loader, ConsolePrinter, PrinterPrefix
 
 
 class NovelSave:
     IS_CHAPTERS_UPDATED = 'is_cu'
 
-    def __init__(self, url, username=None, password=None):
+    def __init__(self, url, username=None, password=None, verbose=False):
 
         self.url = url
         self.username = username
@@ -29,7 +29,7 @@ class NovelSave:
         self.user = UserConfig()
 
         # initialize writers
-        self.console = ConsolePrinter()
+        self.console = ConsolePrinter(verbose)
         NovelLogger.instance = NovelLogger(self.user.path, self.console)
 
         self.source = self.parse_source(self.url)
@@ -68,7 +68,7 @@ class NovelSave:
         self.console.print(
             f'Pending {len(pending)} chapters',
             f'| {pending[0].title}' if len(pending) == 1 else '',
-            prefix=ConsolePrinter.P_SUCCESS
+            prefix=PrinterPrefix.SUCCESS
         )
 
     def metadata(self, url, force=False):
@@ -109,11 +109,11 @@ class NovelSave:
     def download(self, thread_count=4, limit=None):
         # parameter validation
         if limit and limit <= 0:
-            self.console.print("'limit' must be greater than 0", prefix=ConsolePrinter.P_ERROR)
+            self.console.print("'limit' must be greater than 0", prefix=PrinterPrefix.ERROR)
 
         pending = self.db.pending.all()
         if not pending:
-            self.console.print('No pending chapters', prefix=ConsolePrinter.P_ERROR)
+            self.console.print('No pending chapters', prefix=PrinterPrefix.ERROR)
             return
 
         pending.sort(key=lambda c: c.index)
@@ -186,7 +186,7 @@ class NovelSave:
         # reset new downloads flag
         self.db.misc.put(self.IS_CHAPTERS_UPDATED, False)
 
-        self.console.print(f'Saved to {epub.path}', prefix=ConsolePrinter.P_SUCCESS)
+        self.console.print(f'Saved to {epub.path}', prefix=PrinterPrefix.SUCCESS)
 
     def login(self, cookie_browser: Union[str, None] = None, force=False):
 
@@ -206,7 +206,7 @@ class NovelSave:
 
             # set cookies jar to be used by source
             self.source.set_cookies(cj)
-            self.console.print(f'Set cookiejar with {len(cj)} cookies', prefix=ConsolePrinter.P_SUCCESS, verbose=True)
+            self.console.print(f'Set cookiejar with {len(cj)} cookies', prefix=PrinterPrefix.SUCCESS, verbose=True)
         else:
             if force:
                 self._login_and_persist()
@@ -220,7 +220,7 @@ class NovelSave:
                     # if they aren't expired add the existing cookies request session
                     self.source.set_cookies(existing_cookies)
 
-            self.console.print(f'Login successful', prefix=ConsolePrinter.P_SUCCESS, verbose=True)
+            self.console.print(f'Login successful', prefix=PrinterPrefix.SUCCESS, verbose=True)
 
     def _login_and_persist(self):
         """

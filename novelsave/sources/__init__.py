@@ -17,6 +17,7 @@ from .royalroad import RoyalRoad
 from .spacebattles import Spacebattles
 from .wattpad import WattPad
 from .sufficientvelocity import SufficientVelocity
+from .dragontea import DragonTea
 
 sources = [
     Webnovel,
@@ -36,4 +37,5 @@ sources = [
     Spacebattles,
     WattPad,
     SufficientVelocity,
+    DragonTea,
 ]

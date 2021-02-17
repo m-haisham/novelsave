@@ -12,9 +12,9 @@ class Novel:
     url: str = None
 
     meta_source: str = None
-    meta: List[dict] = field(default_factory=lambda: {})
+    meta: List[dict] = field(default_factory=lambda: [])
 
-    def add_meta(self, name: str, value: str, namespace: str = None, others=None):
+    def add_meta(self, name: str, value: str, namespace: str = 'DC', others=None):
         if others is None:
             others = {}
 

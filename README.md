@@ -151,7 +151,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 > Request a new source by [creating a new issue](https://github.com/mHaisham/novelsave/issues/new/choose)
 
 | Sources | Search | Login |
-| -- | -- | -- |
+| -- | :--: | :--: |
 | [webnovel.com] |  | ✔ |
 | [wuxiaworld.co] |  |  |
 | [boxnovel.com] |  |  |
@@ -168,13 +168,14 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [wattpad.com] |  |  |
 | [forums.spacebattles.com] |  |  |
 | [forums.sufficientvelocity.com] |  |  |
+| [dragontea.ink] |  |  |
 
 ## Metadata Sources
 
 > Request a new source by [creating a new issue](https://github.com/mHaisham/novelsave/issues/new/choose)
 
 | Metadata Source | Support |
-| -- | -- |
+| -- | :--: |
 | [wlnupdates.com] | ✔ |
 | [novelupdates.com] | ✔ |
 
@@ -194,8 +195,9 @@ you can access the database by using the `db` attribute of `NovelSave`
 [wuxiaworld.com]: https://www.wuxiaworld.com
 [royalroad.com]: https://www.royalroad.com
 [wattpad.com]: https://www.wattpad.com
-[forums.spacebattles.com]: https://forums.spacebattles.com/
+[forums.spacebattles.com]: https://forums.spacebattles.com
 [forums.sufficientvelocity.com]: https://forums.sufficientvelocity.com
+[dragontea.ink]: https://dragontea.ink
 
 <!-- META SOURCE LINKS -->
 

@@ -1,5 +1,6 @@
 from typing import Tuple, List
 
+from bs4 import BeautifulSoup
 from webnovel import WebnovelBot
 from webnovel.api import ParsedApi
 from webnovel.models import Novel as WebnovelNovel
@@ -70,10 +71,13 @@ class Webnovel(Source):
         else:
             title = wchapter.title
 
+        content = BeautifulSoup(f'<div>{"".join(wchapter.paragraphs)}</div>')
+        self.clean_contents(content)
+
         return Chapter(
             index=wchapter.id,
             title=title,
-            paragraphs=wchapter.paragraphs,
+            paragraphs=str(content),
             url=url,
         )
 

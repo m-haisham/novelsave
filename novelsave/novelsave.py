@@ -193,10 +193,11 @@ class NovelSave:
         # retrieve cookies from browser
         if cookie_browser:
             # retrieve cookiejar of the selected browser
-            if cookie_browser in ['chrome', 'firefox']:
+            if cookie_browser in ['chrome', 'firefox', 'chromium', 'opera', 'edge', ]:
                 cookies = getattr(browser_cookie3, cookie_browser)()
             else:
-                raise ValueError(f"'{cookie_browser}' not recognised; must be of ['chrome', 'firefox']")
+                raise ValueError(f"'{cookie_browser}' not recognised; must be of ['chrome', "
+                                 f"'firefox', 'chromium', 'opera', 'edge', ]")
 
             # filter cookie domains
             cj = RequestsCookieJar()

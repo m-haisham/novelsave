@@ -24,7 +24,7 @@ class Webnovel(Source):
     def login(self, email: str, password: str):
         # init and signin
         webnovel = WebnovelBot(timeout=120)
-        webnovel.signin(email, password)
+        webnovel.signin(email, password, manual=True)
 
         # recreate api
         self.api = webnovel.create_api()

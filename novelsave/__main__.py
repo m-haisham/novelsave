@@ -69,23 +69,24 @@ def login(args, novelsave):
     """
     login and browser cookie
     """
-    cookie_browsers = (args.cookies_chrome, args.cookies_firefox)
+    cookie_browsers = (args.cookies_chrome, args.cookies_firefox, args.cookies_chromium, args.cookies_opera, args.cookies_edge)
+    browser_names = ('chrome', 'firefox', 'chromium', 'opera', 'edge')
 
     # if both login creds and cookie browser provided
     if any((args.username, args.password)) and any(cookie_browsers):
         raise ValueError("Choose one option from login and browser cookies")
 
-    # more than one cookie browser provided
+    # more than one cookie browser provided, it shoudnt reach here since options are XOR
     elif len([b for b in cookie_browsers if b]) > 1:
-        raise ValueError("Select single param from ('--cookies-chrome', '--cookies-firefox')")
+        raise ValueError
 
     # apply credentials
     elif len([b for b in cookie_browsers if b]) == 1:
         browser = None
-        if args.cookies_chrome:
-            browser = 'chrome'
-        elif args.cookies_firefix:
-            browser = 'firefox'
+        for selected, name in zip(cookie_browsers, browser_names):
+            if selected:
+                browser = name
+
         assert browser, "'browser' not recognized"
 
         novelsave.login(cookie_browser=browser, force=args.force_login)
@@ -128,8 +129,12 @@ def main():
     auth_cookies.add_argument('--username', type=str, help='username or email field')
     auth.add_argument('--password', type=str, help='password field; not recommended, refer to README for more details')
     auth.add_argument('--force-login', action='store_true', help='remove existing cookies and login')
+
     auth_cookies.add_argument('--cookies-chrome', action='store_true', help='use cookies from chrome')
     auth_cookies.add_argument('--cookies-firefox', action='store_true', help='use cookies from firefox')
+    auth_cookies.add_argument('--cookies-chromium', action='store_true', help='use cookies from chromium')
+    auth_cookies.add_argument('--cookies-opera', action='store_true', help='use cookies from opera')
+    auth_cookies.add_argument('--cookies-edge', action='store_true', help='use cookies from edge')
 
     # misc
     novel.add_argument('--threads', type=int, help='number of download threads', default=4)

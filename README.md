@@ -18,17 +18,15 @@ or
 pip install git+https://github.com/mHaisham/novelsave.git
 ```
 
-## Commandline
+## Usage
 
-### Example
-
-#### Update a novel
+### Update a novel
 
 ```bash
-novelsave https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c
+novelsave novel https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c
 ```
 
-#### Check/Update configurations
+### Check/Update configurations
 
 ```bash
 novelsave config
@@ -38,69 +36,113 @@ novelsave config
 novelsave config -d novels
 ```
 
-#### Save directory
+### Save directory
 
-Novels are saved to folder `novels` in user home
+Novels are by default saved to folder `novels` in user home
 
-### Help
+## Help
 
-```batch
-usage: __main__.py [-h] [-u] [-p] [-c] [--meta META] [--force-cover] [--force-create] [--force-meta] [--email EMAIL] [-v] [--threads THREADS] [--timeout TIMEOUT]
-                   [--limit LIMIT] [-d DIR]
-                   action
+### `novelsave --help`
+
+```
+usage: novelsave [-h] [-v] {novel,config,list} ...
 
 tool to convert novels to epub
 
 positional arguments:
-  action             novel url for downloading novels; 'config' to change configurations
+  {novel,config,list}
+    novel              download, update, and delete novels
+    list               manipulate currently existing novels
+    config             update and view user configurations
+
+optional arguments:
+  -h, --help           show this help message and exit
+  -v, --verbose        extra information
+```
+
+### `novelsave novel --help`
+
+```
+usage: novelsave novel [-h] [-u] [-p] [-c] [--meta META] [--remove-meta] [--force-cover] [--force-create] [--force-meta] [--username USERNAME]
+                       [--password PASSWORD] [--force-login] [--cookies-chrome] [--cookies-firefox] [--cookies-chromium] [--cookies-opera] [--cookies-edge]
+                       [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT]
+                       url
+
+positional arguments:
+  url                  novel url or identifier for downloading novels
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --threads THREADS    number of download threads
+  --timeout TIMEOUT    webdriver timeout
+  --limit LIMIT        amount of chapters to download
+
+actions:
+  -u, --update         update novel details
+  -p, --pending        download pending chapters
+  -c, --create         create epub from downloaded chapters
+  --meta META          metadata source url
+  --remove-meta        remove current metadata
+  --force-cover        download and overwrite the existing cover
+  --force-create       force create epub
+  --force-meta         force update metadata
+
+auth:
+  --username USERNAME  username or email field
+  --password PASSWORD  password field; not recommended, refer to README for more details
+  --force-login        remove existing cookies and login
+  --cookies-chrome     use cookies from chrome
+  --cookies-firefox    use cookies from firefox
+  --cookies-chromium   use cookies from chromium
+  --cookies-opera      use cookies from opera
+  --cookies-edge       use cookies from edge
+```
+
+### `novelsave list --help`
+
+```
+usage: novelsave list [-h] [--novel NOVEL] [--reset] [--full]
+
+optional arguments:
+  -h, --help     show this help message and exit
+  --novel NOVEL  takes the url of the novel and displays meta information
+  --reset        remove chapters and metadata. to be used with --novel
+  --full         remove everything including compiled epub files. to be used with --reset
+```
+
+### `novelsave config --help`
+
+```
+usage: novelsave config [-h] [-d DIR]
 
 optional arguments:
   -h, --help         show this help message and exit
-  -v, --verbose      enable animations; only in pending
-  --threads THREADS  number of download threads
-  --timeout TIMEOUT  webdriver timeout
-  --limit LIMIT      amount of chapters to download
-
-actions:
-  -u, --update       update novel details
-  -p, --pending      download pending chapters
-  -c, --create       create epub from downloaded chapters
-  --meta META        metadata source url
-  --remove-meta      remove current metadata
-  --force-cover      download and overwrite the existing cover
-  --force-create     force create epub
-  --force-meta       force update metadata
-
-authentication:
-  --username USERNAME  username or email field
-  --password PASSWORD  password field; not recommended, refer to README for more details
-  --cookies-chrome     use cookies from chrome
-  --cookies-firefox    use cookies from firefox
-  --force-login        remove existing cookies and login
-
-config:
   -d DIR, --dir DIR  directory for saving novels
 ```
 
-#### Login and cookies
+## Login and cookies
 
 Two methods of accessing authenticated content are provided
 
-##### Browser cookies
+### Browser cookies
 
 > Recommended method of access
 
 Uses cookies from available browsers access content
 
+use syntax `--cookies-[browser]`. for example
+
+```
+novelsave novel https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c --cookies-firefox
+```
+
 Requires to be Signed in, in the browser of choice
 
-###### Available browsers
+**Available**
 
-- Chrome `--cookies-chrome`
+`chrome` `firefox` `chromium` `opera` `edge`
 
-- Firefox `--cookies-firefox`
-
-##### Login
+### Login
 
 Username and password are sent to the website server to authenticate.
 
@@ -112,7 +154,7 @@ Novelsave attempts to use the available cookies unless:
 
 - user provides the flag `--force-login`
 
-##### Tested
+### Tested
 
 `webnovel.com`
 

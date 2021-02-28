@@ -9,11 +9,10 @@ from .concurrent import ConcurrentActionsController
 from .database import NovelData, CookieDatabase
 from .database.config import UserConfig
 from .epub import NovelEpub
-from .exceptions import MissingSource
 from .logger import NovelLogger
-from .metasources import meta_sources
+from .metasources import parse_metasource
 from .models import MetaData
-from .sources import sources
+from .sources import parse_source
 from .ui import Loader, ConsolePrinter, PrinterPrefix
 
 
@@ -32,7 +31,7 @@ class NovelSave:
         self.console = ConsolePrinter(verbose)
         NovelLogger.instance = NovelLogger(self.user.path, self.console)
 
-        self.source = self.parse_source(self.url)
+        self.source = parse_source(self.url)
         self.cookies = CookieDatabase(self.user.path)
         self.netloc_slug = self.source.source_folder_name()
         self.db, self.path = self.open_db()
@@ -75,7 +74,7 @@ class NovelSave:
         # normalize url
         url = url.rstrip('/')
 
-        meta_source = self.parse_metasource(url)
+        meta_source = parse_metasource(url)
 
         # check caching
         novel = self.db.novel.parse()
@@ -244,30 +243,6 @@ class NovelSave:
 
     def cover_path(self):
         return self.db.path.parent / Path('cover.jpg')
-
-    def parse_source(self, url):
-        """
-        create source object to which the :param url: belongs to
-
-        :return: source object
-        """
-        for source in sources:
-            if source.of(url):
-                return source()
-
-        raise MissingSource(url, f'"{url}" does not belong to any available source')
-
-    def parse_metasource(self, url):
-        """
-        create neta source object to which the :param url: belongs to
-
-        :return: meta source object
-        """
-        for source in meta_sources:
-            if source.of(url):
-                return source()
-
-        raise MissingSource(url, f'"{url}" does not belong to any available metadata source')
 
     def task(self, partial_c):
         ch = self.source.chapter(partial_c.url)

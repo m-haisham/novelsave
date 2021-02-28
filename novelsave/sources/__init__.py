@@ -18,6 +18,7 @@ from .spacebattles import Spacebattles
 from .wattpad import WattPad
 from .sufficientvelocity import SufficientVelocity
 from .dragontea import DragonTea
+from ..exceptions import MissingSource
 
 sources = [
     Webnovel,
@@ -39,3 +40,16 @@ sources = [
     SufficientVelocity,
     DragonTea,
 ]
+
+
+def parse_source(url):
+    """
+    create source object to which the :param url: belongs to
+
+    :return: source object
+    """
+    for source in sources:
+        if source.of(url):
+            return source()
+
+    raise MissingSource(url, f'"{url}" does not belong to any available source')

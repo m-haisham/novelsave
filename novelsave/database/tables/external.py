@@ -21,6 +21,7 @@ class MultiClassExternalTable(MultiClassTable):
             fields: List[str],
             identifier: str,
             naming_scheme: Callable[[T], str],
+            load=True,
     ):
         super(MultiClassExternalTable, self).__init__(db, table, cls, fields, identifier)
 
@@ -35,7 +36,8 @@ class MultiClassExternalTable(MultiClassTable):
         self.iothread = \
             IOThread(self.queue_in, self.queue_out, self._to_dict, self._from_dict, start=True, name='IOThread')
 
-        self._load()
+        if load:
+            self._load()
 
     def put(self, obj):
         name = self.naming_scheme(obj)

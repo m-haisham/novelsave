@@ -7,6 +7,8 @@ from webnovel.tools import UrlTools
 from novelsave import NovelSave
 from novelsave.database import UserConfig
 from novelsave.ui import ConsolePrinter, PrinterPrefix, TableBuilder
+from novelsave.commandline import NovelListing
+
 
 def setup_config(args):
     console = ConsolePrinter(verbose=True)
@@ -69,7 +71,8 @@ def login(args, novelsave):
     """
     login and browser cookie
     """
-    cookie_browsers = (args.cookies_chrome, args.cookies_firefox, args.cookies_chromium, args.cookies_opera, args.cookies_edge)
+    cookie_browsers = (
+        args.cookies_chrome, args.cookies_firefox, args.cookies_chromium, args.cookies_opera, args.cookies_edge)
     browser_names = ('chrome', 'firefox', 'chromium', 'opera', 'edge')
 
     # if both login creds and cookie browser provided
@@ -142,6 +145,16 @@ def main():
     novel.add_argument('--limit', type=int, help='amount of chapters to download')
     novel.set_defaults(func=process_task)
 
+    # Novel listing
+    listing = sub.add_parser('list', help='manipulate currently existing novels')
+    listing.add_argument('--novel', type=str,
+                         help='takes the url of the novel and displays meta information')
+    listing.add_argument('--reset', action='store_true',
+                         help='remove chapters and metadata. to be used with --novel')
+    listing.add_argument('--full', action='store_true',
+                         help='remove everything including compiled epub files. to be used with --reset')
+    listing.set_defaults(func=parse_listing)
+
     # Configurations
     config = sub.add_parser('config', help='update and view user configurations')
     config.add_argument('-d', '--dir', help='directory for saving novels')
@@ -149,6 +162,18 @@ def main():
 
     args = parser.parse_args()
     args.func(args)
+
+
+def parse_listing(args):
+    listing = NovelListing(args.verbose)
+
+    if args.novel:
+        if args.reset:
+            listing.reset_novel(args.novel, args.full)
+        else:
+            listing.show_novel(args.novel)
+    else:
+        listing.show_all()
 
 
 if __name__ == '__main__':

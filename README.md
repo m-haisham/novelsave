@@ -64,38 +64,34 @@ optional arguments:
 
 ```
 usage: novelsave novel [-h] [-u] [-p] [-c] [--meta META] [--remove-meta] [--force-cover] [--force-create] [--force-meta] [--username USERNAME]
-                       [--password PASSWORD] [--force-login] [--cookies-chrome] [--cookies-firefox] [--cookies-chromium] [--cookies-opera] [--cookies-edge]
-                       [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT]
+                       [--password PASSWORD] [--force-login] [--use-cookies USE_COOKIES] [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT]
                        url
 
 positional arguments:
-  url                  novel url or identifier for downloading novels
+  url                   novel url or identifier for downloading novels
 
 optional arguments:
-  -h, --help           show this help message and exit
-  --threads THREADS    number of download threads
-  --timeout TIMEOUT    webdriver timeout
-  --limit LIMIT        amount of chapters to download
+  -h, --help            show this help message and exit
+  --threads THREADS     number of download threads
+  --timeout TIMEOUT     webdriver timeout
+  --limit LIMIT         amount of chapters to download
 
 actions:
-  -u, --update         update novel details
-  -p, --pending        download pending chapters
-  -c, --create         create epub from downloaded chapters
-  --meta META          metadata source url
-  --remove-meta        remove current metadata
-  --force-cover        download and overwrite the existing cover
-  --force-create       force create epub
-  --force-meta         force update metadata
+  -u, --update          update novel details
+  -p, --pending         download pending chapters
+  -c, --create          create epub from downloaded chapters
+  --meta META           metadata source url
+  --remove-meta         remove current metadata
+  --force-cover         download and overwrite the existing cover
+  --force-create        force create epub
+  --force-meta          force update metadata
 
 auth:
-  --username USERNAME  username or email field
-  --password PASSWORD  password field; not recommended, refer to README for more details
-  --force-login        remove existing cookies and login
-  --cookies-chrome     use cookies from chrome
-  --cookies-firefox    use cookies from firefox
-  --cookies-chromium   use cookies from chromium
-  --cookies-opera      use cookies from opera
-  --cookies-edge       use cookies from edge
+  --username USERNAME   username or email field
+  --password PASSWORD   password field; not recommended, refer to README for more details
+  --force-login         remove existing cookies and login
+  --use-cookies USE_COOKIES
+                        use cookies from specified browser
 ```
 
 ### `novelsave list --help`
@@ -130,10 +126,10 @@ Two methods of accessing authenticated content are provided
 
 Uses cookies from available browsers access content
 
-use syntax `--cookies-[browser]`. for example
+use syntax `--use-cookies [browser]`. for example
 
 ```
-novelsave novel https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c --cookies-firefox
+novelsave novel https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c --use-cookies firefox
 ```
 
 Requires to be Signed in, in the browser of choice
@@ -154,9 +150,7 @@ Novelsave attempts to use the available cookies unless:
 
 - user provides the flag `--force-login`
 
-### Tested
-
-`webnovel.com`
+refer to [sources](#sources) to check supported sites.
 
 ## Manual
 

@@ -72,7 +72,7 @@ class NovelListing:
 
         # display a minimal number of information
         novel = data.novel.parse()
-        self.console.print(f'{"Delete" if full else "Reset"} {novel.title}')
+        self.console.print(f'{"Delete" if full else "Reset"} \'{novel.title}\'')
         self.console.list(f'by {novel.author}')
         self.console.list(novel.url)
         self.console.endline()

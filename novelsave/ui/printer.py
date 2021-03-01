@@ -43,7 +43,7 @@ class ConsolePrinter:
         try:
             choice = input()
         except (EOFError, KeyboardInterrupt):
-            print(default)
+            print()
             return False
 
         if choice.lower() in ['yes', 'y']:

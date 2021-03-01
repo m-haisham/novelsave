@@ -27,6 +27,7 @@ class Decoupled:
 
         # get table from database
         table._table = db.table(table.table_name)
+        table.decoupled = db
 
         return table
 

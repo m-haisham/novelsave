@@ -43,3 +43,7 @@ class NovelData(Database):
             load=load_chapters
         )
         self.misc = KeyValueTable(self.db, 'misc')
+
+    def close(self):
+        self.pending.decoupled_db.close()
+        self.db.close()

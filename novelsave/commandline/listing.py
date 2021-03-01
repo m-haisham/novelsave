@@ -1,9 +1,10 @@
+import shutil
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from ..database import NovelData, UserConfig
 from ..exceptions import MissingSource
-from ..sources import Source, parse_source
+from ..sources import parse_source
 from ..ui import ConsolePrinter, PrinterPrefix as Prefix
 
 
@@ -84,11 +85,15 @@ class NovelListing:
 
         try:
             if full:
+                # database has to be closed before we delete the files associated with it
+                # lest it throw an OSError
+                data.close()
+
                 # remove everything
-                path.unlink()
+                shutil.rmtree(path)
             else:
                 # remove chapters
-                data.chapters.path.unlink(missing_ok=True)
+                shutil.rmtree(data.chapters.path)
 
                 # remove metadata
                 data.metadata.truncate()

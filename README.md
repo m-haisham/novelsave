@@ -1,6 +1,13 @@
 # NovelSave
 
-[![GitHub version](https://badge.fury.io/gh/mHaisham%2Fnovelsave.svg)](https://badge.fury.io/gh/mHaisham%2Fnovelsave) [![PyPI version](https://badge.fury.io/py/novelsave.svg)](https://badge.fury.io/py/novelsave)
+![PyPI](https://img.shields.io/pypi/v/novelsave)
+![Python Version](https://img.shields.io/badge/Python-v3.8-blue)
+![Repo Size](https://img.shields.io/github/repo-size/mHaisham/novelsave)
+[![Contributors](https://img.shields.io/github/contributors/mHaisham/novelsave)](https://github.com/mHaisham/novelsave/graphs/contributors)
+![Last Commit](https://img.shields.io/github/last-commit/mHaisham/novelsave/master)
+![Issues](https://img.shields.io/github/issues/mHaisham/novelsave)
+![Pull Requests](https://img.shields.io/github/issues-pr/mHaisham/novelsave)
+[![License](https://img.shields.io/github/license/mHaisham/novelsave)](LICENSE)
 
 Tool to convert novels to epub
 

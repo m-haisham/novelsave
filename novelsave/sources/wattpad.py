@@ -10,10 +10,6 @@ class WattPad(Source):
 
     # 'https://my.w.tt', makes save novel folder naming weird
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(WattPad.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

@@ -7,10 +7,6 @@ from ..models import Novel, Chapter
 class KieshiTl(Source):
     base = 'https://kieshitl.wordpress.com'
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(KieshiTl.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

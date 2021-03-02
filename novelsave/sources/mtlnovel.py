@@ -7,10 +7,6 @@ from ..models import Chapter, Novel
 class MtlNovel(Source):
     base = 'https://www.mtlnovel.com'
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(MtlNovel.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

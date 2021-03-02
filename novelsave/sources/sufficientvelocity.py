@@ -9,10 +9,6 @@ from ..models import Chapter, Novel
 class SufficientVelocity(Source):
     base = 'https://forums.sufficientvelocity.com'
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(SufficientVelocity.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         threadmarks_url = f'{url.rstrip("/")}/threadmarks'
         soup = self.soup(threadmarks_url)

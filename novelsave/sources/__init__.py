@@ -18,6 +18,7 @@ from .spacebattles import Spacebattles
 from .wattpad import WattPad
 from .sufficientvelocity import SufficientVelocity
 from .dragontea import DragonTea
+from .novelsite import NovelSite
 from ..exceptions import MissingSource
 
 sources = [
@@ -39,6 +40,7 @@ sources = [
     WattPad,
     SufficientVelocity,
     DragonTea,
+    NovelSite,
 ]
 
 

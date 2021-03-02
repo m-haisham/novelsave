@@ -8,10 +8,6 @@ from ..models import Chapter, Novel
 class Fanfiction(Source):
     base = 'https://www.fanfiction.net'
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(Fanfiction.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

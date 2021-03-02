@@ -9,10 +9,6 @@ from ..models import Chapter, Novel
 class Spacebattles(Source):
     base = 'https://forums.spacebattles.com'
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(Spacebattles.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         threadmarks_url = f'{url.rstrip("/")}/threadmarks'
         soup = self.soup(threadmarks_url)

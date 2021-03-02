@@ -16,10 +16,6 @@ class NovelFull(Source):
         r'If you find any errors \( broken links.*let us know < report chapter >',
     ]
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(NovelFull.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

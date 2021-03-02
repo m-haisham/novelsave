@@ -11,10 +11,6 @@ class InsanityCave(Source):
     novel_author_regex = re.compile(r'written by(.+)\.')
     chapter_title_regex = re.compile(r'chapter[  ]([0-9]+)[  ]*.[  ](.+)', flags=re.IGNORECASE)
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url[:len(InsanityCave.base)] == InsanityCave.base
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

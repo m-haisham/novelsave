@@ -10,10 +10,6 @@ from ..models import Chapter, Novel
 class ScribbleHub(Source):
     base = 'https://www.scribblehub.com'
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(ScribbleHub.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

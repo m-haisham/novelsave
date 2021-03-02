@@ -20,13 +20,13 @@ class Source:
     retry_count = 5
     cookie_domains = []
 
-    @staticmethod
-    def of(url: str) -> bool:
+    @classmethod
+    def of(cls, url: str) -> bool:
         """
         :param url: url to test
         :return: whether the url is from this source
         """
-        raise NotImplementedError
+        return url.startswith(cls.base)
 
     def __init__(self):
         # public

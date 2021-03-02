@@ -205,6 +205,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [forums.spacebattles.com] |  |  |
 | [forums.sufficientvelocity.com] |  |  |
 | [dragontea.ink] |  |  |
+| [novelsite.net] |  |  |
 
 ## Metadata Sources
 
@@ -234,6 +235,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [forums.spacebattles.com]: https://forums.spacebattles.com
 [forums.sufficientvelocity.com]: https://forums.sufficientvelocity.com
 [dragontea.ink]: https://dragontea.ink
+[novelsite.net]: https://novelsite.net
 
 <!-- META SOURCE LINKS -->
 

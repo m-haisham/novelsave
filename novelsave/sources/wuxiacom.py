@@ -13,10 +13,6 @@ class WuxiaCom(Source):
         r'(volume|chapter) .?\d+',
     ]
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(WuxiaCom.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

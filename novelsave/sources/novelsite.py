@@ -1,5 +1,4 @@
 from typing import List, Tuple
-from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
@@ -7,8 +6,8 @@ from .source import Source
 from ..models import Chapter, Novel
 
 
-class DragonTea(Source):
-    base = 'https://dragontea.ink/'
+class NovelSite(Source):
+    base = 'https://novelsite.net'
 
     bad_tags = [
         'noscript', 'script', 'iframe', 'form', 'hr', 'img', 'ins',
@@ -19,33 +18,38 @@ class DragonTea(Source):
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 
-        summary_paragraphs = [p.text for p in soup.select('.summary__content > p')]
+        authors = [a for a in soup.select('.author-content > a')]
 
         novel = Novel(
-            title=soup.select_one('.post-title').text.strip(),
-            author=soup.select_one('.author-content').text.strip(),
+            title=soup.select_one('.post-title > h1').text.strip().rstrip(' Novel'),
+            author=authors[0].text.strip(),
             thumbnail=soup.select_one('.summary_image img')['src'],
-            synopsis='\n'.join(summary_paragraphs),
+            synopsis=soup.select_one('.summary__content > hr + p').text.strip(),
             url=url,
         )
 
         # other metadata
         for item in soup.select('.post-content_item'):
             if item.select_one('.summary-heading').text.strip() == 'Alternative':
-                novel.add_meta('title', item.select_one('.summary-content').text.strip(), others={'role': 'alt'})
+                for alt in item.select_one('.summary-content').text.strip().split(', '):
+                    if alt != novel.title:
+                        novel.add_meta('title', alt, others={'role': 'alt'})
                 break
 
-        for a in soup.select('.genres-content > a'):
-            novel.add_meta('subject', a.text.strip())
+        for author in authors[1:]:
+            novel.add_meta('contributor', author.text.strip(), others={'role': 'aut', 'link': author['href']})
 
-        artist_content = soup.select_one('.artist-content > a')
-        if artist_content:
-            novel.add_meta('contributor', artist_content.text.strip(),
-                           others={'role': 'ill', 'link': artist_content['href']})
+        artists = soup.select('.artist-content a')
+        for artist in artists:
+            novel.add_meta('contributor', artist.text.strip(), others={'role': 'ill', 'link': artist['href']})
+
+        genres = soup.select('.genres-content > a')
+        for genre in genres:
+            novel.add_meta('subject', genre.text.strip())
 
         novel_id = soup.select_one('.rating-post-id')['value']
         response = self.session.post(
-            'https://dragontea.ink/wp-admin/admin-ajax.php',
+            'https://novelsite.net/wp-admin/admin-ajax.php',
             data={
                 'action': 'manga_get_chapters',
                 'manga': novel_id,
@@ -84,3 +88,6 @@ class DragonTea(Source):
             paragraphs=str(content),
             url=url,
         )
+
+    def novel_folder_name(self, url):
+        return super().novel_folder_name(url).rstrip('-novel')

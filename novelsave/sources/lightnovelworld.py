@@ -10,10 +10,6 @@ class LightNovelWorld(Source):
 
     chapter_title_regex = re.compile(r'chapter (\d+\.?\d*):? ?(.+)?', flags=re.IGNORECASE)
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(LightNovelWorld.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

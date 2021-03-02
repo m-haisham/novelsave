@@ -13,10 +13,6 @@ from ..models import Novel, Chapter
 class Webnovel(Source):
     base = 'https://www.webnovel.com'
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(Webnovel.base)
-
     def __init__(self):
         super(Webnovel, self).__init__()
         self.api = ParsedApi()

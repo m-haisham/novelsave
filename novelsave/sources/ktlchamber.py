@@ -10,10 +10,6 @@ class Ktlchamber(Source):
 
     chapter_regex = re.compile(r'Chapter[  ](\d+)\.[  ]?(.*)', flags=re.IGNORECASE)
 
-    @staticmethod
-    def of(url: str) -> bool:
-        return url.startswith(Ktlchamber.base)
-
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         soup = self.soup(url)
 

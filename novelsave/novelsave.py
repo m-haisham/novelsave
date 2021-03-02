@@ -165,6 +165,11 @@ class NovelSave:
         novel = self.db.novel.parse()
         novel.meta = self.db.metadata.all()
 
+        # this limits metadata to an external source should it be provided
+        # using metadata from both sources causes duplicate entries
+        if novel.meta_source:
+            novel.meta = self.db.metadata.search_where('src', MetaData.SOURCE_EXTERNAL)
+
         epub = NovelEpub(
             novel=novel,
             cover=self.cover_path(),

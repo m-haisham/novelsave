@@ -67,7 +67,7 @@ class Webnovel(Source):
         else:
             title = wchapter.title
 
-        content = BeautifulSoup(f'<div>{"".join(wchapter.paragraphs)}</div>', 'lxml')
+        content = BeautifulSoup(f'<div><p>{"</p><p>".join(wchapter.paragraphs)}</p></div>', 'lxml')
         self.clean_contents(content)
 
         return Chapter(

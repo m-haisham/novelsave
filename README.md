@@ -213,6 +213,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [forums.sufficientvelocity.com] |  |  |
 | [dragontea.ink] |  |  |
 | [novelsite.net] |  |  |
+| [foxaholic.com] |  |  |
 
 ## Metadata Sources
 
@@ -243,6 +244,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [forums.sufficientvelocity.com]: https://forums.sufficientvelocity.com
 [dragontea.ink]: https://dragontea.ink
 [novelsite.net]: https://novelsite.net
+[foxaholic.com]: https://foxaholic.com
 
 <!-- META SOURCE LINKS -->
 

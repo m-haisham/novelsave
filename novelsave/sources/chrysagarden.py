@@ -84,34 +84,11 @@ class Chrysanthemumgarden(Source):
             pass
 
         if 'class' in element.attrs and 'jum' in element['class']:
-            self.unjumble(element)
+            self.reorder_text(element)
 
-        # remove comments
-        if isinstance(element, Comment):
-            element.extract()
+        super(Chrysanthemumgarden, self).clean_element(element)
 
-        elif element.name == 'br':
-            next_element = getattr(element, 'next_sibling')
-            if next_element and next_element.name == 'br':
-                element.extract()
-
-        # Remove bad tags
-        elif element.name in self.bad_tags:
-            element.extract()
-
-        # Remove empty elements
-        elif not element.text.strip():
-            element.extract()
-
-        # Remove blacklisted elements
-        elif self.is_blacklisted(element.text):
-            element.extract()
-
-        # Remove attributes
-        elif hasattr(element, 'attrs'):
-            element.attrs = {}
-
-    def unjumble(self, element):
+    def reorder_text(self, element):
         text = ''
         for char in element.text:
             try:

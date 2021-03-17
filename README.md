@@ -204,7 +204,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [kieshitl.wordpress] |  |  |
 | [scribblehub.com] |  |  |
 | [mtlnovel.com] |  |  |
-| ~~[fanfiction.net]~~ |  |  |
+| ~~[fanfiction.net]~~ due to cloudflare bot protection |  |  |
 | [novelfull.com] |  |  |
 | [wuxiaworld.com] |  |  |
 | [royalroad.com] |  |  |
@@ -214,6 +214,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [dragontea.ink] |  |  |
 | [novelsite.net] |  |  |
 | [foxaholic.com] |  |  |
+| [chrysanthemumgarden.com] |  |  |
 
 ## Metadata Sources
 
@@ -245,6 +246,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [dragontea.ink]: https://dragontea.ink
 [novelsite.net]: https://novelsite.net
 [foxaholic.com]: https://foxaholic.com
+[chrysanthemumgarden.com]: https://chrysanthemumgarden.com
 
 <!-- META SOURCE LINKS -->
 

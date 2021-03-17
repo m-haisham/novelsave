@@ -182,29 +182,32 @@ class Source:
 
         contents.attrs = {}
         for element in contents.find_all(True):
-            # remove comments
-            if isinstance(element, Comment):
-                element.extract()
-
-            elif element.name == 'br':
-                next_element = getattr(element, 'next_sibling')
-                if next_element and next_element.name == 'br':
-                    element.extract()
-
-            # Remove bad tags
-            elif element.name in self.bad_tags:
-                element.extract()
-
-            # Remove empty elements
-            elif not element.text.strip():
-                element.extract()
-
-            # Remove blacklisted elements
-            elif self.is_blacklisted(element.text):
-                element.extract()
-
-            # Remove attributes
-            elif hasattr(element, 'attrs'):
-                element.attrs = {}
+            self.clean_element(element)
 
         return contents
+
+    def clean_element(self, element):
+        # remove comments
+        if isinstance(element, Comment):
+            element.extract()
+
+        elif element.name == 'br':
+            next_element = getattr(element, 'next_sibling')
+            if next_element and next_element.name == 'br':
+                element.extract()
+
+        # Remove bad tags
+        elif element.name in self.bad_tags:
+            element.extract()
+
+        # Remove empty elements
+        elif not element.text.strip():
+            element.extract()
+
+        # Remove blacklisted elements
+        elif self.is_blacklisted(element.text):
+            element.extract()
+
+        # Remove attributes
+        elif hasattr(element, 'attrs'):
+            element.attrs = {}

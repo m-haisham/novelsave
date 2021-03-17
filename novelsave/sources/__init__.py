@@ -20,6 +20,7 @@ from .sufficientvelocity import SufficientVelocity
 from .dragontea import DragonTea
 from .novelsite import NovelSite
 from .foxaholic import Foxaholic
+from .chrysagarden import Chrysanthemumgarden
 from ..exceptions import MissingSource
 
 sources = [
@@ -43,6 +44,7 @@ sources = [
     DragonTea,
     NovelSite,
     Foxaholic,
+    Chrysanthemumgarden,
 ]
 
 

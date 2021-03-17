@@ -241,5 +241,5 @@ dmypy.json
 *.jpg
 *.epub
 
-temp.py
-test.py
+# python files outside package
+./*.py

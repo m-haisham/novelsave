@@ -52,10 +52,8 @@ class CookieDatabase:
         if type(domains) == str:
             domains = (domains, )
 
-        # build statement
         statement = 'SELECT * FROM cookies' + self._build_domain_condition(domains)
 
-        # execute select query
         with self.conn:
             self.cursor.execute(statement, domains)
 
@@ -85,7 +83,6 @@ class CookieDatabase:
         else:
             raise TypeError(f'Unsupported type: {type(cookies[0])} (tuple, http.cookiejar.Cookie)')
 
-        # execute insert query
         try:
             with self.conn:
                 self.cursor.executemany("INSERT INTO cookies VALUES(?, ?, ?, ?, ?)", values)

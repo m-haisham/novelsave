@@ -19,6 +19,11 @@ class Atomic:
 
 
 class AtomicInt(Atomic):
+    def __init__(self, initial):
+        super(AtomicInt, self).__init__(initial)
+
+        assert type(initial) == int, '"initial" value must be an int'
+
     def increment(self, by=1):
         with self._lock:
             self.value += by

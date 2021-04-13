@@ -62,7 +62,7 @@ class Source:
         """
         if type(cookies) == RequestsCookieJar:
             self.session.cookies = cookies
-        if type(cookies) == tuple:
+        elif type(cookies) == tuple:
             # clear preexisting cookies associated with source
             for domain in self.cookie_domains:
                 self.session.cookies.clear(domain=domain)

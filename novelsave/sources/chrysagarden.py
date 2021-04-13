@@ -1,9 +1,6 @@
 import re
 from typing import List, Tuple
 
-from bs4 import Comment
-from bs4.element import NavigableString
-
 from .source import Source
 from ..models import Chapter, Novel
 

@@ -6,10 +6,26 @@ import sys
 class Loader:
     _width: int
 
-    def __init__(self, desc: str = None, target=sys.stdout, draw=True):
+    styles = {
+        'unicode': {
+            'completed': '█',
+            'head': [" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉"],
+        },
+        'ascii': {
+            'completed': '=',
+            'head': [' ', ' ', ' ', ' ', '-', '-', '-', '-'],
+        },
+    }
+
+    def __init__(self, desc: str = None, target=sys.stdout, draw=True, style=None):
         self.desc = desc
         self._target = target
         self._text_only = not self._target.isatty()
+
+        if style is None:
+            self.style = self.styles['unicode']
+        else:
+            self.style = style
 
         if draw:
             if desc:
@@ -80,8 +96,8 @@ class Loader:
         whole_width = math.floor(progress * width)
         remainder_width = (progress * width) % 1
         part_width = math.floor(remainder_width * 8)
-        part_char = [" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉"][part_width]
+        part_char = self.style['head'][part_width]
         if (width - whole_width - 1) < 0:
             part_char = ""
-        line = "|" + "█" * whole_width + part_char + " " * (width - whole_width - 1) + "|"
+        line = "|" + self.style['completed'] * whole_width + part_char + " " * (width - whole_width - 1) + "|"
         return line

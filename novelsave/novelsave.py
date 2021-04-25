@@ -128,8 +128,11 @@ class NovelSave:
             additive = f'{pending[0].index} - {pending[-1].index}'
         self.console.print(f'Downloading {len(pending)} chapters | {additive}...')
 
-        with Loader(f'Populating tasks ({len(pending)})', value=0, total=len(pending), draw=self.console.verbose) \
-                as brush:
+        with Loader(f'Populating tasks ({len(pending)})', draw=self.console.verbose) \
+                as loader:
+
+            value = 0
+            total = len(pending)
 
             # initialize controller
             controller = ConcurrentActionsController(min(thread_count, len(pending)), task=self.task)
@@ -147,8 +150,8 @@ class NovelSave:
 
                 # update brush
                 if self.console.verbose:
-                    brush.value += 1
-                    brush.desc = f'[{brush.value}/{brush.total}] {chapter.url}'
+                    value += 1
+                    loader.update(value / total, f'{chapter.url} [{value}/{total}]')
 
                 self.db.chapters.put(chapter)
 

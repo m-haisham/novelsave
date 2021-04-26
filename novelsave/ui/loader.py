@@ -17,7 +17,7 @@ class Loader:
         },
     }
 
-    def __init__(self, desc: str = None, target=sys.stdout, draw=True, style=None):
+    def __init__(self, desc: str = None, target=sys.stdout, should_draw=True, style=None):
         self.desc = desc
         self._target = target
         self._text_only = not self._target.isatty()
@@ -27,7 +27,8 @@ class Loader:
         else:
             self.style = style
 
-        if draw:
+        self.should_draw = should_draw
+        if should_draw:
             if desc:
                 self._update(0)
             self.update = self._update
@@ -38,6 +39,9 @@ class Loader:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self.should_draw:
+            return
+
         if exc_type is None:
             self.update(1.0)
 
@@ -92,7 +96,7 @@ class Loader:
             return '…' + self.desc[len(self.desc) - width:]
 
     def progress_bar_str(self, value: float, width: int):
-        progress = min(1, max(0, value))
+        progress = min(1.0, max(0.0, value))
         whole_width = math.floor(progress * width)
         remainder_width = (progress * width) % 1
         part_width = math.floor(remainder_width * 8)

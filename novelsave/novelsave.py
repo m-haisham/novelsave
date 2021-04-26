@@ -128,7 +128,7 @@ class NovelSave:
             additive = f'{pending[0].index} - {pending[-1].index}'
         self.console.print(f'Downloading {len(pending)} chapters | {additive}...')
 
-        with Loader(f'Populating tasks ({len(pending)})', draw=self.console.verbose) \
+        with Loader(f'Populating tasks ({len(pending)})', should_draw=self.console.verbose) \
                 as loader:
 
             value = 0

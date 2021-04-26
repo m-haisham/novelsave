@@ -26,7 +26,7 @@ class NovelListing:
                 self.console.raw_print(f"'{novel.title}' by {novel.author}")
                 self.console.list(novel.url)
 
-            self.console.endline()
+            self.console.newline()
 
     def show_novel(self, url):
         data, path = self._open(url)
@@ -42,7 +42,7 @@ class NovelListing:
         self.console.list('thumbnail:', novel.thumbnail)
         self.console.list('lang:', novel.lang)
         self.console.list('url:', novel.url)
-        self.console.endline()
+        self.console.newline()
 
         # print metadata information about novel
         metadata = data.metadata.all()
@@ -56,7 +56,7 @@ class NovelListing:
                     others = ' ' + others
 
                 self.console.list(f"{m['name']}: {m['value']}{others}")
-        self.console.endline()
+        self.console.newline()
 
         # print chapters of the novel
         chapters = data.chapters.all()
@@ -64,7 +64,7 @@ class NovelListing:
         if self.console.verbose:
             for c in chapters:
                 self.console.list(c.title)
-        self.console.endline()
+        self.console.newline()
 
     def reset_novel(self, url, full=True):
         data, path = self._open(url, load=False)
@@ -76,7 +76,7 @@ class NovelListing:
         self.console.print(f'{"Delete" if full else "Reset"} \'{novel.title}\'')
         self.console.list(f'by {novel.author}')
         self.console.list(novel.url)
-        self.console.endline()
+        self.console.newline()
 
         confirm = self.console.confirm('Are you sure?')
         if not confirm:
@@ -123,7 +123,7 @@ class NovelListing:
             source = parse_source(url)
         except MissingSource:
             self.console.print(f"'{url}' could not be assigned to any supported source\n", prefix=Prefix.ERROR)
-            self.console.endline()
+            self.console.newline()
             return None, None
 
         try:

@@ -54,5 +54,5 @@ class ConsolePrinter:
             self.print(f"Unrecognised input. Using default value '{default}'", prefix=PrinterPrefix.ERROR)
             return default
 
-    def endline(self):
+    def newline(self):
         print()

@@ -5,9 +5,10 @@ from pathlib import Path
 from webnovel.tools import UrlTools
 
 from novelsave import NovelSave
-from novelsave.database import UserConfig
-from novelsave.ui import ConsolePrinter, PrinterPrefix, TableBuilder
 from novelsave.cli import NovelListing
+from novelsave.database import UserConfig
+from novelsave.exceptions import MissingSource
+from novelsave.ui import ConsolePrinter, PrinterPrefix, TableBuilder
 
 
 def setup_config(args):
@@ -43,7 +44,17 @@ def process_task(args):
         # or atleast tried to
         args.url = UrlTools.to_novel_url(args.url)
 
-    novelsave = NovelSave(args.url, verbose=args.verbose)
+    try:
+        novelsave = NovelSave(args.url, verbose=args.verbose)
+    except MissingSource:
+        console = ConsolePrinter(verbose=args.verbose)
+
+        console.print(f'"{args.url}" is not supported any available source', prefix=PrinterPrefix.ERROR)
+        console.print(f'Request support by creating a new issue at '
+                      f'https://github.com/mHaisham/novelsave/issues/new/choose')
+        console.newline()
+        return
+
     novelsave.timeout = args.timeout
     login(args, novelsave)
 

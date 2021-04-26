@@ -85,7 +85,9 @@ def login(args, novelsave):
     elif args.username:
         novelsave.username = args.username
 
-        if not args.password:
+        if args.password:
+            novelsave.password = args.password
+        else:
             novelsave.password = getpass('\n[-] password: ')
 
         # login
@@ -143,7 +145,7 @@ def main():
     config.set_defaults(func=setup_config)
 
     args = parser.parse_args()
-    args.func(args)
+    args.func(args)  # TODO handle errors raised
 
 
 def parse_listing(args):

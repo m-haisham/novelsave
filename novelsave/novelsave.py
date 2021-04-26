@@ -5,10 +5,12 @@ import browser_cookie3
 import requests
 from requests.cookies import RequestsCookieJar
 
+from novelsave.models import Chapter
 from .concurrent import ConcurrentActionsController
 from .database import NovelData, CookieDatabase
 from .database.config import UserConfig
 from .epub import NovelEpub
+from .exceptions import ChapterException
 from .logger import NovelLogger
 from .metasources import parse_metasource
 from .models import MetaData
@@ -128,7 +130,7 @@ class NovelSave:
             additive = f'{pending[0].index} - {pending[-1].index}'
         self.console.print(f'Downloading {len(pending)} chapters | {additive}...')
 
-        with Loader(f'Populating tasks ({len(pending)})', should_draw=self.console.verbose) \
+        with Loader(desc=f'Populating tasks ({len(pending)})', should_draw=self.console.verbose) \
                 as loader:
 
             value = 0
@@ -143,7 +145,7 @@ class NovelSave:
             self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
 
             # start downloading
-            for chapter in controller.iter():
+            for result in controller.iter():
                 # debug
                 # brush.print(controller.queue_out.qsize())
                 # brush.print(f'{chapter.no} {chapter.title}')
@@ -153,10 +155,22 @@ class NovelSave:
                     value += 1
                     loader.update(value / total, f'{chapter.url} [{value}/{total}]')
 
-                self.db.chapters.put(chapter)
+                if type(result) is Chapter:
+                    chapter = result
 
-                # at last remove chapter from pending
-                self.db.pending.remove(chapter.url)
+                    self.db.chapters.put(chapter)
+
+                    # at last remove chapter from pending
+                    self.db.pending.remove(chapter.url)
+                elif type(result) is ChapterException:
+                    loader.print(f'{PrinterPrefix.WARNING} [{result.type}] {result.message}')
+                else:
+                    loader.print(f'{PrinterPrefix.WARNING} {str(result)}')
+
+        if self.console.verbose:
+            pending = self.db.pending.all()
+            if len(pending) > 0:
+                self.console.print(f'Download finished with {len(pending)} chapter{"s" if len(pending) > 0 else ""} pending')
 
         # ensure all operations are done
         self.db.chapters.flush()
@@ -252,8 +266,12 @@ class NovelSave:
     def cover_path(self):
         return self.db.path.parent / Path('cover.jpg')
 
-    def task(self, partial_c):
-        ch = self.source.chapter(partial_c.url)
+    def task(self, partial_c) -> Union[Chapter, Exception]:
+        try:
+            ch = self.source.chapter(partial_c.url)
+        except Exception as e:
+            return e
+
         ch.index = partial_c.index
         ch.title = ch.title or partial_c.title
         ch.volume = partial_c.volume

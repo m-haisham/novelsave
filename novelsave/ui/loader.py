@@ -17,10 +17,12 @@ class Loader:
         },
     }
 
-    def __init__(self, desc: str = None, target=sys.stdout, should_draw=True, style=None):
-        self.desc = desc
+    def __init__(self, value: float = 0, desc: str = None, target=sys.stdout, should_draw=True, style=None):
         self._target = target
         self._text_only = not self._target.isatty()
+
+        self.desc = desc
+        self.value = value
 
         if style is None:
             self.style = self.styles['unicode']
@@ -52,11 +54,32 @@ class Loader:
 
         self._target.flush()
 
+    def print(self, *args, end='\n', sep=' '):
+        if not self.should_draw:
+            return
+
+        text = sep.join(args) + end
+
+        if self._text_only:
+            self._target.write(text)
+        else:
+            # remove current progress bar and print
+            self._target.write(f'\033[2K\033[1G')
+            self._target.write(text)
+
+            # re draw progressbar
+            self.update()
+
+        self._target.flush()
+
     def _update_width(self):
         self._width, _ = shutil.get_terminal_size((80, 20))
 
-    def _update(self, value: float, desc: str = None):
+    def _update(self, value: float = None, desc: str = None):
         self._update_width()
+
+        if value is not None:
+            self.value = value
         if desc is not None:
             self.desc = desc
 
@@ -64,19 +87,19 @@ class Loader:
             # No percent string
             desc_str = ''
             percent_str = ''
-            bar_str = self.progress_bar_str(value, self._width - 2)
+            bar_str = self.progress_bar_str(self.value, self._width - 2)
         elif self._width < 40:
             # No padding and desc at smaller size
             desc_str = ''
-            percent_str = "{:6.2f} %".format(value * 100)
-            bar_str = self.progress_bar_str(value, self._width - 12) + ' '
+            percent_str = "{:6.2f} %".format(self.value * 100)
+            bar_str = self.progress_bar_str(self.value, self._width - 12) + ' '
         else:
             # Standard progress bar desc and label
-            desc_length = max(15, math.floor(self._width / 3))
+            desc_length = max(15, math.floor(self._width * (2 / 5)))
 
             desc_str = self.desc_str(desc_length)
-            percent_str = "{:6.2f} %".format(value * 100) + " "
-            bar_str = " " + self.progress_bar_str(value, self._width - desc_length - 14) + ' '
+            percent_str = "{:6.2f} %".format(self.value * 100) + " "
+            bar_str = " " + self.progress_bar_str(self.value, self._width - desc_length - 14) + ' '
 
         if self._text_only:
             self._target.write(f'{bar_str}{percent_str}{desc_str}\n')

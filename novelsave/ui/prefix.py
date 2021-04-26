@@ -7,7 +7,8 @@ class PrinterPrefix:
     SUCCESS = '[✓]'
     NEUTRAL = '[-]'
     ERROR = '[✗]'
+    WARNING = '[!]'
     LIST = ' +--'
 
-    fields = ['SUCCESS', 'NEUTRAL', 'ERROR', 'LIST']
-    values = [SUCCESS, NEUTRAL, ERROR, LIST]
+    fields = ['SUCCESS', 'NEUTRAL', 'ERROR', 'WARNING', 'LIST']
+    values = [SUCCESS, NEUTRAL, ERROR, WARNING, LIST]

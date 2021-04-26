@@ -35,7 +35,7 @@ class NovelData(Database):
                                       ['title', 'author', 'synopsis', 'thumbnail', 'lang', 'meta_source', 'url'])
         self.metadata = SetTable(self.db, 'metadata', field1='name', field2='value')
         self.pending = MultiClassDecoupledTable(self.db, self.path.parent, 'pending', Chapter,
-                                                ['index', 'volume', 'url'], 'url')
+                                                ['index', 'title', 'volume', 'url'], 'url')
         self.chapters = MultiClassExternalTable(
             self.db, self.path.parent, 'chapters',
             Chapter, ['index', 'title', 'paragraphs', 'volume', 'url'], 'url',

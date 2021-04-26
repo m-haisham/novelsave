@@ -7,7 +7,7 @@ from webnovel.tools import UrlTools
 from novelsave import NovelSave
 from novelsave.database import UserConfig
 from novelsave.ui import ConsolePrinter, PrinterPrefix, TableBuilder
-from novelsave.commandline import NovelListing
+from novelsave.cli import NovelListing
 
 
 def setup_config(args):

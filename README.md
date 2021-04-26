@@ -216,6 +216,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [foxaholic.com] |  |  |
 | [chrysanthemumgarden.com] |  |  |
 | [peachpitting.com] |  |  |
+| [betwixtedbutterfly.com] |  |  |
 
 ## Metadata Sources
 
@@ -249,6 +250,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [foxaholic.com]: https://foxaholic.com
 [chrysanthemumgarden.com]: https://chrysanthemumgarden.com
 [peachpitting.com]: https://peachpitting.com
+[betwixtedbutterfly.com]: https://betwixtedbutterfly.com
 
 <!-- META SOURCE LINKS -->
 

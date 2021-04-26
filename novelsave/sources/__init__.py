@@ -23,6 +23,7 @@ from .foxaholic import Foxaholic
 from .chrysagarden import Chrysanthemumgarden
 from .peachpitting import PeachPitting
 from .betwixtedbutterfly import BetwixtedButterfly
+from .dummynovels import DummyNovels
 from ..exceptions import MissingSource
 
 sources = [
@@ -49,6 +50,7 @@ sources = [
     Chrysanthemumgarden,
     PeachPitting,
     BetwixtedButterfly,
+    DummyNovels,
 ]
 
 

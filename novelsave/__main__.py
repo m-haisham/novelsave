@@ -56,7 +56,13 @@ def process_task(args):
         return
 
     novelsave.timeout = args.timeout
-    login(args, novelsave)
+
+    try:
+        login(args, novelsave)
+    except ValueError as e:
+        novelsave.console.print(str(e), prefix=PrinterPrefix.ERROR)
+        novelsave.console.newline()
+        return
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
         novelsave.console.print('No actions selected', prefix=PrinterPrefix.ERROR)
@@ -82,14 +88,9 @@ def login(args, novelsave):
     """
     login and browser cookie
     """
-    browser_names = ('chrome', 'firefox', 'chromium', 'opera', 'edge')
-
     # apply credentials
     if args.use_cookies:
         args.use_cookies = args.use_cookies.lower()
-        if args.use_cookies not in browser_names:
-            raise ValueError(f"extracting cookies from '{args.use_cookies}' is not supported")
-
         novelsave.login(cookie_browser=args.use_cookies, force=args.force_login)
 
     # login

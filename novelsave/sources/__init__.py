@@ -21,6 +21,7 @@ from .dragontea import DragonTea
 from .novelsite import NovelSite
 from .foxaholic import Foxaholic
 from .chrysagarden import Chrysanthemumgarden
+from .peachpitting import PeachPitting
 from ..exceptions import MissingSource
 
 sources = [
@@ -45,6 +46,7 @@ sources = [
     NovelSite,
     Foxaholic,
     Chrysanthemumgarden,
+    PeachPitting,
 ]
 
 

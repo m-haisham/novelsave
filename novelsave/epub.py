@@ -5,7 +5,7 @@ from ebooklib import epub
 from yattag import Doc
 
 from .models import MetaData
-from .tools import StringTools
+from .utils.helpers import StringHelper
 
 
 class NovelEpub:
@@ -79,7 +79,7 @@ class NovelEpub:
 
     @property
     def path(self):
-        return self.save_path / Path(f'{StringTools.slugify(self.novel.title)}.epub').resolve()
+        return self.save_path / Path(f'{StringHelper.slugify(self.novel.title)}.epub').resolve()
 
     def _epub_chapter(self, chapter):
         """
@@ -88,7 +88,7 @@ class NovelEpub:
         :param chapter: novel chapter
         :return: chapter xhtml
         """
-        prefix = f'{f"{StringTools.from_float(chapter.no)} " if chapter.no and chapter.no > 0 else ""}'
+        prefix = f'{f"{StringHelper.from_float(chapter.no)} " if chapter.no and chapter.no > 0 else ""}'
         title = f'{prefix}{chapter.title}'
         epub_chapter = epub.EpubHtml(title=title, file_name=f'{chapter.index}.xhtml', lang='en')
 

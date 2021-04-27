@@ -5,8 +5,8 @@ import browser_cookie3
 import requests
 from requests.cookies import RequestsCookieJar
 
-from novelsave.models import Chapter
-from .concurrent import ConcurrentActionsController
+from .models import Chapter
+from .utils.concurrent import ConcurrentActionsController
 from .database import NovelData, CookieDatabase
 from .database.config import UserConfig
 from .epub import NovelEpub
@@ -15,7 +15,7 @@ from .logger import NovelLogger
 from .metasources import parse_metasource
 from .models import MetaData
 from .sources import parse_source
-from .ui import Loader, ConsolePrinter, PrinterPrefix
+from .utils.ui import Loader, ConsolePrinter, PrinterPrefix
 
 
 class NovelSave:

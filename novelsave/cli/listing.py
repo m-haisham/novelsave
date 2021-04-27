@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Tuple
 from ..database import NovelData, UserConfig
 from ..exceptions import MissingSource
 from ..sources import parse_source
-from ..ui import ConsolePrinter, PrinterPrefix as Prefix
+from ..utils.ui import ConsolePrinter, PrinterPrefix as Prefix
 
 
 class NovelListing:

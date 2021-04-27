@@ -5,7 +5,7 @@ from tinydb import TinyDB
 
 from .multi import MultiClassTable
 from ..accessors import IAccessor
-from ...tools import unzip_arguments
+from ...utils.helpers import unzip_arguments
 
 T = TypeVar('T')
 

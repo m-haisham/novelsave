@@ -1,4 +1,4 @@
-from .string import StringTools
+from .string import StringHelper
 
 
 def unzip_arguments(args, kwargs, pairs):

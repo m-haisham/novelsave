@@ -5,7 +5,7 @@ from typing import Tuple
 int_pattern = re.compile(r'(\d+)')
 
 
-class StringTools:
+class StringHelper:
     @staticmethod
     def collect_integers(s: str) -> Tuple[int]:
         return tuple(int(n) for n in int_pattern.findall(s))

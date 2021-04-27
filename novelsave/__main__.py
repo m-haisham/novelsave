@@ -1,6 +1,5 @@
 import argparse
 from getpass import getpass
-from pathlib import Path
 
 from webnovel.tools import UrlTools
 
@@ -8,7 +7,7 @@ from novelsave import NovelSave
 from novelsave.cli import NovelListing, CliConfig
 from novelsave.database import UserConfig
 from novelsave.exceptions import MissingSource
-from novelsave.ui import ConsolePrinter, PrinterPrefix, TableBuilder, figlet
+from novelsave.utils.ui import ConsolePrinter, PrinterPrefix, figlet
 
 def process_task(args):
     # checks if the provided url is valid

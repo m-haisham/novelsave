@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ..database import UserConfig
-from ..ui import TableBuilder, ConsolePrinter, PrinterPrefix
+from ..utils.ui import TableBuilder, ConsolePrinter, PrinterPrefix
 
 
 class CliConfig:

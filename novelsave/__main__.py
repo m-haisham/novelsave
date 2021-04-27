@@ -8,7 +8,7 @@ from novelsave import NovelSave
 from novelsave.cli import NovelListing
 from novelsave.database import UserConfig
 from novelsave.exceptions import MissingSource
-from novelsave.ui import ConsolePrinter, PrinterPrefix, TableBuilder
+from novelsave.ui import ConsolePrinter, PrinterPrefix, TableBuilder, figlet
 
 
 def setup_config(args):
@@ -158,6 +158,9 @@ def main():
     config.set_defaults(func=setup_config)
 
     args = parser.parse_args()
+
+    print(figlet.app)
+
     args.func(args)  # TODO handle errors raised
 
 

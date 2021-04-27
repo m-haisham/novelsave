@@ -112,9 +112,11 @@ class Loader:
         width = width - 1
 
         if not self.desc:
-            return ''
+            return ' ' * width
         if len(self.desc) <= width:
-            return self.desc
+            # whitespace is added to pad the string
+            # to overwrite the previous desc, should it be longer
+            return self.desc + ' ' * (width - len(self.desc))
         elif len(self.desc) > width:
             return '…' + self.desc[len(self.desc) - width:]
 

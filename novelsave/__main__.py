@@ -5,37 +5,10 @@ from pathlib import Path
 from webnovel.tools import UrlTools
 
 from novelsave import NovelSave
-from novelsave.cli import NovelListing
+from novelsave.cli import NovelListing, CliConfig
 from novelsave.database import UserConfig
 from novelsave.exceptions import MissingSource
 from novelsave.ui import ConsolePrinter, PrinterPrefix, TableBuilder, figlet
-
-
-def setup_config(args):
-    console = ConsolePrinter(verbose=True)
-    user = UserConfig()
-
-    # updating storage directory
-    if args.dir:
-
-        # could throw an OSError: illegal directory names
-        args.dir = Path(args.dir).resolve().absolute()
-
-        try:
-            user.directory.put(str(args.dir))
-            console.print(f'Updated {user.directory.name}', prefix=PrinterPrefix.SUCCESS)
-        except ValueError as e:  # check for validation failures
-            console.print(e, prefix=PrinterPrefix.ERROR)
-
-        # breathe,
-        print()
-
-    table = TableBuilder(('field', 'value'))
-    for config in user.configs:
-        table.add_row((config.name, config.get()))
-
-    print(table)
-
 
 def process_task(args):
     # checks if the provided url is valid
@@ -155,11 +128,13 @@ def main():
     # Configurations
     config = sub.add_parser('config', help='update and view user configurations')
     config.add_argument('-d', '--dir', help='directory for saving novels')
-    config.set_defaults(func=setup_config)
+    config.add_argument('--toggle-banner', action='store_true', help='Toggle show and hide for title banner')
+    config.set_defaults(func=CliConfig.handle)
 
     args = parser.parse_args()
 
-    print(figlet.app)
+    if UserConfig.instance().show_banner.get():
+        print(figlet.banner)
 
     args.func(args)  # TODO handle errors raised
 

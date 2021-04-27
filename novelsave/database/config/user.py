@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import List
 
@@ -21,6 +23,8 @@ class UserConfig:
     databases: List[ConfigBase]
     configs: List[ConfigElement]
 
+    _instance = None
+
     def __init__(self):
         # get cross os configuration path
         self.path = Path(user_config_dir(appname, appauthor, self.version))
@@ -34,15 +38,30 @@ class UserConfig:
             validate=vallidate_dir,
         )
 
+        self.show_banner = ConfigElement(
+            self.config,
+            name='show banner',
+            default=True,
+            validate=lambda v: type(v) == bool
+        )
+
         self.databases = [
-            self.config
+            self.config,
         ]
 
         self.configs = [
-            self.directory
+            self.show_banner,
+            self.directory,
         ]
 
         self.load()
+
+    @classmethod
+    def instance(cls) -> UserConfig:
+        if cls._instance is None:
+            cls._instance = UserConfig()
+
+        return cls._instance
 
     def save(self):
         """

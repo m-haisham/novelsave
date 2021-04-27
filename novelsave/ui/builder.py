@@ -36,8 +36,9 @@ class TableBuilder:
 
         # update max length
         for i, column in enumerate(row):
-            if len(column) > self.column_widths[i]:
-                self.column_widths[i] = len(column)
+            column_length = len(str(column))
+            if column_length > self.column_widths[i]:
+                self.column_widths[i] = column_length
     
     def _build_row(self, row, should_prefix=True):
         cells = []
@@ -49,7 +50,7 @@ class TableBuilder:
         return SEPARATOR.join(cells)
 
     def _build_column_cells(self, value, column_index):
-        return value + WHITE_SPACE * (self.column_widths[column_index] - len(value))
+        return str(value) + WHITE_SPACE * (self.column_widths[column_index] - len(str(value)))
 
     def __str__(self):
         # format:     [-] column 1   | column 2 | column 3

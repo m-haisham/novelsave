@@ -10,7 +10,7 @@ from ..ui import ConsolePrinter, PrinterPrefix as Prefix
 
 class NovelListing:
     def __init__(self, verbose=True):
-        self.user = UserConfig()
+        self.user = UserConfig.instance()
         self.console = ConsolePrinter(verbose)
 
     def show_all(self):

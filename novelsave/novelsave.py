@@ -27,7 +27,7 @@ class NovelSave:
         self.username = username
         self.password = password
 
-        self.user = UserConfig()
+        self.user = UserConfig.instance()
 
         # initialize writers
         self.console = ConsolePrinter(verbose)

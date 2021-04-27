@@ -12,5 +12,7 @@ class PrinterPrefix:
     PADDING = '         '
     LIST    = '     |---'
 
+    LENGTH = len(PADDING)
+
     fields = ['SUCCESS', 'NEUTRAL', 'ERROR', 'WARNING', 'LIST']
     values = [SUCCESS, NEUTRAL, ERROR, WARNING, LIST]

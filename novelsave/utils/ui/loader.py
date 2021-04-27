@@ -2,6 +2,8 @@ import math
 import shutil
 import sys
 
+from .prefix import PrinterPrefix
+
 
 class Loader:
     _width: int
@@ -98,14 +100,15 @@ class Loader:
             desc_length = max(15, math.floor(self._width * (2 / 5)))
 
             desc_str = self.desc_str(desc_length)
-            percent_str = "{:6.2f} %".format(self.value * 100) + " "
-            bar_str = " " + self.progress_bar_str(self.value, self._width - desc_length - 14) + ' '
+            percent_str = "[{:6.2f}%]".format(self.value * 100).ljust(PrinterPrefix.LENGTH)
+            bar_str = " " + self.progress_bar_str(self.value,
+                                                  self._width - desc_length - PrinterPrefix.LENGTH - 6) + ' '
 
         if self._text_only:
-            self._target.write(f'{bar_str}{percent_str}{desc_str}\n')
+            self._target.write(f'{percent_str}{bar_str}{desc_str}\n')
             self._target.flush()
         else:
-            self._target.write(f'\033[G{bar_str}{percent_str}{desc_str}')
+            self._target.write(f'\033[G{percent_str}{bar_str}{desc_str}')
             self._target.flush()
 
     def desc_str(self, width: int) -> str:
@@ -116,7 +119,7 @@ class Loader:
         if len(self.desc) <= width:
             # whitespace is added to pad the string
             # to overwrite the previous desc, should it be longer
-            return self.desc + ' ' * (width - len(self.desc))
+            return self.desc + ' ' * (width - len(self.desc) + 1)
         elif len(self.desc) > width:
             return '…' + self.desc[len(self.desc) - width:]
 

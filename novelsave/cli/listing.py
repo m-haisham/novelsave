@@ -97,6 +97,8 @@ class NovelListing:
 
                 # remove metadata
                 data.metadata.truncate()
+
+            self.console.success('Novel successfully reset')
         except PermissionError as e:
             self.console.error(e)
 

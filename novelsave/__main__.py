@@ -66,6 +66,7 @@ def process_task(args):
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
         novelsave.console.print('No actions selected', prefix=PrinterPrefix.ERROR)
+        novelsave.console.newline()
 
     if args.update:
         novelsave.update(force_cover=args.force_cover)

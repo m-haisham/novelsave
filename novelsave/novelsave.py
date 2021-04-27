@@ -114,7 +114,7 @@ class NovelSave:
 
         pending = self.db.pending.all()
         if not pending:
-            self.console.print('No pending chapters', prefix=PrinterPrefix.ERROR)
+            self.console.print('No pending chapters')
             return
 
         pending.sort(key=lambda c: c.index)
@@ -144,6 +144,10 @@ class NovelSave:
             # set new downloads flag to true
             self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
 
+            # desc is updated to show that tasks have been populated
+            # and that script is in download faze
+            loader.update(desc='')
+
             # start downloading
             for result in controller.iter():
                 # debug
@@ -153,7 +157,7 @@ class NovelSave:
                 # update brush
                 if self.console.verbose:
                     value += 1
-                    loader.update(value / total, f'{chapter.url} [{value}/{total}]')
+                    loader.update(value=value / total, desc=f'{chapter.url} [{value}/{total}]')
 
                 if type(result) is Chapter:
                     chapter = result
@@ -170,13 +174,14 @@ class NovelSave:
         if self.console.verbose:
             pending = self.db.pending.all()
             if len(pending) > 0:
-                self.console.print(f'Download finished with {len(pending)} chapter{"s" if len(pending) > 0 else ""} pending')
+                self.console.print(f'Download finished with {len(pending)} '
+                                   f'chapter{"s" if len(pending) > 0 else ""} pending')
 
         # ensure all operations are done
         self.db.chapters.flush()
 
     def create_epub(self, force=False):
-        self.console.print('Packing epub...')
+        self.console.print('Packing epub...', verbose=True)
 
         # retrieve metadata
         novel = self.db.novel.parse()
@@ -187,10 +192,15 @@ class NovelSave:
         if novel.meta_source:
             novel.meta = self.db.metadata.search_where('src', MetaData.SOURCE_EXTERNAL)
 
+        chapters = self.db.chapters.all()
+        if not chapters:
+            self.console.print('Aborted. No chapters downloaded', prefix=PrinterPrefix.ERROR)
+            return
+
         epub = NovelEpub(
             novel=novel,
             cover=self.cover_path(),
-            chapters=self.db.chapters.all(),
+            chapters=chapters,
             save_path=self.path,
         )
 
@@ -199,7 +209,7 @@ class NovelSave:
 
         # check flags and whether the epub already exists
         if not is_updated and not force and epub.path.exists():
-            self.console.print('Aborted. No changes to chapter database')
+            self.console.print('Aborted. No changes to chapter database', prefix=PrinterPrefix.ERROR)
             return
 
         epub.create()

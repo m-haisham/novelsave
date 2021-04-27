@@ -15,7 +15,7 @@ from .logger import NovelLogger
 from .metasources import parse_metasource
 from .models import MetaData
 from .sources import parse_source
-from .utils.ui import Loader, ConsolePrinter, PrinterPrefix
+from .utils.ui import Loader, ConsoleHandler, PrinterPrefix
 
 
 class NovelSave:
@@ -30,7 +30,7 @@ class NovelSave:
         self.user = UserConfig.instance()
 
         # initialize writers
-        self.console = ConsolePrinter(verbose)
+        self.console = ConsoleHandler(verbose)
         NovelLogger.instance = NovelLogger(self.user.path, self.console)
 
         self.source = parse_source(self.url)
@@ -40,11 +40,11 @@ class NovelSave:
 
     def update(self, force_cover=False):
 
-        self.console.print('Retrieving novel info...')
-        self.console.print(self.url)
+        self.console.info('Retrieving novel info...')
+        self.console.info(self.url)
         novel, chapters = self.source.novel(self.url)
 
-        self.console.print(f'Found {len(chapters)} chapters')
+        self.console.info(f'Found {len(chapters)} chapters')
 
         if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
             # download cover
@@ -66,7 +66,7 @@ class NovelSave:
         self.db.pending.truncate()
         self.db.pending.put_all(pending)
 
-        self.console.print(
+        self.console.success(
             f'Pending {len(pending)} chapters',
             f'| {pending[0].title}' if len(pending) == 1 else '',
             prefix=PrinterPrefix.SUCCESS
@@ -86,8 +86,8 @@ class NovelSave:
         # set meta_source for novel
         self.db.novel.put('meta_source', url)
 
-        self.console.print('Retrieving metadata...')
-        self.console.print(url)
+        self.console.info('Retrieving metadata...')
+        self.console.info(url)
 
         # remove previous external metadata
         self.remove_metadata(with_source=False)
@@ -110,11 +110,11 @@ class NovelSave:
     def download(self, thread_count=4, limit=None):
         # parameter validation
         if limit and limit <= 0:
-            self.console.print("'limit' must be greater than 0", prefix=PrinterPrefix.ERROR)
+            self.console.error("'limit' must be greater than 0")
 
         pending = self.db.pending.all()
         if not pending:
-            self.console.print('No pending chapters')
+            self.console.info('No pending chapters')
             return
 
         pending.sort(key=lambda c: c.index)
@@ -128,7 +128,7 @@ class NovelSave:
             additive = str(pending[0].index)
         else:
             additive = f'{pending[0].index} - {pending[-1].index}'
-        self.console.print(f'Downloading {len(pending)} chapters | {additive}...')
+        self.console.info(f'Downloading {len(pending)} chapters | {additive}...')
 
         with Loader(desc=f'Populating tasks ({len(pending)})', should_draw=self.console.verbose) \
                 as loader:
@@ -174,14 +174,14 @@ class NovelSave:
         if self.console.verbose:
             pending = self.db.pending.all()
             if len(pending) > 0:
-                self.console.print(f'Download finished with {len(pending)} '
+                self.console.info(f'Download finished with {len(pending)} '
                                    f'chapter{"s" if len(pending) > 0 else ""} pending')
 
         # ensure all operations are done
         self.db.chapters.flush()
 
     def create_epub(self, force=False):
-        self.console.print('Packing epub...', verbose=True)
+        self.console.info('Packing epub...', verbose=True)
 
         # retrieve metadata
         novel = self.db.novel.parse()
@@ -194,7 +194,7 @@ class NovelSave:
 
         chapters = self.db.chapters.all()
         if not chapters:
-            self.console.print('Aborted. No chapters downloaded', prefix=PrinterPrefix.ERROR)
+            self.console.error('Aborted. No chapters downloaded')
             return
 
         epub = NovelEpub(
@@ -209,7 +209,7 @@ class NovelSave:
 
         # check flags and whether the epub already exists
         if not is_updated and not force and epub.path.exists():
-            self.console.print('Aborted. No changes to chapter database', prefix=PrinterPrefix.ERROR)
+            self.console.error('Aborted. No changes to chapter database')
             return
 
         epub.create()
@@ -217,7 +217,7 @@ class NovelSave:
         # reset new downloads flag
         self.db.misc.put(self.IS_CHAPTERS_UPDATED, False)
 
-        self.console.print(f'Saved to {epub.path}', prefix=PrinterPrefix.SUCCESS)
+        self.console.success(f'Saved to {epub.path}')
 
     def login(self, cookie_browser: Union[str, None] = None, force=False):
 
@@ -238,7 +238,7 @@ class NovelSave:
 
             # set cookies jar to be used by source
             self.source.set_cookies(cj)
-            self.console.print(f'Set cookiejar with {len(cj)} cookies', prefix=PrinterPrefix.SUCCESS, verbose=True)
+            self.console.success(f'Set cookiejar with {len(cj)} cookies', verbose=True)
         else:
             if force:
                 self._login_and_persist()
@@ -252,7 +252,7 @@ class NovelSave:
                     # if they aren't expired add the existing cookies request session
                     self.source.set_cookies(existing_cookies)
 
-            self.console.print(f'Login successful', prefix=PrinterPrefix.SUCCESS, verbose=True)
+            self.console.success(f'Login successful', verbose=True)
 
     def _login_and_persist(self):
         """

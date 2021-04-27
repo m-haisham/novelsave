@@ -7,7 +7,8 @@ from novelsave import NovelSave
 from novelsave.cli import NovelListing, CliConfig
 from novelsave.database import UserConfig
 from novelsave.exceptions import MissingSource
-from novelsave.utils.ui import ConsolePrinter, PrinterPrefix, figlet
+from novelsave.utils.ui import ConsoleHandler, PrinterPrefix, figlet
+
 
 def process_task(args):
     # checks if the provided url is valid
@@ -19,11 +20,11 @@ def process_task(args):
     try:
         novelsave = NovelSave(args.url, verbose=args.verbose)
     except MissingSource:
-        console = ConsolePrinter(verbose=args.verbose)
+        console = ConsoleHandler(verbose=args.verbose)
 
-        console.print(f'"{args.url}" is not supported any available source', prefix=PrinterPrefix.ERROR)
-        console.print(f'Request support by creating a new issue at '
-                      f'https://github.com/mHaisham/novelsave/issues/new/choose')
+        console.error(f'"{args.url}" is not supported any available source')
+        console.info(f'Request support by creating a new issue at '
+                     f'https://github.com/mHaisham/novelsave/issues/new/choose')
         console.newline()
         return
 
@@ -32,12 +33,12 @@ def process_task(args):
     try:
         login(args, novelsave)
     except ValueError as e:
-        novelsave.console.print(str(e), prefix=PrinterPrefix.ERROR)
+        novelsave.console.error(str(e))
         novelsave.console.newline()
         return
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
-        novelsave.console.print('No actions selected', prefix=PrinterPrefix.ERROR)
+        novelsave.console.error('No actions selected')
         novelsave.console.newline()
 
     if args.update:
@@ -45,7 +46,7 @@ def process_task(args):
 
     if args.remove_meta:
         novelsave.remove_metadata(with_source=True)
-        novelsave.console.print('Removed metadata', prefix=PrinterPrefix.SUCCESS)
+        novelsave.console.success('Removed metadata')
 
     if args.meta:
         novelsave.metadata(url=args.meta, force=args.force_meta)

@@ -28,7 +28,7 @@ class NovelLogger:
 
         # alerting
         if self.console and self.console.verbose:
-            self.console.print('Logger initialised')
+            self.console.info('Logger initialised')
 
         return logger
 

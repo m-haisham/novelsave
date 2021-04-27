@@ -1,12 +1,12 @@
 from pathlib import Path
 
 from ..database import UserConfig
-from ..utils.ui import TableBuilder, ConsolePrinter, PrinterPrefix
+from ..utils.ui import TableBuilder, ConsoleHandler, PrinterPrefix
 
 
 class CliConfig:
     def __init__(self, verbose):
-        self.console = ConsolePrinter(verbose=verbose)
+        self.console = ConsoleHandler(verbose=verbose)
         self.user = UserConfig.instance()
 
     @staticmethod
@@ -27,6 +27,7 @@ class CliConfig:
         for p in config.user.configs:
             table.add_row((p.name, p.get()))
 
+        config.console.info('Configuration')
         print(table)
 
     def set_dir(self, _dir):
@@ -35,12 +36,12 @@ class CliConfig:
 
         try:
             self.user.directory.put(str(dir))
-            self.console.print(f'Updated {self.user.directory.name}', prefix=PrinterPrefix.SUCCESS)
+            self.console.success(f'Updated {self.user.directory.name}')
         except ValueError as e:  # check for validation failures
-            self.console.print(e, prefix=PrinterPrefix.ERROR)
+            self.console.error(e)
 
     def toggle_banner(self):
         new_mode = not self.user.show_banner.get()
         self.user.show_banner.put(new_mode)
 
-        self.console.print(f'Banner mode set to {new_mode}', prefix=PrinterPrefix.SUCCESS)
+        self.console.success(f'Banner mode set to {new_mode}')

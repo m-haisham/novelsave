@@ -5,13 +5,13 @@ from typing import Dict, List, Optional, Tuple
 from ..database import NovelData, UserConfig
 from ..exceptions import MissingSource
 from ..sources import parse_source
-from ..utils.ui import ConsolePrinter, PrinterPrefix as Prefix
+from ..utils.ui import ConsoleHandler, PrinterPrefix as Prefix
 
 
 class NovelListing:
     def __init__(self, verbose=True):
         self.user = UserConfig.instance()
-        self.console = ConsolePrinter(verbose)
+        self.console = ConsoleHandler(verbose)
 
     def show_all(self):
         sources = self._get_sources()
@@ -19,11 +19,11 @@ class NovelListing:
         for key in sources.keys():
 
             # print the source title
-            self.console.print(f'{key} ({len(sources[key])})')
+            self.console.info(f'{key} ({len(sources[key])})')
             for data in sources[key]:
                 # prints minimal novel information
                 novel = data.novel.parse()
-                self.console.raw_print(f"'{novel.title}' by {novel.author}")
+                self.console.info(f"'{novel.title}' by {novel.author}")
                 self.console.list(novel.url)
 
             self.console.newline()
@@ -35,7 +35,7 @@ class NovelListing:
 
         # print basic information about novel
         novel = data.novel.parse()
-        self.console.print('Information')
+        self.console.info('Information')
         self.console.list('title:', novel.title)
         self.console.list('by:', novel.author)
         self.console.list('synopsis:', novel.synopsis)
@@ -46,7 +46,7 @@ class NovelListing:
 
         # print metadata information about novel
         metadata = data.metadata.all()
-        self.console.print(f'Metadata ({len(metadata)})')
+        self.console.info(f'Metadata ({len(metadata)})')
         if self.console.verbose:
             for m in metadata:
 
@@ -60,7 +60,7 @@ class NovelListing:
 
         # print chapters of the novel
         chapters = data.chapters.all()
-        self.console.print(f'Chapters ({len(chapters)})')
+        self.console.info(f'Chapters ({len(chapters)})')
         if self.console.verbose:
             for c in chapters:
                 self.console.list(c.title)
@@ -73,14 +73,14 @@ class NovelListing:
 
         # display a minimal number of information
         novel = data.novel.parse()
-        self.console.print(f'{"Delete" if full else "Reset"} \'{novel.title}\'')
+        self.console.info(f'{"Delete" if full else "Reset"} \'{novel.title}\'')
         self.console.list(f'by {novel.author}')
         self.console.list(novel.url)
         self.console.newline()
 
         confirm = self.console.confirm('Are you sure?')
         if not confirm:
-            self.console.print('Cancelled')
+            self.console.info('Cancelled')
             return
 
         try:
@@ -98,7 +98,7 @@ class NovelListing:
                 # remove metadata
                 data.metadata.truncate()
         except PermissionError as e:
-            self.console.print(e, prefix=Prefix.ERROR)
+            self.console.error(e)
 
     def _get_sources(self) -> Dict[str, List[NovelData]]:
         novels = {}
@@ -122,7 +122,7 @@ class NovelListing:
         try:
             source = parse_source(url)
         except MissingSource:
-            self.console.print(f"'{url}' could not be assigned to any supported source\n", prefix=Prefix.ERROR)
+            self.console.error(f"'{url}' could not be assigned to any supported source\n")
             self.console.newline()
             return None, None
 
@@ -130,7 +130,7 @@ class NovelListing:
             path = self.user.directory.get() / Path(source.source_folder_name()) / source.novel_folder_name(url)
             data = NovelData(path, create=False, load_chapters=load)
         except FileNotFoundError:
-            self.console.print('Record of novel does not exist\n', prefix=Prefix.ERROR)
+            self.console.error('Record of novel does not exist\n')
             return None, None
 
         return data, path

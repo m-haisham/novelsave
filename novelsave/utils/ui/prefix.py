@@ -8,7 +8,9 @@ class PrinterPrefix:
     NEUTRAL = '   [INFO]'
     ERROR   = '  [ERROR]'
     WARNING = '[WARNING]'
-    LIST    = '   ------'
+    QUERY   = '  [QUERY]'
+    PADDING = '         '
+    LIST    = '     |---'
 
     fields = ['SUCCESS', 'NEUTRAL', 'ERROR', 'WARNING', 'LIST']
     values = [SUCCESS, NEUTRAL, ERROR, WARNING, LIST]

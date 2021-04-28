@@ -4,13 +4,13 @@ class PrinterPrefix:
     An enum class holding should_prefix information
     """
 
-    SUCCESS = '[SUCCESS]'
-    NEUTRAL = '   [INFO]'
-    ERROR   = '  [ERROR]'
-    WARNING = '[WARNING]'
-    QUERY   = '  [QUERY]'
-    PADDING = '         '
-    LIST = '-'
+    SUCCESS = ''
+    NEUTRAL = ''
+    ERROR   = ''
+    WARNING = ''
+    QUERY   = ''
+    PADDING = ''
+    LIST    = '-'
 
     LENGTH = len(PADDING)
 

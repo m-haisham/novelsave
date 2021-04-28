@@ -15,14 +15,13 @@ from .logger import NovelLogger
 from .metasources import parse_metasource
 from .models import MetaData
 from .sources import parse_source
-from .utils.ui import Loader, ConsoleHandler, PrinterPrefix
+from .utils.ui import Loader, ConsoleHandler, PrinterPrefix, Completable
 
 
 class NovelSave:
     IS_CHAPTERS_UPDATED = 'is_cu'
 
     def __init__(self, url, username=None, password=None, verbose=False):
-
         self.url = url
         self.username = username
         self.password = password
@@ -40,11 +39,10 @@ class NovelSave:
 
     def update(self, force_cover=False):
 
-        self.console.info('Retrieving novel info...')
-        self.console.info(self.url)
-        novel, chapters = self.source.novel(self.url)
-
-        self.console.info(f'Found {len(chapters)} chapters')
+        with Completable(self.console, 'Downloading webpage, ') as completable:
+            novel, chapters = self.source.novel(self.url)
+            
+            completable.complete(f'"{novel.title}" parsed with {len(chapters)} chapters.')
 
         if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
             # download cover
@@ -60,16 +58,15 @@ class NovelSave:
             self.db.metadata.put(metadata)
 
         # update_pending
-        saved = self.db.chapters.all()
-        pending = list(set(chapters).difference(saved))
 
-        self.db.pending.truncate()
-        self.db.pending.put_all(pending)
+        with Completable(self.console, 'Updating pending, ') as completable:
+            saved = self.db.chapters.all()
+            pending = list(set(chapters).difference(saved))
 
-        self.console.success(
-            f'Pending {len(pending)} chapters',
-            f'| {pending[0].title}' if len(pending) == 1 else '',
-        )
+            self.db.pending.truncate()
+            self.db.pending.put_all(pending)
+
+            completable.complete(f'{len(pending)} chapters, done.')
 
     def metadata(self, url, force=False):
         # normalize url
@@ -113,7 +110,7 @@ class NovelSave:
 
         pending = self.db.pending.all()
         if not pending:
-            self.console.info('No pending chapters')
+            self.console.info('No pending chapters, download aborted.')
             return
 
         pending.sort(key=lambda c: c.index)
@@ -121,31 +118,24 @@ class NovelSave:
         # limiting number of chapters downloaded
         if limit is not None and limit < len(pending):
             pending = pending[:limit]
+            self.console.info(f'Download limited to {pending} chapters.')
 
-        # some useful information
-        if len(pending) == 1:
-            additive = str(pending[0].index)
-        else:
-            additive = f'{pending[0].index} - {pending[-1].index}'
-        self.console.info(f'Downloading {len(pending)} chapters | {additive}...')
+        value = 0
+        total = len(pending)
 
-        with Loader(desc=f'Populating tasks ({len(pending)})', should_draw=self.console.verbose) \
-                as loader:
+        # initialize controller
+        thread_count = min(thread_count, len(pending))
 
-            value = 0
-            total = len(pending)
-
-            # initialize controller
-            controller = ConcurrentActionsController(min(thread_count, len(pending)), task=self.task)
+        with Completable(self.console, f'Creating download controller with {thread_count} threads, '):
+            controller = ConcurrentActionsController(thread_count, task=self.task)
             for chapter in pending:
                 controller.add(chapter)
 
-            # set new downloads flag to true
-            self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
+        # set new downloads flag to true
+        self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
 
-            # desc is updated to show that tasks have been populated
-            # and that script is in download faze
-            loader.update(desc='')
+        with Loader(desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ', done='done.', should_draw=self.console.verbose) \
+                as loader:
 
             # start downloading
             for result in controller.iter():
@@ -156,7 +146,7 @@ class NovelSave:
                 # update brush
                 if self.console.verbose:
                     value += 1
-                    loader.update(value=value / total, desc=f'{chapter.url} [{value}/{total}]')
+                    loader.update(value=value / total, desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ')
 
                 if type(result) is Chapter:
                     chapter = result
@@ -173,14 +163,13 @@ class NovelSave:
         if self.console.verbose:
             pending = self.db.pending.all()
             if len(pending) > 0:
-                self.console.info(f'Download finished with {len(pending)} '
-                                   f'chapter{"s" if len(pending) > 0 else ""} pending')
+                self.console.info(f'Download finished with {len(pending)} chapters pending.')
 
         # ensure all operations are done
         self.db.chapters.flush()
 
     def create_epub(self, force=False):
-        self.console.info('Packing epub...', verbose=True)
+        completable = Completable(self.console, 'Packing epub, ').start()
 
         # retrieve metadata
         novel = self.db.novel.parse()
@@ -193,7 +182,7 @@ class NovelSave:
 
         chapters = self.db.chapters.all()
         if not chapters:
-            self.console.info('Aborted. No chapters downloaded')
+            completable.complete('no chapters downloaded, aborted.')
             return
 
         epub = NovelEpub(
@@ -208,7 +197,7 @@ class NovelSave:
 
         # check flags and whether the epub already exists
         if not is_updated and not force and epub.path.exists():
-            self.console.info('Aborted. No changes to chapter database')
+            completable.complete('no changes to chapter database, aborted.')
             return
 
         epub.create()
@@ -216,28 +205,29 @@ class NovelSave:
         # reset new downloads flag
         self.db.misc.put(self.IS_CHAPTERS_UPDATED, False)
 
-        self.console.success(f'Saved to {epub.path}')
+        completable.complete(f'saved to "{epub.path}".')
 
     def login(self, cookie_browser: Union[str, None] = None, force=False):
 
         # retrieve cookies from browser
         if cookie_browser:
-            # retrieve cookiejar of the selected browser
-            try:
-                cookies = getattr(browser_cookie3, cookie_browser)()
-            except AttributeError:
-                raise ValueError(f"browser '{cookie_browser}' not recognised; must be of either ['chrome', "
-                                 f"'firefox', 'chromium', 'opera', 'edge', ]")
+            with Completable(self.console, 'Extracting browser cookies, ') as completable:
+                # retrieve cookiejar of the selected browser
+                try:
+                    cookies = getattr(browser_cookie3, cookie_browser)()
+                except AttributeError:
+                    raise ValueError(f"browser '{cookie_browser}' not recognised; must be of either ['chrome', "
+                                     f"'firefox', 'chromium', 'opera', 'edge', ]")
 
-            # filter cookie domains
-            cj = RequestsCookieJar()
-            for c in cookies:
-                if c.domain in self.source.cookie_domains:
-                    cj.set(c.name, c.value, domain=c.domain, path=c.path)
+                # filter cookie domains
+                cj = RequestsCookieJar()
+                for c in cookies:
+                    if c.domain in self.source.cookie_domains:
+                        cj.set(c.name, c.value, domain=c.domain, path=c.path)
 
-            # set cookies jar to be used by source
-            self.source.set_cookies(cj)
-            self.console.success(f'Set cookiejar with {len(cj)} cookies', verbose=True)
+                # set cookies jar to be used by source
+                self.source.set_cookies(cj)
+                completable.complete(f'{len(cj)} cookies, done.')
         else:
             if force:
                 self._login_and_persist()

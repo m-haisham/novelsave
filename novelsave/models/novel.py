@@ -5,7 +5,7 @@ from typing import List
 @dataclass
 class Novel:
     title: str = None
-    author: str = None
+    author: str = '<Not specified>'
     synopsis: str = None
     thumbnail: str = None
     lang: str = 'en'

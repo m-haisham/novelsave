@@ -28,19 +28,15 @@ class ConsoleHandler:
             self._target.flush()
 
     def info(self, *args, **kwargs):
-        kwargs['prefix'] = PrinterPrefix.NEUTRAL
         self.print(*args, **kwargs)
 
     def success(self, *args, **kwargs):
-        kwargs['prefix'] = PrinterPrefix.SUCCESS
         self.print(*args, **kwargs)
 
     def error(self, *args, **kwargs):
-        kwargs['prefix'] = PrinterPrefix.ERROR
         self.print(*args, **kwargs)
 
     def warning(self, *args, **kwargs):
-        kwargs['prefix'] = PrinterPrefix.WARNING
         self.print(*args, **kwargs)
 
     def list(self, *args, **kwargs):

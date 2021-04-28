@@ -69,7 +69,6 @@ class NovelSave:
         self.console.success(
             f'Pending {len(pending)} chapters',
             f'| {pending[0].title}' if len(pending) == 1 else '',
-            prefix=PrinterPrefix.SUCCESS
         )
 
     def metadata(self, url, force=False):
@@ -194,7 +193,7 @@ class NovelSave:
 
         chapters = self.db.chapters.all()
         if not chapters:
-            self.console.error('Aborted. No chapters downloaded')
+            self.console.info('Aborted. No chapters downloaded')
             return
 
         epub = NovelEpub(
@@ -209,7 +208,7 @@ class NovelSave:
 
         # check flags and whether the epub already exists
         if not is_updated and not force and epub.path.exists():
-            self.console.error('Aborted. No changes to chapter database')
+            self.console.info('Aborted. No changes to chapter database')
             return
 
         epub.create()

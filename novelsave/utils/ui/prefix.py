@@ -10,7 +10,7 @@ class PrinterPrefix:
     WARNING = '[WARNING]'
     QUERY   = '  [QUERY]'
     PADDING = '         '
-    LIST    = '     |---'
+    LIST = '-'
 
     LENGTH = len(PADDING)
 

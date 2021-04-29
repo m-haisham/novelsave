@@ -1,7 +1,5 @@
 from typing import List
 
-from .prefix import PrinterPrefix
-
 WHITE_SPACE = ' '
 HARD_LINE = '='
 SOFT_LINE = '-'
@@ -66,7 +64,7 @@ class TableBuilder:
             HARD_LINE * table_width,
         ]
 
-        return PrinterPrefix.PADDING + ' ' + f'\n{PrinterPrefix.PADDING} '.join(lines)
+        return '\n'.join(lines)
 
     def __repr__(self):
         return f'{self.__class__.__name__}(title={self.title}, headers={self.headers}, row_count={len(self.rows)})'

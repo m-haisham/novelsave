@@ -9,10 +9,9 @@ class ConsoleHandler:
     handles output to stdout based on set attributes
     """
     def __init__(self, plain=False, target=sys.stdout):
-        self.plain = plain
-
         self._target = target
-        self._text_only = not self._target.isatty()
+        self.plain = plain or not self._target.isatty()
+        print('is-plain', self.plain)
 
     def print(self, *args, hide_plain=False, prefix='', sep=' ', end='\n'):
         if prefix:

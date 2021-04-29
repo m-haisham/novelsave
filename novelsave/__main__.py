@@ -6,7 +6,7 @@ from webnovel.tools import UrlTools
 from novelsave import NovelSave
 from novelsave.cli import NovelListing, CliConfig
 from novelsave.database import UserConfig
-from novelsave.exceptions import MissingSource
+from novelsave.exceptions import MissingSource, ResponseException
 from novelsave.utils.ui import ConsoleHandler, PrinterPrefix, figlet
 
 
@@ -19,22 +19,17 @@ def process_task(args):
 
     try:
         novelsave = NovelSave(args.url, verbose=args.verbose)
-    except MissingSource:
+    except MissingSource as e:
         console = ConsoleHandler(verbose=args.verbose)
-
-        console.error(f'"{args.url}" is not supported any available source')
-        console.info(f'Request support by creating a new issue at '
-                     f'https://github.com/mHaisham/novelsave/issues/new/choose')
-        console.newline()
+        console.error(str(e))
         return
 
     novelsave.timeout = args.timeout
 
     try:
         login(args, novelsave)
-    except ValueError as e:
+    except Exception as e:
         novelsave.console.error(str(e))
-        novelsave.console.newline()
         return
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
@@ -42,7 +37,11 @@ def process_task(args):
         novelsave.console.newline()
 
     if args.update:
-        novelsave.update(force_cover=args.force_cover)
+        try:
+            novelsave.update(force_cover=args.force_cover)
+        except ResponseException as e:
+            novelsave.console.error(e.message)
+            return
 
     if args.remove_meta:
         novelsave.remove_metadata(with_source=True)

@@ -5,16 +5,14 @@ import browser_cookie3
 import requests
 from requests.cookies import RequestsCookieJar
 
-from .models import Chapter
-from .utils.concurrent import ConcurrentActionsController
-from .database import NovelData, CookieDatabase
-from .database.config import UserConfig
+from .database import NovelData, CookieDatabase, UserConfig
 from .epub import NovelEpub
-from .exceptions import ChapterException
+from .exceptions import ChapterException, UnsupportedBrowserException
 from .logger import NovelLogger
 from .metasources import parse_metasource
-from .models import MetaData
+from .models import Chapter, MetaData
 from .sources import parse_source
+from .utils.concurrent import ConcurrentActionsController
 from .utils.ui import Loader, ConsoleHandler, PrinterPrefix
 
 
@@ -44,7 +42,7 @@ class NovelSave:
 
             line.end(f'"{novel.title}" parsed with {len(chapters)} chapters.')
 
-        with self.console.line('Downloading cover image, ') as line:
+        with self.console.line('Downloading cover, ') as line:
             if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
 
                 # download cover
@@ -167,9 +165,9 @@ class NovelSave:
                     # at last remove chapter from pending
                     self.db.pending.remove(chapter.url)
                 elif type(result) is ChapterException:
-                    loader.print(f'{PrinterPrefix.WARNING} [{result.type}] {result.message}')
+                    loader.print(f'{PrinterPrefix.WARNING}[{result.type}] {result.message}')
                 else:
-                    loader.print(f'{PrinterPrefix.WARNING} {str(result)}')
+                    loader.print(f'{PrinterPrefix.WARNING}{str(result)}')
 
         if self.console.verbose:
             pending = self.db.pending.all()
@@ -227,8 +225,7 @@ class NovelSave:
                 try:
                     cookies = getattr(browser_cookie3, cookie_browser)()
                 except AttributeError:
-                    raise ValueError(f"browser '{cookie_browser}' not recognised; must be of either ['chrome', "
-                                     f"'firefox', 'chromium', 'opera', 'edge', ]")
+                    raise UnsupportedBrowserException(cookie_browser)
 
                 # filter cookie domains
                 cj = RequestsCookieJar()

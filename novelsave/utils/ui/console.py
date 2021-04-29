@@ -34,8 +34,10 @@ class ConsoleHandler:
     def success(self, *args, **kwargs):
         self.print(*args, **kwargs)
 
-    def error(self, *args, **kwargs):
-        self.print(*args, **kwargs)
+    def error(self, text: str, **kwargs):
+        kwargs['sep'] = ''
+        self.newline()
+        self.print('[ERROR]\n', text.lstrip(), **kwargs)
 
     def warning(self, *args, **kwargs):
         self.print(*args, **kwargs)

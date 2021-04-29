@@ -1,6 +1,7 @@
 import sys
 
 from .prefix import PrinterPrefix
+from .line import LineHandler
 
 
 class ConsoleHandler:
@@ -63,3 +64,6 @@ class ConsoleHandler:
     def newline(self):
         self._target.write('\n')
         self._target.flush()
+
+    def line(self, *args, **kwargs):
+        return LineHandler(self, *args, **kwargs)

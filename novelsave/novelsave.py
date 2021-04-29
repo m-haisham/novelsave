@@ -15,7 +15,7 @@ from .logger import NovelLogger
 from .metasources import parse_metasource
 from .models import MetaData
 from .sources import parse_source
-from .utils.ui import Loader, ConsoleHandler, PrinterPrefix, Completable
+from .utils.ui import Loader, ConsoleHandler, PrinterPrefix
 
 
 class NovelSave:
@@ -39,34 +39,42 @@ class NovelSave:
 
     def update(self, force_cover=False):
 
-        with Completable(self.console, 'Downloading webpage, ') as completable:
+        with self.console.line('Downloading webpage, ') as line:
             novel, chapters = self.source.novel(self.url)
-            
-            completable.complete(f'"{novel.title}" parsed with {len(chapters)} chapters.')
 
-        if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
-            # download cover
-            response = requests.get(novel.thumbnail)
-            with self.cover_path().open('wb') as f:
-                f.write(response.content)
+            line.end(f'"{novel.title}" parsed with {len(chapters)} chapters.')
 
-        # update novel information
-        self.db.novel.set(novel)
+        with self.console.line('Downloading cover image, ') as line:
+            if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
 
-        # update metadata
-        for metadata in novel.meta:
-            self.db.metadata.put(metadata)
+                # download cover
+                response = requests.get(novel.thumbnail)
+                with self.cover_path().open('wb') as f:
+                    f.write(response.content)
 
-        # update_pending
+                line.end(f'{len(response.content)} bytes, done.')
+            else:
+                if novel.thumbnail:
+                    line.end('already downloaded, aborted.')
+                else:
+                    line.end('not provided, aborted.')
 
-        with Completable(self.console, 'Updating pending, ') as completable:
+        with self.console.line('Updating novel information, ') as line:
+            # update novel information
+            self.db.novel.set(novel)
+
+            # update metadata
+            for metadata in novel.meta:
+                self.db.metadata.put(metadata)
+
+            # update_pending
             saved = self.db.chapters.all()
             pending = list(set(chapters).difference(saved))
 
             self.db.pending.truncate()
             self.db.pending.put_all(pending)
 
-            completable.complete(f'{len(pending)} chapters, done.')
+            line.end(f'with {len(pending)} chapters pending, done.')
 
     def metadata(self, url, force=False):
         # normalize url
@@ -74,16 +82,16 @@ class NovelSave:
 
         meta_source = parse_metasource(url)
 
+        line = self.console.line('Retrieving metadata, ').start()
+
         # check caching
         novel = self.db.novel.parse()
         if not force and novel.meta_source == url:
+            line.end('already exists, aborted.')
             return
 
         # set meta_source for novel
         self.db.novel.put('meta_source', url)
-
-        self.console.info('Retrieving metadata...')
-        self.console.info(url)
 
         # remove previous external metadata
         self.remove_metadata(with_source=False)
@@ -95,6 +103,8 @@ class NovelSave:
             obj = vars(metadata)
 
             self.db.metadata.put(obj)
+
+        line.end()
 
     def remove_metadata(self, with_source=True):
         self.db.metadata.remove_where('src', MetaData.SOURCE_EXTERNAL)
@@ -126,7 +136,7 @@ class NovelSave:
         # initialize controller
         thread_count = min(thread_count, len(pending))
 
-        with Completable(self.console, f'Creating download controller with {thread_count} threads, '):
+        with self.console.line(f'Creating download controller with {thread_count} threads, '):
             controller = ConcurrentActionsController(thread_count, task=self.task)
             for chapter in pending:
                 controller.add(chapter)
@@ -134,7 +144,8 @@ class NovelSave:
         # set new downloads flag to true
         self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
 
-        with Loader(desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ', done='done.', should_draw=self.console.verbose) \
+        with Loader(desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ', done='done.',
+                    should_draw=self.console.verbose) \
                 as loader:
 
             # start downloading
@@ -169,7 +180,7 @@ class NovelSave:
         self.db.chapters.flush()
 
     def create_epub(self, force=False):
-        completable = Completable(self.console, 'Packing epub, ').start()
+        line = self.console.line('Packing epub, ').start()
 
         # retrieve metadata
         novel = self.db.novel.parse()
@@ -182,7 +193,7 @@ class NovelSave:
 
         chapters = self.db.chapters.all()
         if not chapters:
-            completable.complete('no chapters downloaded, aborted.')
+            line.end('no chapters downloaded, aborted.')
             return
 
         epub = NovelEpub(
@@ -197,7 +208,7 @@ class NovelSave:
 
         # check flags and whether the epub already exists
         if not is_updated and not force and epub.path.exists():
-            completable.complete('no changes to chapter database, aborted.')
+            line.end('no changes to chapter database, aborted.')
             return
 
         epub.create()
@@ -205,13 +216,13 @@ class NovelSave:
         # reset new downloads flag
         self.db.misc.put(self.IS_CHAPTERS_UPDATED, False)
 
-        completable.complete(f'saved to "{epub.path}".')
+        line.end(f'saved to "{epub.path}".')
 
     def login(self, cookie_browser: Union[str, None] = None, force=False):
 
         # retrieve cookies from browser
         if cookie_browser:
-            with Completable(self.console, 'Extracting browser cookies, ') as completable:
+            with self.console.line(f'Extracting browser cookies from "{cookie_browser}", ') as line:
                 # retrieve cookiejar of the selected browser
                 try:
                     cookies = getattr(browser_cookie3, cookie_browser)()
@@ -227,34 +238,37 @@ class NovelSave:
 
                 # set cookies jar to be used by source
                 self.source.set_cookies(cj)
-                completable.complete(f'{len(cj)} cookies, done.')
+                line.end(f'{len(cj)} cookies, done.')
         else:
             if force:
                 self._login_and_persist()
             else:
+                line = self.console.line('Attempting authentication using existing cookies, ')
+
                 # get existing cookies and check if they are expired
                 # expired cookies are discarded
                 existing_cookies = self.cookies.select(self.source.cookie_domains)
                 if self.cookies.check_expired(existing_cookies):
+                    line.end('expired.')
                     self._login_and_persist()
                 else:
                     # if they aren't expired add the existing cookies request session
                     self.source.set_cookies(existing_cookies)
-
-            self.console.success(f'Login successful', verbose=True)
+                    line.end()
 
     def _login_and_persist(self):
         """
         Delete existing cookies and replace with new received from via fresh login
         """
-        # remove existing cookies
-        self.cookies.delete(self.source.cookie_domains)
+        with self.console.line('Attempting authentication using credentials, '):
+            # remove existing cookies
+            self.cookies.delete(self.source.cookie_domains)
 
-        # source specific login
-        self.source.login(self.username, self.password)
+            # source specific login
+            self.source.login(self.username, self.password)
 
-        # set new cookies
-        self.cookies.insert(self.source.session.cookies)
+            # set new cookies
+            self.cookies.insert(self.source.session.cookies)
 
     def open_db(self):
         # trailing slash adds nothing

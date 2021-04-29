@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Tuple
 from ..database import NovelData, UserConfig
 from ..exceptions import MissingSource
 from ..sources import parse_source
-from ..utils.ui import ConsoleHandler, PrinterPrefix as Prefix
+from ..utils.ui import ConsoleHandler
 
 
 class NovelListing:
@@ -47,23 +47,21 @@ class NovelListing:
         # print metadata information about novel
         metadata = data.metadata.all()
         self.console.info(f'Metadata ({len(metadata)})')
-        if self.console.verbose:
-            for m in metadata:
+        for m in metadata:
 
-                # build others to a more readable format
-                others = ' '.join([f'[{key}={value}]' for key, value in m['others'].items()])
-                if others:
-                    others = ' ' + others
+            # build others to a more readable format
+            others = ' '.join([f'[{key}={value}]' for key, value in m['others'].items()])
+            if others:
+                others = ' ' + others
 
-                self.console.list(f"{m['name']}: {m['value']}{others}")
+            self.console.list(f"{m['name']}: {m['value']}{others}")
         self.console.newline()
 
         # print chapters of the novel
         chapters = data.chapters.all()
         self.console.info(f'Chapters ({len(chapters)})')
-        if self.console.verbose:
-            for c in chapters:
-                self.console.list(c.title)
+        for c in chapters:
+            self.console.list(c.title)
         self.console.newline()
 
     def reset_novel(self, url, full=True):
@@ -102,7 +100,7 @@ class NovelListing:
                     # remove metadata
                     data.metadata.truncate()
         except PermissionError as e:
-            self.console.error(e)
+            self.console.error(str(e))
 
     def _get_sources(self) -> Dict[str, List[NovelData]]:
         novels = {}
@@ -125,9 +123,8 @@ class NovelListing:
     def _open(self, url: str, load=True) -> Tuple[Optional[NovelData], Optional[Path]]:
         try:
             source = parse_source(url)
-        except MissingSource:
-            self.console.error(f"'{url}' could not be assigned to any supported source\n")
-            self.console.newline()
+        except MissingSource as e:
+            self.console.error(str(e))
             return None, None
 
         try:

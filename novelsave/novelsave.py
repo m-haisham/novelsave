@@ -19,7 +19,7 @@ from .utils.ui import Loader, ConsoleHandler, PrinterPrefix
 class NovelSave:
     IS_CHAPTERS_UPDATED = 'is_cu'
 
-    def __init__(self, url, username=None, password=None, verbose=False):
+    def __init__(self, url, username=None, password=None, plain=False):
         self.url = url
         self.username = username
         self.password = password
@@ -27,7 +27,7 @@ class NovelSave:
         self.user = UserConfig.instance()
 
         # initialize writers
-        self.console = ConsoleHandler(verbose)
+        self.console = ConsoleHandler(plain)
         NovelLogger.instance = NovelLogger(self.user.path, self.console)
 
         self.source = parse_source(self.url)
@@ -143,8 +143,7 @@ class NovelSave:
         self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
 
         with Loader(desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ', done='done.',
-                    should_draw=self.console.verbose) \
-                as loader:
+                    should_draw=not self.console.plain) as loader:
 
             # start downloading
             for result in controller.iter():
@@ -153,7 +152,7 @@ class NovelSave:
                 # brush.print(f'{chapter.no} {chapter.title}')
 
                 # update brush
-                if self.console.verbose:
+                if not self.console.plain:
                     value += 1
                     loader.update(value=value / total, desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ')
 
@@ -169,7 +168,7 @@ class NovelSave:
                 else:
                     loader.print(f'{PrinterPrefix.WARNING}{str(result)}')
 
-        if self.console.verbose:
+        if self.console.plain:
             pending = self.db.pending.all()
             if len(pending) > 0:
                 self.console.info(f'Download finished with {len(pending)} chapters pending.')

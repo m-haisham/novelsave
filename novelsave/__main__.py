@@ -1,4 +1,5 @@
 import argparse
+import sys
 from getpass import getpass
 
 from webnovel.tools import UrlTools
@@ -7,7 +8,7 @@ from novelsave import NovelSave
 from novelsave.cli import NovelListing, CliConfig
 from novelsave.database import UserConfig
 from novelsave.exceptions import MissingSource, ResponseException
-from novelsave.utils.ui import ConsoleHandler, PrinterPrefix, figlet
+from novelsave.utils.ui import ConsoleHandler, figlet
 
 
 def process_task(args):
@@ -18,11 +19,11 @@ def process_task(args):
         args.url = UrlTools.to_novel_url(args.url)
 
     try:
-        novelsave = NovelSave(args.url, verbose=args.verbose)
+        novelsave = NovelSave(args.url, plain=args.plain)
     except MissingSource as e:
-        console = ConsoleHandler(verbose=args.verbose)
+        console = ConsoleHandler(plain=args.plain)
         console.error(str(e))
-        return
+        sys.exit(1)
 
     novelsave.timeout = args.timeout
 
@@ -30,7 +31,7 @@ def process_task(args):
         login(args, novelsave)
     except Exception as e:
         novelsave.console.error(str(e))
-        return
+        sys.exit(1)
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
         novelsave.console.error('No actions selected')
@@ -41,7 +42,7 @@ def process_task(args):
             novelsave.update(force_cover=args.force_cover)
         except ResponseException as e:
             novelsave.console.error(e.message)
-            return
+            sys.exit(1)
 
     if args.remove_meta:
         novelsave.remove_metadata(with_source=True)
@@ -82,7 +83,7 @@ def login(args, novelsave):
 
 def main():
     parser = argparse.ArgumentParser(prog='novelsave', description='tool to convert novels to epub')
-    parser.add_argument('-v', '--verbose', help='extra information', action='store_true')
+    parser.add_argument('--plain', help='restrict display output in plain, tabular text format', action='store_true')
 
     sub = parser.add_subparsers()
 
@@ -118,10 +119,11 @@ def main():
     listing = sub.add_parser('list', help='manipulate currently existing novels')
     listing.add_argument('--novel', type=str,
                          help='takes the url of the novel and displays meta information')
-    listing.add_argument('--reset', action='store_true',
-                         help='remove chapters and metadata. to be used with --novel')
-    listing.add_argument('--full', action='store_true',
-                         help='remove everything including compiled epub files. to be used with --reset')
+    deleting = listing.add_mutually_exclusive_group()
+    deleting.add_argument('--reset', action='store_true',
+                          help='remove chapters and metadata. to be used with --novel')
+    deleting.add_argument('--delete', action='store_true',
+                          help='remove everything including compiled epub files. to be used with --novel')
     listing.set_defaults(func=parse_listing)
 
     # Configurations
@@ -132,22 +134,32 @@ def main():
 
     args = parser.parse_args()
 
-    if UserConfig.instance().show_banner.get():
+    if not args.plain and UserConfig.instance().show_banner.get():
         print(figlet.banner)
 
-    args.func(args)  # TODO handle errors raised
+    args.func(args)
 
 
 def parse_listing(args):
-    listing = NovelListing(args.verbose)
+    listing = NovelListing(args.plain)
 
     if args.novel:
         if args.reset:
-            listing.reset_novel(args.novel, args.full)
+            listing.reset_novel(args.novel, False)
+        elif args.delete:
+            listing.reset_novel(args.novel, True)
         else:
             listing.show_novel(args.novel)
     else:
-        listing.show_all()
+        if args.reset:
+            listing.console.error('flag [--reset] must be used along with argument [--novel NOVEL]\n')
+        elif args.delete:
+            listing.console.error('flag [--delete] must be used along with argument [--novel NOVEL]\n')
+        else:
+            listing.show_all()
+            sys.exit(0)
+
+        sys.exit(1)
 
 
 if __name__ == '__main__':

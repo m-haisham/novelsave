@@ -1,4 +1,4 @@
-import errno
+import sys
 from pathlib import Path
 
 from ..database import UserConfig
@@ -7,12 +7,12 @@ from ..utils.ui import TableBuilder, ConsoleHandler
 
 class CliConfig:
     def __init__(self, verbose):
-        self.console = ConsoleHandler(verbose=verbose)
+        self.console = ConsoleHandler(plain=verbose)
         self.user = UserConfig.instance()
 
     @staticmethod
     def handle(args):
-        config = CliConfig(args.verbose)
+        config = CliConfig(args.plain)
 
         # updating storage directory
         try:
@@ -23,14 +23,14 @@ class CliConfig:
                 config.console.error(f'The provided path is syntactically incorrect: ({args.dir})')
             else:
                 config.console.error(str(e))
-            return
+            sys.exit(1)
         except ValueError as e:  # check for validation failures
             config.console.error('''
 Path validation failed. make sure that:
   - The path exists
   - The path points a directory
     ''')
-            return
+            sys.exit(1)
 
         if args.toggle_banner:
             config.toggle_banner()

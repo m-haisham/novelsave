@@ -16,14 +16,14 @@ class NovelListing:
     def show_all(self):
         sources = self._get_sources()
 
-        for key in sources.keys():
+        for i, key in enumerate(sources.keys()):
 
             # print the source title
-            self.console.info(f'{key} ({len(sources[key])})')
+            self.console.info(f'{i}: {key} ({len(sources[key])})')
             for data in sources[key]:
                 # prints minimal novel information
                 novel = data.novel.parse()
-                self.console.info(f"'{novel.title}' by {novel.author}")
+                self.console.info(f'"{novel.title}" by {novel.author}')
                 self.console.list(novel.url)
 
             self.console.newline()
@@ -71,34 +71,36 @@ class NovelListing:
         if data is None:
             return
 
+        action = "Delete" if full else "Reset"
+        action_working = 'Deleting' if full else 'Resetting'
+
         # display a minimal number of information
         novel = data.novel.parse()
-        self.console.info(f'{"Delete" if full else "Reset"} \'{novel.title}\'')
+        self.console.info(f'{action} "{novel.title}"')
         self.console.list(f'by {novel.author}')
         self.console.list(novel.url)
         self.console.newline()
 
         confirm = self.console.confirm('Are you sure?')
         if not confirm:
-            self.console.info('Cancelled')
+            self.console.info(f'{action} cancelled by user')
             return
 
         try:
-            if full:
-                # database has to be closed before we delete the files associated with it
-                # lest it throw an OSError
-                data.close()
+            with self.console.line(f'{action_working} "{novel.title}", '):
+                if full:
+                    # database has to be closed before we delete the files associated with it
+                    # lest it throw an OSError
+                    data.close()
 
-                # remove everything
-                shutil.rmtree(path)
-            else:
-                # remove chapters
-                shutil.rmtree(data.chapters.path)
+                    # remove everything
+                    shutil.rmtree(path)
+                else:
+                    # remove chapters
+                    shutil.rmtree(data.chapters.path)
 
-                # remove metadata
-                data.metadata.truncate()
-
-            self.console.success('Novel successfully reset')
+                    # remove metadata
+                    data.metadata.truncate()
         except PermissionError as e:
             self.console.error(e)
 

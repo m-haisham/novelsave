@@ -8,7 +8,7 @@ class PrinterPrefix:
     NEUTRAL = ''
     ERROR   = ''
     WARNING = ''
-    QUERY   = ''
+    QUERY   = '?'
     PADDING = ''
     LIST    = '-'
 

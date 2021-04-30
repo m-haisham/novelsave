@@ -124,6 +124,7 @@ def main():
                           help='remove chapters and metadata. to be used with --novel')
     deleting.add_argument('--delete', action='store_true',
                           help='remove everything including compiled epub files. to be used with --novel')
+    listing.add_argument('--yes', action='store_true', help='skip_confirm confirmation used in --reset and --delete')
     listing.set_defaults(func=parse_listing)
 
     # Configurations
@@ -145,9 +146,9 @@ def parse_listing(args):
 
     if args.novel:
         if args.reset:
-            listing.reset_novel(args.novel, False)
+            listing.reset_novel(args.novel, full=False, skip_confirm=args.yes)
         elif args.delete:
-            listing.reset_novel(args.novel, True)
+            listing.reset_novel(args.novel, full=True, skip_confirm=args.yes)
         else:
             listing.show_novel(args.novel)
     else:

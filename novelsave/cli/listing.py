@@ -64,7 +64,7 @@ class NovelListing:
             self.console.list(c.title)
         self.console.newline()
 
-    def reset_novel(self, url, full=True):
+    def reset_novel(self, url, full=True, skip_confirm=False):
         data, path = self._open(url, load=False)
         if data is None:
             return
@@ -79,10 +79,11 @@ class NovelListing:
         self.console.list(novel.url)
         self.console.newline()
 
-        confirm = self.console.confirm('Are you sure?')
-        if not confirm:
-            self.console.info(f'{action} cancelled by user')
-            return
+        if not skip_confirm:
+            confirm = self.console.confirm('Are you sure?')
+            if not confirm:
+                self.console.info(f'{action} cancelled by user')
+                return
 
         try:
             with self.console.line(f'{action_working} "{novel.title}", '):

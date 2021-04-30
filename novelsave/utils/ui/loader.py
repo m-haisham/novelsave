@@ -34,6 +34,8 @@ class Loader:
         else:
             self.style = style
 
+        # syntax from line is used when in plain mode
+        # so why not just just line itself
         self.line = self.console.line(self.desc, self.done)
 
         if self.console.plain:

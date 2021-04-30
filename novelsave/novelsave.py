@@ -168,10 +168,9 @@ class NovelSave:
                 else:
                     loader.print(f'{PrinterPrefix.WARNING}{str(result)}')
 
-        if self.console.plain:
-            pending = self.db.pending.all()
-            if len(pending) > 0:
-                self.console.info(f'Download finished with {len(pending)} chapters pending.')
+        pending = self.db.pending.all()
+        if len(pending) > 0:
+            self.console.info(f'Download finished with {len(pending)} chapters pending.')
 
         # ensure all operations are done
         self.db.chapters.flush()

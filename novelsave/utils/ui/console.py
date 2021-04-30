@@ -1,17 +1,26 @@
 import sys
 
-from .prefix import PrinterPrefix
+from colorama import init, Fore
+
+from .colored import Colored
 from .line import LineHandler
+from .prefix import PrinterPrefix
+
+# colorama
+init()
 
 
 class ConsoleHandler:
     """
     handles output to stdout based on set attributes
     """
+
     def __init__(self, plain=False, target=sys.stdout):
         self._target = target
+
+        # if the target is not a terminal, force it to run in plain mode
+        # this removes any ASCII escape codes, eventual colors
         self.plain = plain or not self._target.isatty()
-        print('is-plain', self.plain)
 
     def print(self, *args, hide_plain=False, prefix='', sep=' ', end='\n'):
         if prefix:
@@ -27,6 +36,12 @@ class ConsoleHandler:
             self._target.write(text)
             self._target.flush()
 
+    def write(self, text: str):
+        self._target.write(text)
+
+    def flush(self):
+        self._target.flush()
+
     def info(self, *args, **kwargs):
         self.print(*args, **kwargs)
 
@@ -35,8 +50,10 @@ class ConsoleHandler:
 
     def error(self, text: str, **kwargs):
         kwargs['sep'] = ''
-        self.newline()
-        self.print('[ERROR]\n', text.lstrip(), **kwargs)
+
+        with self.colored(Fore.RED):
+            self.newline()
+            self.print('[ERROR]\n', text.lstrip(), **kwargs)
 
     def warning(self, *args, **kwargs):
         self.print(*args, **kwargs)
@@ -66,5 +83,8 @@ class ConsoleHandler:
         self._target.write('\n')
         self._target.flush()
 
-    def line(self, *args, **kwargs):
+    def line(self, *args, **kwargs) -> LineHandler:
         return LineHandler(self, *args, **kwargs)
+
+    def colored(self, *args, **kwargs) -> Colored:
+        return Colored(self, *args, **kwargs)

@@ -219,6 +219,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [betwixtedbutterfly.com] |  |  |
 | [dummynovels.com] |  |  |
 | [chickengege.org] |  |  |
+| [wuxiaworld.online] |  |  |
 
 ## Metadata Sources
 
@@ -255,6 +256,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [betwixtedbutterfly.com]: https://betwixtedbutterfly.com
 [dummynovels.com]: https://dummynovels.com
 [chickengege.org]: https://www.chickengege.org
+[wuxiaworld.online]: https://wuxiaworld.online
 
 <!-- META SOURCE LINKS -->
 

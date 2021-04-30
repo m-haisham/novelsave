@@ -142,8 +142,11 @@ class NovelSave:
         # set new downloads flag to true
         self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
 
-        with Loader(desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ', done='done.',
-                    should_draw=not self.console.plain) as loader:
+        loader_desc = f'Downloading {len(pending)} chapters, '\
+            if self.console.plain \
+            else f'Downloading chapters, {Loader.percent} ({value}/{total}), '
+
+        with Loader(self.console, desc=loader_desc, done='done.') as loader:
 
             # start downloading
             for result in controller.iter():
@@ -151,10 +154,8 @@ class NovelSave:
                 # brush.print(controller.queue_out.qsize())
                 # brush.print(f'{chapter.no} {chapter.title}')
 
-                # update brush
-                if not self.console.plain:
-                    value += 1
-                    loader.update(value=value / total, desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ')
+                value += 1
+                loader.update(value=value / total, desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ')
 
                 if type(result) is Chapter:
                     chapter = result

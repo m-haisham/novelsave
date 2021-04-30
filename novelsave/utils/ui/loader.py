@@ -2,8 +2,6 @@ import math
 import shutil
 import sys
 
-from .prefix import PrinterPrefix
-
 
 class Loader:
     _width: int
@@ -19,11 +17,13 @@ class Loader:
         },
     }
 
-    default_percent_str = "{:6.2f}%"
+    percent = "{:6.2f}%"
 
-    def __init__(self, value: float = 0, desc: str = None, done='', target=sys.stdout, should_draw=True, style=None):
+    def __init__(self, console, value: float = 0, desc: str = None, done='', target=sys.stdout, style=None):
         self._target = target
         self._text_only = not self._target.isatty()
+
+        self.console = console
 
         self.desc = desc
         self.value = value
@@ -34,19 +34,24 @@ class Loader:
         else:
             self.style = style
 
-        self.should_draw = should_draw
-        if should_draw:
+        self.line = self.console.line(self.desc, self.done)
+
+        if self.console.plain:
+            self.update = lambda *args, **kwargs: None
+        else:
             if desc:
                 self._update(0)
             self.update = self._update
-        else:
-            self.update = lambda *args, **kwargs: None
 
     def __enter__(self):
+        if self.console.plain:
+            self.line.__enter__()
+
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if not self.should_draw:
+        if self.console.plain:
+            self.line.__exit__(exc_type, exc_val, exc_tb)
             return
 
         if exc_type is None:
@@ -60,7 +65,8 @@ class Loader:
         self._target.flush()
 
     def print(self, *args, end='\n', sep=' '):
-        if not self.should_draw:
+        if self.console.plain:
+            self.console.print(*args, end=end, sep=sep)
             return
 
         text = sep.join(args) + end
@@ -88,19 +94,10 @@ class Loader:
         if desc is not None:
             self.desc = desc
 
-        if self._width < 12:
-            # No percent string
-            desc_str = ''
-            percent_str = ''
-        elif self._width < 40:
-            # No padding and desc at smaller size
-            desc_str = ''
-            percent_str = "{:6.2f} %".format(self.value * 100)
-        else:
-            # Standard progress bar desc and label
-            desc_length = max(15, self._width - 10)
+        # Standard progress bar desc and label
+        desc_length = max(15, self._width)
+        desc_str = self.desc_str(desc_length).format(self.value * 100)
 
-            desc_str = self.desc_str(desc_length).format(self.value * 100)
         if self._text_only:
             self._target.write(f'{desc_str}\n')
             self._target.flush()

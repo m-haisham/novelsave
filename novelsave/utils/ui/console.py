@@ -53,10 +53,12 @@ class ConsoleHandler:
 
         with self.colored(Fore.RED):
             self.newline()
-            self.print('[ERROR]\n', text.lstrip(), **kwargs)
+            sep = '\n' if '\n' in text.rstrip() else ' '
+            self.print(f'[ERROR]{sep}', text.lstrip(), **kwargs)
 
     def warning(self, *args, **kwargs):
-        self.print(*args, **kwargs)
+        with self.colored(Fore.YELLOW):
+            self.print('[WARNING]', *args, **kwargs)
 
     def list(self, *args, **kwargs):
         kwargs['prefix'] = PrinterPrefix.LIST

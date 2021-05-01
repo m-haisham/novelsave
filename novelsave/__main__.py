@@ -63,9 +63,9 @@ def login(args, novelsave):
     login and browser cookie
     """
     # apply credentials
-    if args.use_cookies:
-        args.use_cookies = args.use_cookies.lower()
-        novelsave.login(cookie_browser=args.use_cookies, force=args.force_login)
+    if args.cookies_from:
+        args.cookies_from = args.cookies_from.lower()
+        novelsave.login(cookie_browser=args.cookies_from, force=args.force_login)
 
     # login
     elif args.username:
@@ -107,7 +107,7 @@ def main():
     auth_cookies.add_argument('--username', type=str, help='username or email field')
     auth.add_argument('--password', type=str, help='password field; not recommended, refer to README for more details')
     auth.add_argument('--force-login', action='store_true', help='remove existing cookies and login')
-    auth_cookies.add_argument('--use-cookies', help='use cookies from specified browser')
+    auth_cookies.add_argument('--cookies-from', help='use cookies from specified browser')
 
     # misc
     novel.add_argument('--threads', type=int, help='number of download threads', default=4)

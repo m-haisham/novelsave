@@ -52,26 +52,27 @@ Novels are by default saved to folder `novels` in user home
 ### `novelsave --help`
 
 ```
-usage: novelsave [-h] [-v] {novel,config,list} ...
+usage: novelsave [-h] [--plain] {novel,list,config} ...
 
 tool to convert novels to epub
 
 positional arguments:
-  {novel,config,list}
+  {novel,list,config}
     novel              download, update, and delete novels
     list               manipulate currently existing novels
     config             update and view user configurations
 
 optional arguments:
   -h, --help           show this help message and exit
-  -v, --verbose        extra information
+  --plain              restrict display output in plain, tabular text format
 ```
 
 ### `novelsave novel --help`
 
 ```
 usage: novelsave novel [-h] [-u] [-p] [-c] [--meta META] [--remove-meta] [--force-cover] [--force-create] [--force-meta] [--username USERNAME]
-                       [--password PASSWORD] [--force-login] [--use-cookies USE_COOKIES] [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT]
+                       [--password PASSWORD] [--force-login] [--use-cookies USE_COOKIES] [--cookies-from COOKIES_FROM] [--threads THREADS] [--timeout TIMEOUT]
+                       [--limit LIMIT]
                        url
 
 positional arguments:
@@ -98,6 +99,39 @@ auth:
   --password PASSWORD   password field; not recommended, refer to README for more details
   --force-login         remove existing cookies and login
   --use-cookies USE_COOKIES
+                        use cookies from specified browser (deprecated)
+  --cookies-from COOKIES_FROM
+                        use cookies from specified browser
+
+C:\Users\User\Documents\Projects\Python\novelsave>py -m novelsave novel --help
+usage: novelsave novel [-h] [-u] [-p] [-c] [--meta META] [--remove-meta] [--force-cover] [--force-create] [--force-meta] [--username USERNAME]
+                       [--password PASSWORD] [--force-login] [--cookies-from COOKIES_FROM] [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT]
+                       url
+
+positional arguments:
+  url                   novel url or identifier for downloading novels
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --threads THREADS     number of download threads
+  --timeout TIMEOUT     webdriver timeout
+  --limit LIMIT         amount of chapters to download
+
+actions:
+  -u, --update          update novel details
+  -p, --pending         download pending chapters
+  -c, --create          create epub from downloaded chapters
+  --meta META           metadata source url
+  --remove-meta         remove current metadata
+  --force-cover         download and overwrite the existing cover
+  --force-create        force create epub
+  --force-meta          force update metadata
+
+auth:
+  --username USERNAME   username or email field
+  --password PASSWORD   password field; not recommended, refer to README for more details
+  --force-login         remove existing cookies and login
+  --cookies-from COOKIES_FROM
                         use cookies from specified browser
 ```
 
@@ -116,11 +150,12 @@ optional arguments:
 ### `novelsave config --help`
 
 ```
-usage: novelsave config [-h] [-d DIR]
+usage: novelsave config [-h] [-d DIR] [--toggle-banner]
 
 optional arguments:
   -h, --help         show this help message and exit
   -d DIR, --dir DIR  directory for saving novels
+  --toggle-banner    Toggle show and hide for title banner
 ```
 
 ## Login and cookies
@@ -179,7 +214,7 @@ if __name__ == '__main__':
 - ```remove_metadata(self, with_source=True):```
 - ```download(self, thread_count=4, limit=None):```
 - ```create_epub(self, force=False):```
-- ```def login(self, cookie_browser: Union[str, None] = None, force=False):```
+- ```login(self, cookie_browser: Union[str, None] = None, force=False):```
 
 ### Database
 

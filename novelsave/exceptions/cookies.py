@@ -9,11 +9,10 @@ class UnsupportedBrowserException(Exception):
 
     @property
     def message(self):
-        message = f'Browser "{self.browser}" is not recognised. Use one of the supported browsers as described below.'
-        for b in self.supported:
-            message += f'\n    --use-cookies {b}'
-        message += '\n'
-
+        message = f'''Browser "{self.browser}" is not recognised. Use one of the supported browsers as described below.
+    (use "--cookies-from <browser>" to use cookies from a specific browser)
+    browser: {str(self.supported).strip('()').replace(r"'", '')}
+'''
         return message
 
     def __str__(self):

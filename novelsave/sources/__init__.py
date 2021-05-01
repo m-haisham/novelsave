@@ -1,30 +1,30 @@
 from .source import Source
-from .webnovel import Webnovel
+from .betwixtedbutterfly import BetwixtedButterfly
 from .boxnovel import BoxNovel
-from .scribblehub import ScribbleHub
+from .chickengage import ChickEngage
+from .chrysagarden import Chrysanthemumgarden
+from .dragontea import DragonTea
+from .dummynovels import DummyNovels
+from .fanfiction import Fanfiction
+from .foxaholic import Foxaholic
 from .insanitycave import InsanityCave
 from .kieshitl import KieshiTl
 from .ktlchamber import Ktlchamber
 from .lightnovelworld import LightNovelWorld
+from .mtlnovel import MtlNovel
+from .novelfull import NovelFull
+from .novelonlinefull import NovelOnlineFull
+from .novelsite import NovelSite
+from .peachpitting import PeachPitting
 from .readlightnovel import ReadLightNovel
+from .royalroad import RoyalRoad
+from .scribblehub import ScribbleHub
+from .spacebattles import Spacebattles
+from .sufficientvelocity import SufficientVelocity
+from .wattpad import WattPad
 from .webnovel import Webnovel
 from .wuxiaco import WuxiaCo
-from .mtlnovel import MtlNovel
-from .fanfiction import Fanfiction
-from .novelfull import NovelFull
 from .wuxiacom import WuxiaCom
-from .royalroad import RoyalRoad
-from .spacebattles import Spacebattles
-from .wattpad import WattPad
-from .sufficientvelocity import SufficientVelocity
-from .dragontea import DragonTea
-from .novelsite import NovelSite
-from .foxaholic import Foxaholic
-from .chrysagarden import Chrysanthemumgarden
-from .peachpitting import PeachPitting
-from .betwixtedbutterfly import BetwixtedButterfly
-from .dummynovels import DummyNovels
-from .chickengage import ChickEngage
 from .wuxiaonline import WuxiaOnline
 from ..exceptions import MissingSource
 
@@ -55,6 +55,7 @@ sources = [
     DummyNovels,
     ChickEngage,
     WuxiaOnline,
+    NovelOnlineFull,
 ]
 
 

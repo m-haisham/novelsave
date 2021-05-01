@@ -220,6 +220,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [dummynovels.com] |  |  |
 | [chickengege.org] |  |  |
 | [wuxiaworld.online] |  |  |
+| [novelonlinefull.com] |  |  |
 
 ## Metadata Sources
 
@@ -257,6 +258,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [dummynovels.com]: https://dummynovels.com
 [chickengege.org]: https://www.chickengege.org
 [wuxiaworld.online]: https://wuxiaworld.online
+[novelonlinefull.com]: https://novelonlinefull.com
 
 <!-- META SOURCE LINKS -->
 

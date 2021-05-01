@@ -7,6 +7,12 @@ from ..models import Chapter, Novel
 class NovelFull(Source):
     base = 'https://novelfull.com'
 
+    bad_tags = [
+        'noscript', 'script', 'iframe', 'form', 'hr', 'img', 'ins',
+        'button', 'input', 'amp-auto-ads', 'pirate',
+        'h1', 'h2', 'h3'
+    ]
+
     blacklist_patterns = [
         r'^\s*Translator:',
         r'^\s*Editor:',
@@ -74,3 +80,6 @@ class NovelFull(Source):
             paragraphs=str(content),
             url=url,
         )
+    
+    def novel_folder_name(self, url):
+        return super(NovelFull, self).novel_folder_name(url.rstrip('.html'))

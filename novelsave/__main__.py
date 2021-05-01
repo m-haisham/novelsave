@@ -2,26 +2,25 @@ import argparse
 import sys
 from getpass import getpass
 
-from webnovel.tools import UrlTools
-
 from novelsave import NovelSave
 from novelsave.cli import NovelListing, CliConfig
 from novelsave.database import UserConfig
 from novelsave.exceptions import MissingSource, ResponseException
+from novelsave.utils.helpers import url_pattern
 from novelsave.utils.ui import ConsoleHandler, figlet
 
 
 def process_task(args):
+    console = ConsoleHandler(plain=args.plain)
+
     # checks if the provided url is valid
-    if 'https://' not in args.url:
-        # non valid urls are converted to webnovel urls
-        # or atleast tried to
-        args.url = UrlTools.to_novel_url(args.url)
+    if not url_pattern.match(args.url):
+        console.error('Provided url is not valid. Please check and try again')
+        sys.exit(1)
 
     try:
         novelsave = NovelSave(args.url, plain=args.plain)
     except MissingSource as e:
-        console = ConsoleHandler(plain=args.plain)
         console.error(str(e))
         sys.exit(1)
 
@@ -30,23 +29,23 @@ def process_task(args):
     try:
         login(args, novelsave)
     except Exception as e:
-        novelsave.console.error(str(e))
+        console.error(str(e))
         sys.exit(1)
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
-        novelsave.console.error('No actions selected')
-        novelsave.console.newline()
+        console.error('No actions selected')
+        console.newline()
 
     if args.update:
         try:
             novelsave.update(force_cover=args.force_cover)
         except ResponseException as e:
-            novelsave.console.error(e.message)
+            console.error(e.message)
             sys.exit(1)
 
     if args.remove_meta:
         novelsave.remove_metadata(with_source=True)
-        novelsave.console.success('Removed metadata')
+        console.success('Removed metadata')
 
     if args.meta:
         novelsave.metadata(url=args.meta, force=args.force_meta)

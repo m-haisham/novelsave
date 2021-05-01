@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+from ..meta import github
 from ..database import UserConfig
 from ..utils.ui import TableBuilder, ConsoleHandler
 
@@ -42,8 +43,8 @@ Path validation failed. make sure that:
         for p in config.user.configs:
             table.add_row((p.name, p.get()))
 
-        config.console.info('Current configurations')
-        print(table)
+        config.console.write(str(table) + '\n')
+        config.console.flush()
 
     def set_dir(self, _dir):
         with self.console.line('Updating novels location, ') as line:

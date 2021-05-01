@@ -12,27 +12,32 @@ class NovelLogger:
         self._logger = None
 
     def create_logger(self):
-        with self.console.line('Initializing logger, ', hide_plain=True) as line:
-            logfilename = f"{datetime.today().strftime('%Y-%m-%d')}.log"
-            logfile = self.path / Path('logs') / logfilename
-            logfile.parent.mkdir(parents=True, exist_ok=True)
+        if self.console:
+            line = self.console.line('Initializing logger, ', hide_plain=True).start()
+        else:
+            line = None
 
+        logfilename = f"{datetime.today().strftime('%Y-%m-%d')}.log"
+        logfile = self.path / Path('logs') / logfilename
+        logfile.parent.mkdir(parents=True, exist_ok=True)
+
+        if line:
             line.write(f'created file {logfilename}, ')
 
-            logger = logging.getLogger('novel-logger')
-            logger.setLevel(logging.DEBUG)
+        logger = logging.getLogger('novel-logger')
+        logger.setLevel(logging.DEBUG)
 
-            # setting stream handler
-            sh = logging.StreamHandler(logfile.open('a'))
+        # setting stream handler
+        sh = logging.StreamHandler(logfile.open('a'))
 
-            formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s')
-            sh.setFormatter(formatter)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s')
+        sh.setFormatter(formatter)
 
-            logger.addHandler(sh)
+        logger.addHandler(sh)
 
-            # alerting
-            if self.console and not self.console.plain:
-                self.console.info('Logger initialised.')
+        # alerting
+        if line:
+            line.end()
 
         return logger
 

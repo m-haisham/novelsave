@@ -1,5 +1,4 @@
 import shutil
-import sys
 
 
 class Loader:
@@ -7,9 +6,7 @@ class Loader:
 
     percent = "{:6.2f}%"
 
-    def __init__(self, console, value: float = 0, desc: str = None, done='', target=sys.stdout, style=None):
-        self._target = target
-
+    def __init__(self, console, value: float = 0, desc: str = None, done=''):
         self.console = console
 
         self.desc = desc
@@ -40,8 +37,9 @@ class Loader:
 
         if exc_type is None:
             self.update(1.0)
-
-        self._target.flush()
+        
+        self.console.write(self.done + '\n')
+        self.console.flush()
 
     def print(self, *args, end='\n', sep=' '):
         if self.console.plain:
@@ -51,13 +49,13 @@ class Loader:
         text = sep.join(args) + end
 
         # remove current progress bar and print
-        self._target.write(f'\033[2K\033[1G')
-        self._target.write(text)
+        self.console.write(f'\033[2K\033[1G')
+        self.console.write(text)
 
         # re draw progressbar
         self.update()
 
-        self._target.flush()
+        self.console.flush()
 
     def _update_width(self):
         self._width, _ = shutil.get_terminal_size((80, 20))
@@ -74,8 +72,8 @@ class Loader:
         desc_length = max(15, self._width)
         desc_str = self.desc_str(desc_length).format(self.value * 100)
 
-        self._target.write(f'\033[G{desc_str}')
-        self._target.flush()
+        self.console.write(f'\033[G{desc_str}')
+        self.console.flush()
 
     def desc_str(self, width: int) -> str:
         width = width - 1

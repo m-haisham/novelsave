@@ -7,7 +7,7 @@ from requests.cookies import RequestsCookieJar
 
 from .database import NovelData, CookieDatabase, UserConfig
 from .epub import NovelEpub
-from .exceptions import ChapterException, UnsupportedBrowserException
+from .exceptions import ChapterException, UnsupportedBrowserException, DownloadLimitException
 from .logger import NovelLogger
 from .metasources import parse_metasource
 from .models import Chapter, MetaData
@@ -114,7 +114,7 @@ class NovelSave:
     def download(self, thread_count=4, limit=None):
         # parameter validation
         if limit and limit <= 0:
-            self.console.error("'limit' must be greater than 0")
+            raise DownloadLimitException(limit)
 
         pending = self.db.pending.all()
         if not pending:
@@ -126,8 +126,9 @@ class NovelSave:
         # limiting number of chapters downloaded
         if limit is not None and limit < len(pending):
             pending = pending[:limit]
-            self.console.info(f'Download limited to {pending} chapters.')
+            self.console.info(f'Download limited to {len(pending)} chapters.')
 
+        # below this point is stuff directly related to download
         value = 0
         total = len(pending)
 
@@ -155,7 +156,7 @@ class NovelSave:
                 # brush.print(f'{chapter.no} {chapter.title}')
 
                 value += 1
-                loader.update(value=value / total, desc=f'Downloading chapters, {"{:6.2f}%"} ({value}/{total}), ')
+                loader.update(value=value / total, desc=f'Downloading chapters, {Loader.percent} ({value}/{total}), ')
 
                 if type(result) is Chapter:
                     chapter = result

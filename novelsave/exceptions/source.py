@@ -16,8 +16,7 @@ class MissingSource(TypeError):
         return f'''
 The source ({self.source}) of the url is not supported in the current version ({__version__}).
 Request support by creating a new issue:
-    {new_issue}
-'''
+    {new_issue}'''
 
     def __str__(self):
         return self.message

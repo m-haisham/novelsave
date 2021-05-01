@@ -14,6 +14,5 @@ class ResponseException(Exception):
 '''
         if self.response.status_code == 404:
             message += 'The provided url cannot be reached. Make sure the novel is accessible.'
-        message += '\n'
 
         return message

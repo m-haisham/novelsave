@@ -51,7 +51,11 @@ def process_task(args):
         novelsave.metadata(url=args.meta, force=args.force_meta)
 
     if args.pending:
-        novelsave.download(thread_count=args.threads, limit=args.limit)
+        try:
+            novelsave.download(thread_count=args.threads, limit=args.limit)
+        except ValueError as e:
+            console.error(str(e))
+            sys.exit(1)
 
     if args.create or args.force_create:
         novelsave.create_epub(force=args.force_create)

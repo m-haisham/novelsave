@@ -6,8 +6,8 @@ from ..utils.ui import TableBuilder, ConsoleHandler
 
 
 class CliConfig:
-    def __init__(self, verbose):
-        self.console = ConsoleHandler(plain=verbose)
+    def __init__(self, plain):
+        self.console = ConsoleHandler(plain=plain)
         self.user = UserConfig.instance()
 
     @staticmethod

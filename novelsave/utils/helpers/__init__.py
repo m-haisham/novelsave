@@ -1,7 +1,12 @@
+from typing import Iterable, Tuple
+
 from .string import StringHelper
 
 
-def unzip_arguments(args, kwargs, pairs):
+def unzip_arguments(args: tuple, kwargs: dict, pairs: Iterable[Tuple[int, str]]):
+    """
+    This is a helper function used extract to arguments from :args and :kwargs
+    """
     unzipped = []
     for pair in pairs:
         try:

@@ -221,6 +221,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [chickengege.org] |  |  |
 | [wuxiaworld.online] |  |  |
 | [novelonlinefull.com] |  |  |
+| [novelpassion.com] |  |  |
 
 ## Metadata Sources
 
@@ -259,6 +260,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [chickengege.org]: https://www.chickengege.org
 [wuxiaworld.online]: https://wuxiaworld.online
 [novelonlinefull.com]: https://novelonlinefull.com
+[novelpassion.com]: https://www.novelpassion.com
 
 <!-- META SOURCE LINKS -->
 

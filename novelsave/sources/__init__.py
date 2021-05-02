@@ -26,6 +26,7 @@ from .webnovel import Webnovel
 from .wuxiaco import WuxiaCo
 from .wuxiacom import WuxiaCom
 from .wuxiaonline import WuxiaOnline
+from .novelpassion import NovelPassion
 from ..exceptions import MissingSource
 
 sources = [
@@ -56,6 +57,7 @@ sources = [
     ChickEngage,
     WuxiaOnline,
     NovelOnlineFull,
+    NovelPassion,
 ]
 
 

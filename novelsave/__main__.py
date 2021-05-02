@@ -95,7 +95,7 @@ def main():
     sub = parser.add_subparsers()
 
     novel = sub.add_parser('novel', help='download, update, and delete novels')
-    novel.add_argument('url', type=str, help="novel url or identifier for downloading novels")
+    novel.add_argument('url', type=str, help="url of the specific novel")
 
     # exposed actions
     actions = novel.add_argument_group(title='actions')
@@ -131,7 +131,7 @@ def main():
                           help='remove chapters and metadata. to be used with --novel')
     deleting.add_argument('--delete', action='store_true',
                           help='remove everything including compiled epub files. to be used with --novel')
-    listing.add_argument('--yes', action='store_true', help='skip_confirm confirmation used in --reset and --delete')
+    listing.add_argument('--yes', action='store_true', help='skip confirm confirmation used in --reset and --delete')
     listing.set_defaults(func=CliListing.handle)
 
     # Configurations

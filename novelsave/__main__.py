@@ -19,7 +19,7 @@ def process_task(args):
         sys.exit(1)
 
     try:
-        novelsave = NovelSave(args.url, plain=args.plain)
+        novelsave = NovelSave(args.url, args.no_input, plain=args.plain)
     except MissingSource as e:
         console.error(str(e))
         sys.exit(1)
@@ -88,7 +88,9 @@ def main():
         prog='novelsave',
         description='This is a tool to download and convert webnovels from popular sites to epub',
     )
+
     parser.add_argument('--plain', help='restrict display output in plain, tabular text format', action='store_true')
+    parser.add_argument('--no-input', help='don’t prompt or do anything interactive', action='store_true')
 
     sub = parser.add_subparsers()
 
@@ -149,7 +151,7 @@ def main():
 
 
 def parse_listing(args):
-    listing = NovelListing(args.plain)
+    listing = NovelListing(args.plain, args.no_input)
 
     if args.novel:
         # checks if the provided url is valid

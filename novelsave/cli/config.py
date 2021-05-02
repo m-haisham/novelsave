@@ -6,13 +6,13 @@ from ..utils.ui import ConsoleHandler
 
 
 class CliConfig:
-    def __init__(self, plain):
-        self.console = ConsoleHandler(plain=plain)
+    def __init__(self, plain, no_input):
+        self.console = ConsoleHandler(plain, no_input)
         self.user = UserConfig.instance()
 
     @staticmethod
     def handle(args):
-        config = CliConfig(args.plain)
+        config = CliConfig(args.plain, args.no_input)
 
         # updating storage directory
         try:

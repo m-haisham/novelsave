@@ -14,8 +14,10 @@ class ConsoleHandler:
     handles output to stdout based on set attributes
     """
 
-    def __init__(self, plain=False, target=sys.stdout):
+    def __init__(self, plain=False, no_input=False, target=sys.stdout):
         self._target = target
+
+        self.no_input = no_input
 
         # if the target is not a terminal, force it to run in plain mode
         # this removes any ASCII escape codes, eventual colors
@@ -62,6 +64,10 @@ class ConsoleHandler:
     def confirm(self, desc, default=False):
         self._target.write(f'? {desc}: {"(Y/n)" if default else "(y/N)"} ')
         self._target.flush()
+
+        if self.no_input:
+            self.print('No')
+            return False
 
         try:
             choice = input()

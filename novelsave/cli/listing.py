@@ -10,9 +10,9 @@ from ..utils.ui import ConsoleHandler
 
 
 class NovelListing:
-    def __init__(self, verbose=True):
+    def __init__(self, plain=True, no_input=False):
         self.user = UserConfig.instance()
-        self.console = ConsoleHandler(verbose)
+        self.console = ConsoleHandler(plain, no_input)
 
     def show_all(self):
         sources = self._get_sources()

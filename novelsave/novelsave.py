@@ -19,7 +19,7 @@ from .utils.ui import Loader, ConsoleHandler
 class NovelSave:
     IS_CHAPTERS_UPDATED = 'is_cu'
 
-    def __init__(self, url, username=None, password=None, plain=False):
+    def __init__(self, url, no_input, username=None, password=None, plain=False):
         self.url = url
         self.username = username
         self.password = password
@@ -27,7 +27,7 @@ class NovelSave:
         self.user = UserConfig.instance()
 
         # initialize writers
-        self.console = ConsoleHandler(plain)
+        self.console = ConsoleHandler(plain, no_input)
         NovelLogger.instance = NovelLogger(self.user.path, self.console)
 
         self.source = parse_source(self.url)

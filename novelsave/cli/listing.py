@@ -6,13 +6,39 @@ from typing import Dict, List, Optional, Tuple
 from ..database import NovelData, UserConfig
 from ..exceptions import MissingSource
 from ..sources import parse_source
+from ..utils.helpers import url_pattern
 from ..utils.ui import ConsoleHandler
 
 
-class NovelListing:
+class CliListing:
     def __init__(self, plain=True, no_input=False):
         self.user = UserConfig.instance()
         self.console = ConsoleHandler(plain, no_input)
+
+    @staticmethod
+    def handle(args):
+        listing = CliListing(args.plain, args.no_input)
+
+        if args.novel:
+            # checks if the provided url is valid
+            if not url_pattern.match(args.novel):
+                listing.console.error('Provided url is not valid. Please check and try again')
+                sys.exit(1)
+
+            if args.reset:
+                listing.reset_novel(args.novel, full=False, skip_confirm=args.yes)
+            elif args.delete:
+                listing.reset_novel(args.novel, full=True, skip_confirm=args.yes)
+            else:
+                listing.show_novel(args.novel)
+        elif args.reset:
+            listing.console.error('flag [--reset] must be used along with argument [--novel NOVEL]')
+            sys.exit(1)
+        elif args.delete:
+            listing.console.error('flag [--delete] must be used along with argument [--novel NOVEL]')
+            sys.exit(1)
+        else:
+            listing.show_all()
 
     def show_all(self):
         sources = self._get_sources()

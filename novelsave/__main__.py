@@ -3,7 +3,7 @@ import sys
 from getpass import getpass
 
 from novelsave import NovelSave
-from novelsave.cli import NovelListing, CliConfig, DefaultSubcommandArgumentParser
+from novelsave.cli import CliListing, CliConfig, DefaultSubcommandArgumentParser
 from novelsave.database import UserConfig
 from novelsave.exceptions import MissingSource, ResponseException
 from novelsave.utils.helpers import url_pattern
@@ -132,7 +132,7 @@ def main():
     deleting.add_argument('--delete', action='store_true',
                           help='remove everything including compiled epub files. to be used with --novel')
     listing.add_argument('--yes', action='store_true', help='skip_confirm confirmation used in --reset and --delete')
-    listing.set_defaults(func=parse_listing)
+    listing.set_defaults(func=CliListing.handle)
 
     # Configurations
     config = sub.add_parser('config', help='update and view user configurations')
@@ -148,32 +148,6 @@ def main():
         print(figlet.banner)
 
     args.func(args)
-
-
-def parse_listing(args):
-    listing = NovelListing(args.plain, args.no_input)
-
-    if args.novel:
-        # checks if the provided url is valid
-        if not url_pattern.match(args.novel):
-            listing.console.error('Provided url is not valid. Please check and try again')
-            sys.exit(1)
-
-        if args.reset:
-            listing.reset_novel(args.novel, full=False, skip_confirm=args.yes)
-        elif args.delete:
-            listing.reset_novel(args.novel, full=True, skip_confirm=args.yes)
-        else:
-            listing.show_novel(args.novel)
-    elif args.reset:
-        listing.console.error('flag [--reset] must be used along with argument [--novel NOVEL]')
-        sys.exit(1)
-    elif args.delete:
-        listing.console.error('flag [--delete] must be used along with argument [--novel NOVEL]')
-        sys.exit(1)
-    else:
-        listing.show_all()
-
 
 if __name__ == '__main__':
     main()

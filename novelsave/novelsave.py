@@ -32,7 +32,6 @@ class NovelSave:
 
         self.source = parse_source(self.url)
         self.cookies = CookieDatabase(self.user.path)
-        self.netloc_slug = self.source.source_folder_name()
         self.db, self.path = self.open_db()
 
     def update(self, force_cover=False):
@@ -266,7 +265,7 @@ class NovelSave:
 
     def open_db(self):
         # trailing slash adds nothing
-        path = Path(self.user.directory.get()) / Path(self.netloc_slug) / self.source.novel_folder_name(self.url)
+        path = Path(self.user.directory.get()) / Path(self.source.source_folder_name()) / self.source.novel_folder_name(self.url)
 
         return NovelData(path), path
 

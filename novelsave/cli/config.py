@@ -3,6 +3,7 @@ from pathlib import Path
 
 from ..database import UserConfig
 from ..utils.ui import ConsoleHandler
+from ..exceptions import PathValidationException
 
 
 class CliConfig:
@@ -25,11 +26,7 @@ class CliConfig:
                 config.console.error(str(e))
             sys.exit(1)
         except ValueError as e:  # check for validation failures
-            config.console.error('''
-Path validation failed. make sure that:
-  - The path exists
-  - The path points a directory
-    ''')
+            config.console.error(str(PathValidationException(args.save_dir)))
             sys.exit(1)
 
         if args.toggle_banner:

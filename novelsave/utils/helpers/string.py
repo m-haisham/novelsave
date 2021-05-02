@@ -1,8 +1,7 @@
 import re
-
 from typing import Tuple
 
-int_pattern = re.compile(r'(\d+)')
+from .pattern import int_pattern
 
 
 class StringHelper:

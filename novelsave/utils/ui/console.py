@@ -66,7 +66,7 @@ class ConsoleHandler:
         self._target.flush()
 
         if self.no_input:
-            self.print('No')
+            self.print('(No input mode)')
             return False
 
         try:

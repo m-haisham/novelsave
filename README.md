@@ -119,7 +119,7 @@ usage: novelsave novel [-h] [-u] [-p] [-c] [--meta META] [--remove-meta] [--forc
                        url
 
 positional arguments:
-  url                   novel url or identifier for downloading novels
+  url                   url of the specific novel
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -221,7 +221,8 @@ if __name__ == '__main__':
 - ```remove_metadata(self, with_source=True):```
 - ```download(self, thread_count=4, limit=None):```
 - ```create_epub(self, force=False):```
-- ```login(self, cookie_browser: Union[str, None] = None, force=False):```
+- ```cookie_auth(self, cookie_browser: Union[str, None] = None)```
+- ```credential_auth(self)```
 
 ### Database
 

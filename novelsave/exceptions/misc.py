@@ -19,4 +19,7 @@ class PathValidationException(ValueError):
 
 
 class NoInputException(Exception):
-    pass
+    messages = {
+        'cred_password': '''No password was provided and the program was run in "no-input" mode. Either run the the program without --no-input or provide a password.
+    (use "--password <password>" to provide a password)'''
+    }

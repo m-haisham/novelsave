@@ -15,3 +15,7 @@ class UnsupportedBrowserException(Exception):
 
     def __str__(self):
         return self.message
+
+
+class CookieAuthException(Exception):
+    pass

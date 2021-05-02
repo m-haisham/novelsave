@@ -3,7 +3,7 @@ import sys
 from novelsave import NovelSave
 from novelsave.cli import CliListing, CliConfig, DefaultSubcommandArgumentParser
 from novelsave.database import UserConfig
-from novelsave.exceptions import MissingSource, ResponseException, NoInputException
+from novelsave.exceptions import MissingSource, ResponseException, NoInputException, CookieAuthException
 from novelsave.utils.helpers import url_pattern
 from novelsave.utils.ui import ConsoleHandler, figlet
 
@@ -60,30 +60,35 @@ def process_task(args):
 
 def login(args, novelsave):
     """
-    login and browser cookie
+    cookie_auth and browser cookie
     """
     # apply credentials
     if args.cookies_from:
         args.cookies_from = args.cookies_from.lower()
-        novelsave.login(cookie_browser=args.cookies_from, force=args.force_login)
+        novelsave.cookie_auth(cookie_browser=args.cookies_from)
 
-    # login
+    # cookie_auth
     elif args.username:
         novelsave.username = args.username
 
-        if args.password:
-            novelsave.password = args.password
+        def resolve_and_auth():
+            if args.password:
+                novelsave.password = args.password
+            else:
+                try:
+                    novelsave.password = novelsave.console.getpass(f'Enter your password: ({args.username}) ')
+                except NoInputException:
+                    raise Exception(NoInputException.messages['cred_password'])
+
+            novelsave.credential_auth()
+
+        if args.force_login:
+            resolve_and_auth()
         else:
             try:
-                novelsave.password = novelsave.console.getpass('Enter your password: ')
-            except NoInputException:
-                raise Exception('No password was provided and the program was run in no-input mode. '
-                                'Either run the the program without --no-input or provide a password.'
-                                '\n    (use "--password <password>" to provide a password)')
-
-        # login
-        if novelsave.password:
-            novelsave.login()
+                novelsave.cookie_auth()
+            except CookieAuthException:
+                resolve_and_auth()
 
 
 def main():
@@ -150,7 +155,10 @@ def main():
     if not args.plain and UserConfig.instance().show_banner.get():
         print(figlet.banner)
 
-    args.func(args)
+    try:
+        args.func(args)
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from requests.cookies import RequestsCookieJar
 
 from .database import NovelData, CookieDatabase, UserConfig
 from .epub import NovelEpub
-from .exceptions import ChapterException, UnsupportedBrowserException, DownloadLimitException
+from .exceptions import ChapterException, UnsupportedBrowserException, CookieAuthException, DownloadLimitException
 from .logger import NovelLogger
 from .metasources import parse_metasource
 from .models import Chapter, MetaData
@@ -212,7 +212,7 @@ class NovelSave:
 
         line.end(f'saved to "{epub.path}".')
 
-    def login(self, cookie_browser: Union[str, None] = None, force=False):
+    def cookie_auth(self, cookie_browser: Union[str, None] = None):
 
         # retrieve cookies from browser
         if cookie_browser:
@@ -233,26 +233,21 @@ class NovelSave:
                 self.source.set_cookies(cj)
                 line.end(f'{len(cj)} cookies, done.')
         else:
-            if force:
-                self._login_and_persist()
-            else:
-                line = self.console.line('Attempting authentication using existing cookies, ').start()
-
+            with self.console.line('Attempting authentication using existing cookies, ') as line:
                 # get existing cookies and check if they are expired
                 # expired cookies are discarded
                 existing_cookies = self.cookies.select(self.source.cookie_domains)
                 if not existing_cookies:
                     line.end('none.')
-                    self._login_and_persist()
+                    raise CookieAuthException()
                 elif self.cookies.check_expired(existing_cookies):
                     line.end('expired.')
-                    self._login_and_persist()
+                    raise CookieAuthException()
                 else:
                     # if they aren't expired add the existing cookies request session
                     self.source.set_cookies(existing_cookies)
-                    line.end()
 
-    def _login_and_persist(self):
+    def credential_auth(self):
         """
         Delete existing cookies and replace with new received from via fresh login
         """

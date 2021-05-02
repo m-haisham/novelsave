@@ -4,7 +4,6 @@ from colorama import init, Fore
 
 from .colored import Colored
 from .line import LineHandler
-from .prefix import PrinterPrefix
 
 # colorama
 init()
@@ -57,11 +56,11 @@ class ConsoleHandler:
             self.print('WARNING:', *args, **kwargs)
 
     def list(self, *args, **kwargs):
-        kwargs['prefix'] = PrinterPrefix.LIST
+        kwargs['prefix'] = '-'
         self.print(*args, **kwargs)
 
     def confirm(self, desc, default=False):
-        self._target.write(f'{PrinterPrefix.QUERY} {desc}: {"(Y/n)" if default else "(y/N)"} ')
+        self._target.write(f'? {desc}: {"(Y/n)" if default else "(y/N)"} ')
         self._target.flush()
 
         try:

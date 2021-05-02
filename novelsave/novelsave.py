@@ -13,7 +13,7 @@ from .metasources import parse_metasource
 from .models import Chapter, MetaData
 from .sources import parse_source
 from .utils.concurrent import ConcurrentActionsController
-from .utils.ui import Loader, ConsoleHandler, PrinterPrefix
+from .utils.ui import Loader, ConsoleHandler
 
 
 class NovelSave:
@@ -163,9 +163,9 @@ class NovelSave:
                     # at last remove chapter from pending
                     self.db.pending.remove(chapter.url)
                 elif type(result) is ChapterException:
-                    loader.print(f'{PrinterPrefix.WARNING}[{result.type}] {result.message}')
+                    loader.print(f'{result.type} - {result.message}', func=self.console.warning)
                 else:
-                    loader.print(f'{PrinterPrefix.WARNING}{str(result)}')
+                    loader.print(str(result), func=self.console.warning)
 
         pending = self.db.pending.all()
         if len(pending) > 0:

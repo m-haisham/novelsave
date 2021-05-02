@@ -1,5 +1,7 @@
 import shutil
 
+from typing import Callable
+
 
 class Loader:
     _width: int
@@ -41,21 +43,17 @@ class Loader:
         self.console.write(self.done + '\n')
         self.console.flush()
 
-    def print(self, *args, end='\n', sep=' '):
+    def print(self, *args, func: Callable, end='\n', sep=' '):
         if self.console.plain:
             self.console.print(*args, end=end, sep=sep)
             return
 
-        text = sep.join(args) + end
-
         # remove current progress bar and print
-        self.console.write(f'\033[2K\033[1G')
-        self.console.write(text)
+        self.console.write(f'\033[2K\r')
+        func(*args, end=end, sep=sep)
 
         # re draw progressbar
         self.update()
-
-        self.console.flush()
 
     def _update_width(self):
         self._width, _ = shutil.get_terminal_size((80, 20))
@@ -72,7 +70,7 @@ class Loader:
         desc_length = max(15, self._width)
         desc_str = self.desc_str(desc_length).format(self.value * 100)
 
-        self.console.write(f'\033[G{desc_str}')
+        self.console.write(f'\r{desc_str}')
         self.console.flush()
 
     def desc_str(self, width: int) -> str:

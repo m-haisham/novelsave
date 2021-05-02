@@ -16,3 +16,7 @@ class PathValidationException(ValueError):
 
     def __str__(self):
         return 'Path validation failed. Make sure that the path exists and that it points to a directory.'
+
+
+class NoInputException(Exception):
+    pass

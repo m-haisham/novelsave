@@ -1,9 +1,11 @@
 import sys
+from getpass import getpass
 
 from colorama import init, Fore
 
 from .colored import Colored
 from .line import LineHandler
+from ...exceptions import NoInputException
 
 # colorama
 init()
@@ -60,6 +62,12 @@ class ConsoleHandler:
     def list(self, *args, **kwargs):
         kwargs['prefix'] = '-'
         self.print(*args, **kwargs)
+
+    def getpass(self, s: str):
+        if self.no_input:
+            raise NoInputException()
+
+        return getpass(s)
 
     def confirm(self, desc, default=False):
         self._target.write(f'? {desc}: {"(Y/n)" if default else "(y/N)"} ')

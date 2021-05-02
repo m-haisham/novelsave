@@ -236,12 +236,15 @@ class NovelSave:
             if force:
                 self._login_and_persist()
             else:
-                line = self.console.line('Attempting authentication using existing cookies, ')
+                line = self.console.line('Attempting authentication using existing cookies, ').start()
 
                 # get existing cookies and check if they are expired
                 # expired cookies are discarded
                 existing_cookies = self.cookies.select(self.source.cookie_domains)
-                if self.cookies.check_expired(existing_cookies):
+                if not existing_cookies:
+                    line.end('none.')
+                    self._login_and_persist()
+                elif self.cookies.check_expired(existing_cookies):
                     line.end('expired.')
                     self._login_and_persist()
                 else:

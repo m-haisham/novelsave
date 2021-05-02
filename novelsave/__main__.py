@@ -1,11 +1,9 @@
-import argparse
 import sys
-from getpass import getpass
 
 from novelsave import NovelSave
 from novelsave.cli import CliListing, CliConfig, DefaultSubcommandArgumentParser
 from novelsave.database import UserConfig
-from novelsave.exceptions import MissingSource, ResponseException
+from novelsave.exceptions import MissingSource, ResponseException, NoInputException
 from novelsave.utils.helpers import url_pattern
 from novelsave.utils.ui import ConsoleHandler, figlet
 
@@ -76,7 +74,12 @@ def login(args, novelsave):
         if args.password:
             novelsave.password = args.password
         else:
-            novelsave.password = getpass('\n[-] password: ')
+            try:
+                novelsave.password = novelsave.console.getpass('Enter your password: ')
+            except NoInputException:
+                raise Exception('No password was provided and the program was run in no-input mode. '
+                                'Either run the the program without --no-input or provide a password.'
+                                '\n    (use "--password <password>" to provide a password)')
 
         # login
         if novelsave.password:
@@ -148,6 +151,7 @@ def main():
         print(figlet.banner)
 
     args.func(args)
+
 
 if __name__ == '__main__':
     main()

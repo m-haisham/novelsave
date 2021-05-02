@@ -33,10 +33,10 @@ class CliListing:
                 listing.show_novel(args.novel)
         elif args.reset:
             listing.console.error('flag [--reset] must be used along with argument [--novel NOVEL]')
-            sys.exit(1)
+            sys.exit(2)
         elif args.delete:
             listing.console.error('flag [--delete] must be used along with argument [--novel NOVEL]')
-            sys.exit(1)
+            sys.exit(2)
         else:
             listing.show_all()
 

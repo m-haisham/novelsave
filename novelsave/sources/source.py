@@ -9,7 +9,7 @@ from requests.cookies import RequestsCookieJar
 
 from ..models import Novel, Chapter
 from ..utils.helpers import StringHelper
-from ..exceptions import ResponseException
+from ..exceptions import ResponseException, LoginUnavailableException
 
 header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) '
                         'Chrome/39.0.2171.95 Safari/537.36'}
@@ -52,7 +52,7 @@ class Source:
         :param password: credential key
         :return: None
         """
-        raise NotImplementedError
+        raise LoginUnavailableException(self)
 
     def set_cookies(self, cookies: Union[RequestsCookieJar, Tuple[dict]]):
         """
@@ -65,7 +65,10 @@ class Source:
         elif type(cookies) == tuple:
             # clear preexisting cookies associated with source
             for domain in self.cookie_domains:
-                self.session.cookies.clear(domain=domain)
+                try:
+                    self.session.cookies.clear(domain=domain)
+                except KeyError:
+                    pass
 
             # add the dict formatted cookies
             for cookie in cookies:

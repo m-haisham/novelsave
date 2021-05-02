@@ -21,6 +21,17 @@ Request support by creating a new issue:
         return self.message
 
 
+class LoginUnavailableException(Exception):
+    def __init__(self, source):
+        super(LoginUnavailableException, self).__init__()
+        self.source = source
+
+    def __str__(self):
+        return f'''Login is not available for the source: {self.source.base}
+Request support by creating a new issue:
+    {new_issue}'''
+
+
 class ChapterException(Exception):
     def __init__(self, type, message):
         super(ChapterException, self).__init__(f'[{type}] {message}')

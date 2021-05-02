@@ -3,7 +3,7 @@ import sys
 from getpass import getpass
 
 from novelsave import NovelSave
-from novelsave.cli import NovelListing, CliConfig
+from novelsave.cli import NovelListing, CliConfig, DefaultSubcommandArgumentParser
 from novelsave.database import UserConfig
 from novelsave.exceptions import MissingSource, ResponseException
 from novelsave.utils.helpers import url_pattern
@@ -84,7 +84,10 @@ def login(args, novelsave):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='novelsave', description='tool to convert novels to epub')
+    parser = DefaultSubcommandArgumentParser(
+        prog='novelsave',
+        description='This is a tool to download and convert webnovels from popular sites to epub',
+    )
     parser.add_argument('--plain', help='restrict display output in plain, tabular text format', action='store_true')
 
     sub = parser.add_subparsers()
@@ -134,6 +137,8 @@ def main():
     config.add_argument('-d', '--dir', help='directory for saving novels')
     config.add_argument('--toggle-banner', action='store_true', help='Toggle show and hide for title banner')
     config.set_defaults(func=CliConfig.handle)
+
+    parser.set_default_subparser('novel')
 
     args = parser.parse_args()
 

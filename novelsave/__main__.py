@@ -134,7 +134,7 @@ def main():
 
     # Configurations
     config = sub.add_parser('config', help='update and view user configurations')
-    config.add_argument('-d', '--dir', help='directory for saving novels')
+    config.add_argument('--save-dir', help='directory for saving novels')
     config.add_argument('--toggle-banner', action='store_true', help='Toggle show and hide for title banner')
     config.set_defaults(func=CliConfig.handle)
 

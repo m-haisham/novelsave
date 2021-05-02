@@ -1,9 +1,8 @@
 import sys
 from pathlib import Path
 
-from ..meta import github
 from ..database import UserConfig
-from ..utils.ui import TableBuilder, ConsoleHandler
+from ..utils.ui import ConsoleHandler
 
 
 class CliConfig:
@@ -17,8 +16,8 @@ class CliConfig:
 
         # updating storage directory
         try:
-            if args.dir:
-                config.set_dir(args.dir)
+            if args.save_dir:
+                config.set_dir(args.save_dir)
         except IOError as e:
             if e.errno == 22:  # invalid filename
                 config.console.error(f'The provided path is syntactically incorrect: ({args.dir})')
@@ -36,15 +35,11 @@ Path validation failed. make sure that:
         if args.toggle_banner:
             config.toggle_banner()
 
-        # breathe,
-        config.console.newline()
+        # put some space if there has been any status changes
+        if any((args.save_dir, args.toggle_banner)):
+            config.console.newline()
 
-        table = TableBuilder(('field', 'value'))
-        for p in config.user.configs:
-            table.add_row((p.name, p.get()))
-
-        config.console.write(str(table) + '\n')
-        config.console.flush()
+        config.display()
 
     def set_dir(self, _dir):
         with self.console.line('Updating novels location, ') as line:
@@ -58,4 +53,10 @@ Path validation failed. make sure that:
         new_mode = not self.user.show_banner.get()
         self.user.show_banner.put(new_mode)
 
-        self.console.success(f'Banner mode set to "{"show" if new_mode else "hide"}"')
+        self.console.success(f'Banner mode changed to "{"show" if new_mode else "hide"}"')
+
+    def display(self):
+        self.console.write(f'[CONFIGURATIONS]\n')
+        self.console.write(f'Banner mode is set to "{"show" if self.user.show_banner.get() else "hide"}".\n')
+        self.console.write(f'Current save directory is "{self.user.directory.get()}".\n')
+        self.console.flush()

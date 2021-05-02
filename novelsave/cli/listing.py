@@ -1,4 +1,5 @@
 import shutil
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -102,6 +103,7 @@ class NovelListing:
                     data.metadata.truncate()
         except PermissionError as e:
             self.console.error(str(e))
+            sys.exit(1)
 
     def _get_sources(self) -> Dict[str, List[NovelData]]:
         novels = {}
@@ -126,13 +128,13 @@ class NovelListing:
             source = parse_source(url)
         except MissingSource as e:
             self.console.error(str(e))
-            return None, None
+            sys.exit(1)
 
         try:
             path = self.user.directory.get() / Path(source.source_folder_name()) / source.novel_folder_name(url)
             data = NovelData(path, create=False, load_chapters=load)
         except FileNotFoundError:
             self.console.error('Record of novel does not exist\n')
-            return None, None
+            sys.exit(1)
 
         return data, path

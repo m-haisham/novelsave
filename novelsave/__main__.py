@@ -147,22 +147,25 @@ def parse_listing(args):
     listing = NovelListing(args.plain)
 
     if args.novel:
+        # checks if the provided url is valid
+        if not url_pattern.match(args.novel):
+            listing.console.error('Provided url is not valid. Please check and try again')
+            sys.exit(1)
+
         if args.reset:
             listing.reset_novel(args.novel, full=False, skip_confirm=args.yes)
         elif args.delete:
             listing.reset_novel(args.novel, full=True, skip_confirm=args.yes)
         else:
             listing.show_novel(args.novel)
+    elif args.reset:
+        listing.console.error('flag [--reset] must be used along with argument [--novel NOVEL]')
+        sys.exit(1)
+    elif args.delete:
+        listing.console.error('flag [--delete] must be used along with argument [--novel NOVEL]')
+        sys.exit(1)
     else:
-        if args.reset:
-            listing.console.error('flag [--reset] must be used along with argument [--novel NOVEL]\n')
-        elif args.delete:
-            listing.console.error('flag [--delete] must be used along with argument [--novel NOVEL]\n')
-        else:
-            listing.show_all()
-            sys.exit(0)
-
-        sys.exit(2)
+        listing.show_all()
 
 
 if __name__ == '__main__':

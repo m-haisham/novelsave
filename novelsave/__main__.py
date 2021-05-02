@@ -45,7 +45,6 @@ def process_task(args):
 
     if args.remove_meta:
         novelsave.remove_metadata(with_source=True)
-        console.success('Removed metadata')
 
     if args.meta:
         novelsave.metadata(url=args.meta, force=args.force_meta)
@@ -101,8 +100,8 @@ def main():
     actions.add_argument('--meta', type=str, help='metadata source url', default=None)
     actions.add_argument('--remove-meta', action='store_true', help='remove current metadata')
     actions.add_argument('--force-cover', action='store_true', help='download and overwrite the existing cover')
-    actions.add_argument('--force-create', action='store_true', help='force create epub')
-    actions.add_argument('--force-meta', action='store_true', help='force update metadata')
+    actions.add_argument('--force-create', action='store_true', help='force create epub ignoring update status')
+    actions.add_argument('--force-meta', action='store_true', help='force update metadata ignoring previous metadata')
 
     # auth
     auth = novel.add_argument_group(title='auth')

@@ -13,8 +13,7 @@ class MissingSource(TypeError):
     @property
     def message(self):
         # TODO add help to check for update
-        return f'''
-The source ({self.source}) of the url is not supported in the current version ({__version__}).
+        return f'''The source ({self.source}) of the url is not supported in the current version ({__version__}).
 Request support by creating a new issue:
     {new_issue}'''
 

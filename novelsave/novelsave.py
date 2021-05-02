@@ -80,29 +80,26 @@ class NovelSave:
 
         meta_source = parse_metasource(url)
 
-        line = self.console.line('Retrieving metadata, ').start()
+        with self.console.line('Retrieving metadata, ') as line:
+            # check caching
+            novel = self.db.novel.parse()
+            if not force and novel.meta_source == url:
+                line.end('already exists, aborted.')
+                return
 
-        # check caching
-        novel = self.db.novel.parse()
-        if not force and novel.meta_source == url:
-            line.end('already exists, aborted.')
-            return
+            # set meta_source for novel
+            self.db.novel.put('meta_source', url)
 
-        # set meta_source for novel
-        self.db.novel.put('meta_source', url)
+            # remove previous external metadata
+            self.remove_metadata(with_source=False)
 
-        # remove previous external metadata
-        self.remove_metadata(with_source=False)
+            # update metadata
+            for metadata in meta_source.retrieve(url):
+                # convert to object and mark as external metadata
+                metadata.src = MetaData.SOURCE_EXTERNAL
+                obj = vars(metadata)
 
-        # update metadata
-        for metadata in meta_source.retrieve(url):
-            # convert to object and mark as external metadata
-            metadata.src = MetaData.SOURCE_EXTERNAL
-            obj = vars(metadata)
-
-            self.db.metadata.put(obj)
-
-        line.end()
+                self.db.metadata.put(obj)
 
     def remove_metadata(self, with_source=True):
         self.db.metadata.remove_where('src', MetaData.SOURCE_EXTERNAL)

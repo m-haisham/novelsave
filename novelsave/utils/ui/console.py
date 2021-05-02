@@ -48,17 +48,13 @@ class ConsoleHandler:
     def success(self, *args, **kwargs):
         self.print(*args, **kwargs)
 
-    def error(self, text: str, **kwargs):
-        kwargs['sep'] = ''
-
+    def error(self, *args, **kwargs):
         with self.colored(Fore.RED):
-            self.newline()
-            sep = '\n' if '\n' in text.rstrip() else ' '
-            self.print(f'[ERROR]{sep}', text.lstrip(), **kwargs)
+            self.print(f'ERROR:', *args, **kwargs)
 
     def warning(self, *args, **kwargs):
         with self.colored(Fore.YELLOW):
-            self.print('[WARNING]', *args, **kwargs)
+            self.print('WARNING:', *args, **kwargs)
 
     def list(self, *args, **kwargs):
         kwargs['prefix'] = PrinterPrefix.LIST

@@ -9,7 +9,7 @@ class ResponseException(Exception):
     @property
     def message(self):
         message = f'''The website responded with status code: {self.response.status_code}.
-    {self.response.url}
+{self.response.url}
 
 '''
         if self.response.status_code == 404:

@@ -236,6 +236,8 @@ you can access the database by using the `db` attribute of `NovelSave`
 
 > Request a new source by [creating a new issue](https://github.com/mHaisham/novelsave/issues/new/choose)
 
+### Novel
+
 | Sources | Login |                 Reason                  |
 | -- | :--: | :--: |
 | [webnovel.com] | ✔ |  |
@@ -265,15 +267,6 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [wuxiaworld.online] |  |  |
 | [novelonlinefull.com] |  |  |
 | [novelpassion.com] |  |  |
-
-## Metadata Sources
-
-> Request a new source by [creating a new issue](https://github.com/mHaisham/novelsave/issues/new/choose)
-
-| Metadata Source | Support |
-| -- | :--: |
-| [wlnupdates.com] | ✔ |
-| [novelupdates.com] | ✔ |
 
 <!-- SOURCE LINKS -->
 
@@ -305,7 +298,23 @@ you can access the database by using the `db` attribute of `NovelSave`
 [novelonlinefull.com]: https://novelonlinefull.com
 [novelpassion.com]: https://www.novelpassion.com
 
+### Metadata
+
+| Metadata Source | Support |
+| -- | :--: |
+| [wlnupdates.com] | ✔ |
+| [novelupdates.com] | ✔ |
+
 <!-- META SOURCE LINKS -->
 
 [wlnupdates.com]: https://www.wlnupdates.com
 [novelupdates.com]: https://www.novelupdates.com
+
+## Disclaimer
+
+We are not affiliated, associated, authorized, endorsed by, or in any way officially connected with the any of the [sources](#sources) mentioned above.
+
+## License
+
+[Apache-2.0](https://github.com/mHaisham/novelsave/blob/master/LICENSE)
+

@@ -5,72 +5,73 @@ import browser_cookie3
 import requests
 from requests.cookies import RequestsCookieJar
 
-from novelsave.models import Chapter
-from .concurrent import ConcurrentActionsController
-from .database import NovelData, CookieDatabase
-from .database.config import UserConfig
+from .database import NovelData, CookieDatabase, UserConfig
 from .epub import NovelEpub
-from .exceptions import ChapterException
+from .exceptions import ChapterException, UnsupportedBrowserException, CookieAuthException, DownloadLimitException
 from .logger import NovelLogger
 from .metasources import parse_metasource
-from .models import MetaData
+from .models import Chapter, MetaData
 from .sources import parse_source
-from .ui import Loader, ConsolePrinter, PrinterPrefix
+from .utils.concurrent import ConcurrentActionsController
+from .utils.ui import Loader, ConsoleHandler
 
 
 class NovelSave:
     IS_CHAPTERS_UPDATED = 'is_cu'
 
-    def __init__(self, url, username=None, password=None, verbose=False):
-
+    def __init__(self, url, no_input, username=None, password=None, plain=False):
         self.url = url
         self.username = username
         self.password = password
 
-        self.user = UserConfig()
+        self.user = UserConfig.instance()
 
         # initialize writers
-        self.console = ConsolePrinter(verbose)
+        self.console = ConsoleHandler(plain, no_input)
         NovelLogger.instance = NovelLogger(self.user.path, self.console)
 
         self.source = parse_source(self.url)
         self.cookies = CookieDatabase(self.user.path)
-        self.netloc_slug = self.source.source_folder_name()
         self.db, self.path = self.open_db()
 
     def update(self, force_cover=False):
 
-        self.console.print('Retrieving novel info...')
-        self.console.print(self.url)
-        novel, chapters = self.source.novel(self.url)
+        with self.console.line('Downloading webpage, ') as line:
+            novel, chapters = self.source.novel(self.url)
 
-        self.console.print(f'Found {len(chapters)} chapters')
+            line.end(f'"{novel.title}" parsed with {len(chapters)} chapters.')
 
-        if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
-            # download cover
-            response = requests.get(novel.thumbnail)
-            with self.cover_path().open('wb') as f:
-                f.write(response.content)
+        with self.console.line('Downloading cover, ') as line:
+            if (force_cover or not self.cover_path().exists()) and novel.thumbnail:
 
-        # update novel information
-        self.db.novel.set(novel)
+                # download cover
+                response = requests.get(novel.thumbnail)
+                with self.cover_path().open('wb') as f:
+                    f.write(response.content)
 
-        # update metadata
-        for metadata in novel.meta:
-            self.db.metadata.put(metadata)
+                line.end(f'{len(response.content)} bytes, done.')
+            else:
+                if novel.thumbnail:
+                    line.end('already downloaded, aborted.')
+                else:
+                    line.end('not provided, aborted.')
 
-        # update_pending
-        saved = self.db.chapters.all()
-        pending = list(set(chapters).difference(saved))
+        with self.console.line('Updating novel information, ') as line:
+            # update novel information
+            self.db.novel.set(novel)
 
-        self.db.pending.truncate()
-        self.db.pending.put_all(pending)
+            # update metadata
+            for metadata in novel.meta:
+                self.db.metadata.put(metadata)
 
-        self.console.print(
-            f'Pending {len(pending)} chapters',
-            f'| {pending[0].title}' if len(pending) == 1 else '',
-            prefix=PrinterPrefix.SUCCESS
-        )
+            # update_pending
+            saved = self.db.chapters.all()
+            pending = list(set(chapters).difference(saved))
+
+            self.db.pending.truncate()
+            self.db.pending.put_all(pending)
+
+            line.end(f'with {len(pending)} chapters pending, done.')
 
     def metadata(self, url, force=False):
         # normalize url
@@ -78,27 +79,26 @@ class NovelSave:
 
         meta_source = parse_metasource(url)
 
-        # check caching
-        novel = self.db.novel.parse()
-        if not force and novel.meta_source == url:
-            return
+        with self.console.line('Retrieving metadata, ') as line:
+            # check caching
+            novel = self.db.novel.parse()
+            if not force and novel.meta_source == url:
+                line.end('already exists, aborted.')
+                return
 
-        # set meta_source for novel
-        self.db.novel.put('meta_source', url)
+            # set meta_source for novel
+            self.db.novel.put('meta_source', url)
 
-        self.console.print('Retrieving metadata...')
-        self.console.print(url)
+            # remove previous external metadata
+            self.remove_metadata(with_source=False)
 
-        # remove previous external metadata
-        self.remove_metadata(with_source=False)
+            # update metadata
+            for metadata in meta_source.retrieve(url):
+                # convert to object and mark as external metadata
+                metadata.src = MetaData.SOURCE_EXTERNAL
+                obj = vars(metadata)
 
-        # update metadata
-        for metadata in meta_source.retrieve(url):
-            # convert to object and mark as external metadata
-            metadata.src = MetaData.SOURCE_EXTERNAL
-            obj = vars(metadata)
-
-            self.db.metadata.put(obj)
+                self.db.metadata.put(obj)
 
     def remove_metadata(self, with_source=True):
         self.db.metadata.remove_where('src', MetaData.SOURCE_EXTERNAL)
@@ -110,11 +110,11 @@ class NovelSave:
     def download(self, thread_count=4, limit=None):
         # parameter validation
         if limit and limit <= 0:
-            self.console.print("'limit' must be greater than 0", prefix=PrinterPrefix.ERROR)
+            raise DownloadLimitException(limit)
 
         pending = self.db.pending.all()
         if not pending:
-            self.console.print('No pending chapters', prefix=PrinterPrefix.ERROR)
+            self.console.info('No pending chapters, download aborted.')
             return
 
         pending.sort(key=lambda c: c.index)
@@ -122,27 +122,28 @@ class NovelSave:
         # limiting number of chapters downloaded
         if limit is not None and limit < len(pending):
             pending = pending[:limit]
+            self.console.info(f'Download limited to {len(pending)} chapters.')
 
-        # some useful information
-        if len(pending) == 1:
-            additive = str(pending[0].index)
-        else:
-            additive = f'{pending[0].index} - {pending[-1].index}'
-        self.console.print(f'Downloading {len(pending)} chapters | {additive}...')
+        # below this point is stuff directly related to download
+        value = 0
+        total = len(pending)
 
-        with Loader(desc=f'Populating tasks ({len(pending)})', should_draw=self.console.verbose) \
-                as loader:
+        # initialize controller
+        thread_count = min(thread_count, len(pending))
 
-            value = 0
-            total = len(pending)
-
-            # initialize controller
-            controller = ConcurrentActionsController(min(thread_count, len(pending)), task=self.task)
+        with self.console.line(f'Creating download controller with {thread_count} threads, '):
+            controller = ConcurrentActionsController(thread_count, task=self.task)
             for chapter in pending:
                 controller.add(chapter)
 
-            # set new downloads flag to true
-            self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
+        # set new downloads flag to true
+        self.db.misc.put(self.IS_CHAPTERS_UPDATED, True)
+
+        loader_desc = f'Downloading {len(pending)} chapters, '\
+            if self.console.plain \
+            else f'Downloading chapters, {Loader.percent} ({value}/{total}), '
+
+        with Loader(self.console, desc=loader_desc, done='done.') as loader:
 
             # start downloading
             for result in controller.iter():
@@ -150,10 +151,8 @@ class NovelSave:
                 # brush.print(controller.queue_out.qsize())
                 # brush.print(f'{chapter.no} {chapter.title}')
 
-                # update brush
-                if self.console.verbose:
-                    value += 1
-                    loader.update(value / total, f'{chapter.url} [{value}/{total}]')
+                value += 1
+                loader.update(value=value / total, desc=f'Downloading chapters, {Loader.percent} ({value}/{total}), ')
 
                 if type(result) is Chapter:
                     chapter = result
@@ -163,20 +162,19 @@ class NovelSave:
                     # at last remove chapter from pending
                     self.db.pending.remove(chapter.url)
                 elif type(result) is ChapterException:
-                    loader.print(f'{PrinterPrefix.WARNING} [{result.type}] {result.message}')
+                    loader.print(f'{result.type} - {result.message}', func=self.console.warning)
                 else:
-                    loader.print(f'{PrinterPrefix.WARNING} {str(result)}')
+                    loader.print(str(result), func=self.console.warning)
 
-        if self.console.verbose:
-            pending = self.db.pending.all()
-            if len(pending) > 0:
-                self.console.print(f'Download finished with {len(pending)} chapter{"s" if len(pending) > 0 else ""} pending')
+        pending = self.db.pending.all()
+        if len(pending) > 0:
+            self.console.info(f'Download finished with {len(pending)} chapters pending.')
 
         # ensure all operations are done
         self.db.chapters.flush()
 
     def create_epub(self, force=False):
-        self.console.print('Packing epub...')
+        line = self.console.line('Packing epub, ').start()
 
         # retrieve metadata
         novel = self.db.novel.parse()
@@ -187,10 +185,15 @@ class NovelSave:
         if novel.meta_source:
             novel.meta = self.db.metadata.search_where('src', MetaData.SOURCE_EXTERNAL)
 
+        chapters = self.db.chapters.all()
+        if not chapters:
+            line.end('no chapters downloaded, aborted.')
+            return
+
         epub = NovelEpub(
             novel=novel,
             cover=self.cover_path(),
-            chapters=self.db.chapters.all(),
+            chapters=chapters,
             save_path=self.path,
         )
 
@@ -199,7 +202,7 @@ class NovelSave:
 
         # check flags and whether the epub already exists
         if not is_updated and not force and epub.path.exists():
-            self.console.print('Aborted. No changes to chapter database')
+            line.end('no changes to chapter database, aborted.')
             return
 
         epub.create()
@@ -207,59 +210,60 @@ class NovelSave:
         # reset new downloads flag
         self.db.misc.put(self.IS_CHAPTERS_UPDATED, False)
 
-        self.console.print(f'Saved to {epub.path}', prefix=PrinterPrefix.SUCCESS)
+        line.end(f'saved to "{epub.path}".')
 
-    def login(self, cookie_browser: Union[str, None] = None, force=False):
+    def cookie_auth(self, cookie_browser: Union[str, None] = None):
 
         # retrieve cookies from browser
         if cookie_browser:
-            # retrieve cookiejar of the selected browser
-            try:
-                cookies = getattr(browser_cookie3, cookie_browser)()
-            except AttributeError:
-                raise ValueError(f"browser '{cookie_browser}' not recognised; must be of either ['chrome', "
-                                 f"'firefox', 'chromium', 'opera', 'edge', ]")
+            with self.console.line(f'Extracting browser cookies from "{cookie_browser}", ') as line:
+                # retrieve cookiejar of the selected browser
+                try:
+                    cookies = getattr(browser_cookie3, cookie_browser)()
+                except AttributeError:
+                    raise UnsupportedBrowserException(cookie_browser)
 
-            # filter cookie domains
-            cj = RequestsCookieJar()
-            for c in cookies:
-                if c.domain in self.source.cookie_domains:
-                    cj.set(c.name, c.value, domain=c.domain, path=c.path)
+                # filter cookie domains
+                cj = RequestsCookieJar()
+                for c in cookies:
+                    if c.domain in self.source.cookie_domains:
+                        cj.set(c.name, c.value, domain=c.domain, path=c.path)
 
-            # set cookies jar to be used by source
-            self.source.set_cookies(cj)
-            self.console.print(f'Set cookiejar with {len(cj)} cookies', prefix=PrinterPrefix.SUCCESS, verbose=True)
+                # set cookies jar to be used by source
+                self.source.set_cookies(cj)
+                line.end(f'{len(cj)} cookies, done.')
         else:
-            if force:
-                self._login_and_persist()
-            else:
+            with self.console.line('Attempting authentication using existing cookies, ') as line:
                 # get existing cookies and check if they are expired
                 # expired cookies are discarded
                 existing_cookies = self.cookies.select(self.source.cookie_domains)
-                if self.cookies.check_expired(existing_cookies):
-                    self._login_and_persist()
+                if not existing_cookies:
+                    line.end('none.')
+                    raise CookieAuthException()
+                elif self.cookies.check_expired(existing_cookies):
+                    line.end('expired.')
+                    raise CookieAuthException()
                 else:
                     # if they aren't expired add the existing cookies request session
                     self.source.set_cookies(existing_cookies)
 
-            self.console.print(f'Login successful', prefix=PrinterPrefix.SUCCESS, verbose=True)
-
-    def _login_and_persist(self):
+    def credential_auth(self):
         """
         Delete existing cookies and replace with new received from via fresh login
         """
-        # remove existing cookies
-        self.cookies.delete(self.source.cookie_domains)
+        with self.console.line('Attempting authentication using credentials, '):
+            # remove existing cookies
+            self.cookies.delete(self.source.cookie_domains)
 
-        # source specific login
-        self.source.login(self.username, self.password)
+            # source specific login
+            self.source.login(self.username, self.password)
 
-        # set new cookies
-        self.cookies.insert(self.source.session.cookies)
+            # set new cookies
+            self.cookies.insert(self.source.session.cookies)
 
     def open_db(self):
         # trailing slash adds nothing
-        path = Path(self.user.directory.get()) / Path(self.netloc_slug) / self.source.novel_folder_name(self.url)
+        path = Path(self.user.directory.get()) / Path(self.source.source_folder_name()) / self.source.novel_folder_name(self.url)
 
         return NovelData(path), path
 

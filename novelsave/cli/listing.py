@@ -1,29 +1,56 @@
 import shutil
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from ..database import NovelData, UserConfig
 from ..exceptions import MissingSource
 from ..sources import parse_source
-from ..ui import ConsolePrinter, PrinterPrefix as Prefix
+from ..utils.helpers import url_pattern
+from ..utils.ui import ConsoleHandler
 
 
-class NovelListing:
-    def __init__(self, verbose=True):
-        self.user = UserConfig()
-        self.console = ConsolePrinter(verbose)
+class CliListing:
+    def __init__(self, plain=True, no_input=False):
+        self.user = UserConfig.instance()
+        self.console = ConsoleHandler(plain, no_input)
+
+    @staticmethod
+    def handle(args):
+        listing = CliListing(args.plain, args.no_input)
+
+        if args.novel:
+            # checks if the provided url is valid
+            if not url_pattern.match(args.novel):
+                listing.console.error('Provided url is not valid. Please check and try again')
+                sys.exit(1)
+
+            if args.reset:
+                listing.reset_novel(args.novel, full=False, skip_confirm=args.yes)
+            elif args.delete:
+                listing.reset_novel(args.novel, full=True, skip_confirm=args.yes)
+            else:
+                listing.show_novel(args.novel)
+        elif args.reset:
+            listing.console.error('flag [--reset] must be used along with argument [--novel NOVEL]')
+            sys.exit(2)
+        elif args.delete:
+            listing.console.error('flag [--delete] must be used along with argument [--novel NOVEL]')
+            sys.exit(2)
+        else:
+            listing.show_all()
 
     def show_all(self):
         sources = self._get_sources()
 
-        for key in sources.keys():
+        for i, key in enumerate(sources.keys()):
 
             # print the source title
-            self.console.print(f'{key} ({len(sources[key])})')
+            self.console.info(f'{i}: {key} ({len(sources[key])})')
             for data in sources[key]:
                 # prints minimal novel information
                 novel = data.novel.parse()
-                self.console.raw_print(f"'{novel.title}' by {novel.author}")
+                self.console.info(f'"{novel.title}" by {novel.author}')
                 self.console.list(novel.url)
 
             self.console.newline()
@@ -35,7 +62,7 @@ class NovelListing:
 
         # print basic information about novel
         novel = data.novel.parse()
-        self.console.print('Information')
+        self.console.info('Information')
         self.console.list('title:', novel.title)
         self.console.list('by:', novel.author)
         self.console.list('synopsis:', novel.synopsis)
@@ -46,59 +73,63 @@ class NovelListing:
 
         # print metadata information about novel
         metadata = data.metadata.all()
-        self.console.print(f'Metadata ({len(metadata)})')
-        if self.console.verbose:
-            for m in metadata:
+        self.console.info(f'Metadata ({len(metadata)})')
+        for m in metadata:
 
-                # build others to a more readable format
-                others = ' '.join([f'[{key}={value}]' for key, value in m['others'].items()])
-                if others:
-                    others = ' ' + others
+            # build others to a more readable format
+            others = ' '.join([f'[{key}={value}]' for key, value in m['others'].items()])
+            if others:
+                others = ' ' + others
 
-                self.console.list(f"{m['name']}: {m['value']}{others}")
+            self.console.list(f"{m['name']}: {m['value']}{others}")
         self.console.newline()
 
         # print chapters of the novel
         chapters = data.chapters.all()
-        self.console.print(f'Chapters ({len(chapters)})')
-        if self.console.verbose:
-            for c in chapters:
-                self.console.list(c.title)
+        self.console.info(f'Chapters ({len(chapters)})')
+        for c in chapters:
+            self.console.list(c.title)
         self.console.newline()
 
-    def reset_novel(self, url, full=True):
+    def reset_novel(self, url, full=True, skip_confirm=False):
         data, path = self._open(url, load=False)
         if data is None:
             return
 
+        action = "Delete" if full else "Reset"
+        action_working = 'Deleting' if full else 'Resetting'
+
         # display a minimal number of information
         novel = data.novel.parse()
-        self.console.print(f'{"Delete" if full else "Reset"} \'{novel.title}\'')
+        self.console.info(f'{action} "{novel.title}"')
         self.console.list(f'by {novel.author}')
         self.console.list(novel.url)
         self.console.newline()
 
-        confirm = self.console.confirm('Are you sure?')
-        if not confirm:
-            self.console.print('Cancelled')
-            return
+        if not skip_confirm:
+            confirm = self.console.confirm('Are you sure?')
+            if not confirm:
+                self.console.info(f'{action} cancelled by user')
+                return
 
         try:
-            if full:
-                # database has to be closed before we delete the files associated with it
-                # lest it throw an OSError
-                data.close()
+            with self.console.line(f'{action_working} "{novel.title}", '):
+                if full:
+                    # database has to be closed before we delete the files associated with it
+                    # lest it throw an OSError
+                    data.close()
 
-                # remove everything
-                shutil.rmtree(path)
-            else:
-                # remove chapters
-                shutil.rmtree(data.chapters.path)
+                    # remove everything
+                    shutil.rmtree(path)
+                else:
+                    # remove chapters
+                    shutil.rmtree(data.chapters.path)
 
-                # remove metadata
-                data.metadata.truncate()
+                    # remove metadata
+                    data.metadata.truncate()
         except PermissionError as e:
-            self.console.print(e, prefix=Prefix.ERROR)
+            self.console.error(str(e))
+            sys.exit(1)
 
     def _get_sources(self) -> Dict[str, List[NovelData]]:
         novels = {}
@@ -121,16 +152,15 @@ class NovelListing:
     def _open(self, url: str, load=True) -> Tuple[Optional[NovelData], Optional[Path]]:
         try:
             source = parse_source(url)
-        except MissingSource:
-            self.console.print(f"'{url}' could not be assigned to any supported source\n", prefix=Prefix.ERROR)
-            self.console.newline()
-            return None, None
+        except MissingSource as e:
+            self.console.error(str(e))
+            sys.exit(1)
 
         try:
             path = self.user.directory.get() / Path(source.source_folder_name()) / source.novel_folder_name(url)
             data = NovelData(path, create=False, load_chapters=load)
         except FileNotFoundError:
-            self.console.print('Record of novel does not exist\n', prefix=Prefix.ERROR)
-            return None, None
+            self.console.error('Record of novel does not exist\n')
+            sys.exit(1)
 
         return data, path

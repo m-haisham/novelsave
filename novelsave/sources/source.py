@@ -1,6 +1,6 @@
 import re
 import time
-from typing import Tuple, List, Iterable, Union
+from typing import Tuple, List, Union
 from urllib.parse import urlparse
 
 import requests
@@ -8,8 +8,8 @@ from bs4 import BeautifulSoup, Comment
 from requests.cookies import RequestsCookieJar
 
 from ..models import Novel, Chapter
-from ..tools import StringTools
-from ..exceptions import ResponseException
+from ..utils.helpers import StringHelper
+from ..exceptions import ResponseException, LoginUnavailableException
 
 header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) '
                         'Chrome/39.0.2171.95 Safari/537.36'}
@@ -52,7 +52,7 @@ class Source:
         :param password: credential key
         :return: None
         """
-        raise NotImplementedError
+        raise LoginUnavailableException(self)
 
     def set_cookies(self, cookies: Union[RequestsCookieJar, Tuple[dict]]):
         """
@@ -65,7 +65,10 @@ class Source:
         elif type(cookies) == tuple:
             # clear preexisting cookies associated with source
             for domain in self.cookie_domains:
-                self.session.cookies.clear(domain=domain)
+                try:
+                    self.session.cookies.clear(domain=domain)
+                except KeyError:
+                    pass
 
             # add the dict formatted cookies
             for cookie in cookies:
@@ -145,14 +148,14 @@ class Source:
         """
         :return: suitable folder name from netloc
         """
-        return StringTools.slugify(urlparse(self.base).netloc, replace='_')
+        return StringHelper.slugify(urlparse(self.base).netloc, replace='_')
 
     def novel_folder_name(self, url):
         """
         :param url: novel url
         :return: suitable novel folder name
         """
-        return StringTools.slugify(url.strip('/ ').split('/')[-1])
+        return StringHelper.slugify(url.strip('/ ').split('/')[-1])
 
     # ---- Inspired from https://github.com/dipu-bd/lightnovel-crawler ----
     # ----      And almost a perfect copy of the functions below       ----

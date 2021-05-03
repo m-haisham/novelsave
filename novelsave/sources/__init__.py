@@ -71,4 +71,4 @@ def parse_source(url):
         if source.of(url):
             return source()
 
-    raise MissingSource(url, f'"{url}" does not belong to any available source')
+    raise MissingSource(url)

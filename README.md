@@ -9,7 +9,7 @@
 ![Pull Requests](https://img.shields.io/github/issues-pr/mHaisham/novelsave)
 [![License](https://img.shields.io/github/license/mHaisham/novelsave)](LICENSE)
 
-Tool to convert novels to epub
+This is a tool to download and convert webnovels from popular sites to epub.
 
 > **v0.6.+ is not compatible with previous versions**
 
@@ -27,55 +27,99 @@ pip install git+https://github.com/mHaisham/novelsave.git
 
 ## Usage
 
-### Update a novel
+### Basic
+
+The most common arguments you'll be using are
+
+- `-u` `--update`  - downloads novel webpage and updates novel information on disk. This includes title, author and chapters (including pending chapters).
+- `-p` `--pending` - download all the pending chapters. Typically uses 4 threads to download chapter pages unless otherwise specified (`--thread-count <count>`).
+- `-c` `--create` - packs the (downloaded chapters of) novel into an epub file.
 
 ```bash
-novelsave novel https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c
+novelsave <url> -u -p -c
 ```
 
-### Check/Update configurations
+By combining these 3 flags you can update, download, and create epub in a single line.
+
+### Pipe
+
+If you are calling novelsave via another program or want to pipe the output to another program like `grep`, add the `--plain` flag.
+
+This ensures that the output would be as concise as possible.
+
+```bash
+novelsave --plain <url> -u -p -c
+```
+
+### Configurations
+
+You can check the programs configurations as shown below
 
 ```bash
 novelsave config
 ```
 
+#### Banner
+
+``````
+                              ___                                       
+                             /\_ \                                      
+  ___     ___   __  __     __\//\ \     ____     __     __  __     __   
+/' _ `\  / __`\/\ \/\ \  /'__`\\ \ \   /',__\  /'__`\  /\ \/\ \  /'__`\ 
+/\ \/\ \/\ \L\ \ \ \_/ |/\  __/ \_\ \_/\__, `\/\ \L\.\_\ \ \_/ |/\  __/ 
+\ \_\ \_\ \____/\ \___/ \ \____\/\____\/\____/\ \__/.\_\\ \___/ \ \____\
+ \/_/\/_/\/___/  \/__/   \/____/\/____/\/___/  \/__/\/_/ \/__/   \/____/
+  v(version) - https://github.com/mHaisham/novelsave
+``````
+
+Banner is by default displayed at start-up of the program unless its run in plain mode.
+
+You can change the display settings of banner as shown below.
+
 ```bash
-novelsave config -d novels
+novelsave config --toggle-banner
 ```
 
-### Save directory
+#### Save directory
 
-Novels are by default saved to folder `novels` in user home
+Novels are by default saved to folder `novels` in user home.
+
+Change the novels download directory as shown below.
+
+```bash
+novelsave config --save-dir <dir>
+```
 
 ## Help
 
 ### `novelsave --help`
 
-```
-usage: novelsave [-h] [-v] {novel,config,list} ...
+```bash
+usage: novelsave [-h] [--plain] [--no-input] {novel,list,config} ...
 
-tool to convert novels to epub
+This is a tool to download and convert webnovels from popular sites to epub
 
 positional arguments:
-  {novel,config,list}
+  {novel,list,config}
     novel              download, update, and delete novels
     list               manipulate currently existing novels
     config             update and view user configurations
 
 optional arguments:
   -h, --help           show this help message and exit
-  -v, --verbose        extra information
+  --plain              restrict display output in plain, tabular text format
+  --no-input           don’t prompt or do anything interactive
 ```
 
-### `novelsave novel --help`
+### `novelsave novel --help`	
 
-```
+```bash
 usage: novelsave novel [-h] [-u] [-p] [-c] [--meta META] [--remove-meta] [--force-cover] [--force-create] [--force-meta] [--username USERNAME]
-                       [--password PASSWORD] [--force-login] [--use-cookies USE_COOKIES] [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT]
+                       [--password PASSWORD] [--force-login] [--cookies-from COOKIES_FROM] [--threads THREADS] [--timeout TIMEOUT] [--limit LIMIT]
                        url
 
 positional arguments:
-  url                   novel url or identifier for downloading novels
+  url                   url of the specific novel
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -90,53 +134,53 @@ actions:
   --meta META           metadata source url
   --remove-meta         remove current metadata
   --force-cover         download and overwrite the existing cover
-  --force-create        force create epub
-  --force-meta          force update metadata
+  --force-create        force create epub ignoring update status
+  --force-meta          force update metadata ignoring previous metadata
 
 auth:
   --username USERNAME   username or email field
   --password PASSWORD   password field; not recommended, refer to README for more details
   --force-login         remove existing cookies and login
-  --use-cookies USE_COOKIES
+  --cookies-from COOKIES_FROM
                         use cookies from specified browser
 ```
 
 ### `novelsave list --help`
 
 ```
-usage: novelsave list [-h] [--novel NOVEL] [--reset] [--full]
+usage: novelsave list [-h] [--novel NOVEL] [--reset | --delete] [--yes]
 
 optional arguments:
   -h, --help     show this help message and exit
   --novel NOVEL  takes the url of the novel and displays meta information
   --reset        remove chapters and metadata. to be used with --novel
-  --full         remove everything including compiled epub files. to be used with --reset
+  --delete       remove everything including compiled epub files. to be used with --novel
+  --yes          skip confirm confirmation used in --reset and --delete
 ```
 
 ### `novelsave config --help`
 
-```
-usage: novelsave config [-h] [-d DIR]
+```bash
+usage: novelsave config [-h] [--save-dir SAVE_DIR] [--toggle-banner]
 
 optional arguments:
-  -h, --help         show this help message and exit
-  -d DIR, --dir DIR  directory for saving novels
+  -h, --help           show this help message and exit
+  --save-dir SAVE_DIR  directory for saving novels
+  --toggle-banner      Toggle show and hide for title banner
 ```
 
 ## Login and cookies
 
 Two methods of accessing authenticated content are provided
 
-### Browser cookies
-
-> Recommended method of access
+### Browser cookies (Recommended)
 
 Uses cookies from available browsers access content
 
 use syntax `--use-cookies [browser]`. for example
 
-```
-novelsave novel https://www.webnovel.com/book/my-disciples-are-all-villains_16984011906162405 -u -p -c --use-cookies firefox
+```bash
+novelsave <url> -u -p -c --cookies-from firefox
 ```
 
 Requires to be Signed in, in the browser of choice
@@ -149,7 +193,7 @@ Requires to be Signed in, in the browser of choice
 
 Username and password are sent to the website server to authenticate.
 
-Cookies are now persisted and stored at config's location.
+Cookies are persisted and stored at config's location.
 
 Novelsave attempts to use the available cookies unless:
 
@@ -159,9 +203,7 @@ Novelsave attempts to use the available cookies unless:
 
 refer to [sources](#sources) to check supported sites.
 
-## Manual
-
-Pass a url to the `NovelSave` class which will select the correct source for it.
+## Module
 
 ```python
 from novelsave import NovelSave
@@ -179,7 +221,8 @@ if __name__ == '__main__':
 - ```remove_metadata(self, with_source=True):```
 - ```download(self, thread_count=4, limit=None):```
 - ```create_epub(self, force=False):```
-- ```def login(self, cookie_browser: Union[str, None] = None, force=False):```
+- ```cookie_auth(self, cookie_browser: Union[str, None] = None)```
+- ```credential_auth(self)```
 
 ### Database
 
@@ -193,9 +236,9 @@ you can access the database by using the `db` attribute of `NovelSave`
 
 > Request a new source by [creating a new issue](https://github.com/mHaisham/novelsave/issues/new/choose)
 
-| Sources | Search | Login |
+| Sources | Login |                 Reason                  |
 | -- | :--: | :--: |
-| [webnovel.com] |  | ✔ |
+| [webnovel.com] | ✔ |  |
 | [wuxiaworld.co] |  |  |
 | [boxnovel.com] |  |  |
 | [readlightnovel.org] |  |  |
@@ -204,7 +247,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [kieshitl.wordpress] |  |  |
 | [scribblehub.com] |  |  |
 | [mtlnovel.com] |  |  |
-| ~~[fanfiction.net]~~ due to cloudflare bot protection |  |  |
+| ~~[fanfiction.net]~~ |  | Broken due to cloudflare bot protection |
 | [novelfull.com] |  |  |
 | [wuxiaworld.com] |  |  |
 | [royalroad.com] |  |  |

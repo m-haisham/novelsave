@@ -12,8 +12,17 @@ class NovelLogger:
         self._logger = None
 
     def create_logger(self):
-        logfile = self.path / Path('logs') / f"{datetime.today().strftime('%Y-%m-%d')}.log"
+        if self.console:
+            line = self.console.line('Initializing logger, ', hide_plain=True).start()
+        else:
+            line = None
+
+        logfilename = f"{datetime.today().strftime('%Y-%m-%d')}.log"
+        logfile = self.path / Path('logs') / logfilename
         logfile.parent.mkdir(parents=True, exist_ok=True)
+
+        if line:
+            line.write(f'created file {logfilename}, ')
 
         logger = logging.getLogger('novel-logger')
         logger.setLevel(logging.DEBUG)
@@ -27,8 +36,8 @@ class NovelLogger:
         logger.addHandler(sh)
 
         # alerting
-        if self.console and self.console.verbose:
-            self.console.print('Logger initialised')
+        if line:
+            line.end()
 
         return logger
 

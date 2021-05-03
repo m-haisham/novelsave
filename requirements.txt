@@ -7,3 +7,4 @@ ebooklib==0.17.1
 webnovelbot==0.3.0
 lxml>=4.6.1
 browser-cookie3>=0.12.0
+colorama

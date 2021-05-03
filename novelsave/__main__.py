@@ -1,84 +1,58 @@
-import argparse
-from getpass import getpass
-from pathlib import Path
-
-from webnovel.tools import UrlTools
+import sys
 
 from novelsave import NovelSave
-from novelsave.cli import NovelListing
+from novelsave.cli import CliListing, CliConfig, DefaultSubcommandArgumentParser
 from novelsave.database import UserConfig
-from novelsave.exceptions import MissingSource
-from novelsave.ui import ConsolePrinter, PrinterPrefix, TableBuilder
-
-
-def setup_config(args):
-    console = ConsolePrinter(verbose=True)
-    user = UserConfig()
-
-    # updating storage directory
-    if args.dir:
-
-        # could throw an OSError: illegal directory names
-        args.dir = Path(args.dir).resolve().absolute()
-
-        try:
-            user.directory.put(str(args.dir))
-            console.print(f'Updated {user.directory.name}', prefix=PrinterPrefix.SUCCESS)
-        except ValueError as e:  # check for validation failures
-            console.print(e, prefix=PrinterPrefix.ERROR)
-
-        # breathe,
-        print()
-
-    table = TableBuilder(('field', 'value'))
-    for config in user.configs:
-        table.add_row((config.name, config.get()))
-
-    print(table)
+from novelsave.exceptions import MissingSource, ResponseException, NoInputException, CookieAuthException
+from novelsave.utils.helpers import url_pattern
+from novelsave.utils.ui import ConsoleHandler, figlet
 
 
 def process_task(args):
+    console = ConsoleHandler(plain=args.plain)
+
     # checks if the provided url is valid
-    if 'https://' not in args.url:
-        # non valid urls are converted to webnovel urls
-        # or atleast tried to
-        args.url = UrlTools.to_novel_url(args.url)
+    if not url_pattern.match(args.url):
+        console.error('Provided url is not valid. Please check and try again')
+        sys.exit(1)
 
     try:
-        novelsave = NovelSave(args.url, verbose=args.verbose)
-    except MissingSource:
-        console = ConsolePrinter(verbose=args.verbose)
-
-        console.print(f'"{args.url}" is not supported any available source', prefix=PrinterPrefix.ERROR)
-        console.print(f'Request support by creating a new issue at '
-                      f'https://github.com/mHaisham/novelsave/issues/new/choose')
-        console.newline()
-        return
+        novelsave = NovelSave(args.url, args.no_input, plain=args.plain)
+    except MissingSource as e:
+        console.error(str(e))
+        sys.exit(1)
 
     novelsave.timeout = args.timeout
 
     try:
         login(args, novelsave)
-    except ValueError as e:
-        novelsave.console.print(str(e), prefix=PrinterPrefix.ERROR)
-        novelsave.console.newline()
-        return
+    except Exception as e:
+        console.error(str(e))
+        sys.exit(1)
 
     if not any([args.update, args.remove_meta, args.meta, args.pending, args.create, args.force_create]):
-        novelsave.console.print('No actions selected', prefix=PrinterPrefix.ERROR)
+        console.error('No actions selected')
+        console.newline()
 
     if args.update:
-        novelsave.update(force_cover=args.force_cover)
+        try:
+            novelsave.update(force_cover=args.force_cover)
+        except ResponseException as e:
+            console.error(e.message)
+            sys.exit(1)
 
     if args.remove_meta:
         novelsave.remove_metadata(with_source=True)
-        novelsave.console.print('Removed metadata', prefix=PrinterPrefix.SUCCESS)
 
     if args.meta:
         novelsave.metadata(url=args.meta, force=args.force_meta)
 
     if args.pending:
-        novelsave.download(thread_count=args.threads, limit=args.limit)
+        try:
+            novelsave.download(thread_count=args.threads, limit=args.limit)
+        except ValueError as e:
+            console.error(str(e))
+            sys.exit(1)
 
     if args.create or args.force_create:
         novelsave.create_epub(force=args.force_create)
@@ -86,35 +60,50 @@ def process_task(args):
 
 def login(args, novelsave):
     """
-    login and browser cookie
+    cookie_auth and browser cookie
     """
     # apply credentials
-    if args.use_cookies:
-        args.use_cookies = args.use_cookies.lower()
-        novelsave.login(cookie_browser=args.use_cookies, force=args.force_login)
+    if args.cookies_from:
+        args.cookies_from = args.cookies_from.lower()
+        novelsave.cookie_auth(cookie_browser=args.cookies_from)
 
-    # login
+    # cookie_auth
     elif args.username:
         novelsave.username = args.username
 
-        if args.password:
-            novelsave.password = args.password
-        else:
-            novelsave.password = getpass('\n[-] password: ')
+        def resolve_and_auth():
+            if args.password:
+                novelsave.password = args.password
+            else:
+                try:
+                    novelsave.password = novelsave.console.getpass(f'Enter your password: ({args.username}) ')
+                except NoInputException:
+                    raise Exception(NoInputException.messages['cred_password'])
 
-        # login
-        if novelsave.password:
-            novelsave.login()
+            novelsave.credential_auth()
+
+        if args.force_login:
+            resolve_and_auth()
+        else:
+            try:
+                novelsave.cookie_auth()
+            except CookieAuthException:
+                resolve_and_auth()
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='novelsave', description='tool to convert novels to epub')
-    parser.add_argument('-v', '--verbose', help='extra information', action='store_true')
+    parser = DefaultSubcommandArgumentParser(
+        prog='novelsave',
+        description='This is a tool to download and convert webnovels from popular sites to epub',
+    )
+
+    parser.add_argument('--plain', help='restrict display output in plain, tabular text format', action='store_true')
+    parser.add_argument('--no-input', help='don’t prompt or do anything interactive', action='store_true')
 
     sub = parser.add_subparsers()
 
     novel = sub.add_parser('novel', help='download, update, and delete novels')
-    novel.add_argument('url', type=str, help="novel url or identifier for downloading novels")
+    novel.add_argument('url', type=str, help="url of the specific novel")
 
     # exposed actions
     actions = novel.add_argument_group(title='actions')
@@ -124,8 +113,8 @@ def main():
     actions.add_argument('--meta', type=str, help='metadata source url', default=None)
     actions.add_argument('--remove-meta', action='store_true', help='remove current metadata')
     actions.add_argument('--force-cover', action='store_true', help='download and overwrite the existing cover')
-    actions.add_argument('--force-create', action='store_true', help='force create epub')
-    actions.add_argument('--force-meta', action='store_true', help='force update metadata')
+    actions.add_argument('--force-create', action='store_true', help='force create epub ignoring update status')
+    actions.add_argument('--force-meta', action='store_true', help='force update metadata ignoring previous metadata')
 
     # auth
     auth = novel.add_argument_group(title='auth')
@@ -133,7 +122,7 @@ def main():
     auth_cookies.add_argument('--username', type=str, help='username or email field')
     auth.add_argument('--password', type=str, help='password field; not recommended, refer to README for more details')
     auth.add_argument('--force-login', action='store_true', help='remove existing cookies and login')
-    auth_cookies.add_argument('--use-cookies', help='use cookies from specified browser')
+    auth_cookies.add_argument('--cookies-from', help='use cookies from specified browser')
 
     # misc
     novel.add_argument('--threads', type=int, help='number of download threads', default=4)
@@ -145,31 +134,31 @@ def main():
     listing = sub.add_parser('list', help='manipulate currently existing novels')
     listing.add_argument('--novel', type=str,
                          help='takes the url of the novel and displays meta information')
-    listing.add_argument('--reset', action='store_true',
-                         help='remove chapters and metadata. to be used with --novel')
-    listing.add_argument('--full', action='store_true',
-                         help='remove everything including compiled epub files. to be used with --reset')
-    listing.set_defaults(func=parse_listing)
+    deleting = listing.add_mutually_exclusive_group()
+    deleting.add_argument('--reset', action='store_true',
+                          help='remove chapters and metadata. to be used with --novel')
+    deleting.add_argument('--delete', action='store_true',
+                          help='remove everything including compiled epub files. to be used with --novel')
+    listing.add_argument('--yes', action='store_true', help='skip confirm confirmation used in --reset and --delete')
+    listing.set_defaults(func=CliListing.handle)
 
     # Configurations
     config = sub.add_parser('config', help='update and view user configurations')
-    config.add_argument('-d', '--dir', help='directory for saving novels')
-    config.set_defaults(func=setup_config)
+    config.add_argument('--save-dir', help='directory for saving novels')
+    config.add_argument('--toggle-banner', action='store_true', help='Toggle show and hide for title banner')
+    config.set_defaults(func=CliConfig.handle)
+
+    parser.set_default_subparser('novel')
 
     args = parser.parse_args()
-    args.func(args)  # TODO handle errors raised
 
+    if not args.plain and UserConfig.instance().show_banner.get():
+        print(figlet.banner)
 
-def parse_listing(args):
-    listing = NovelListing(args.verbose)
-
-    if args.novel:
-        if args.reset:
-            listing.reset_novel(args.novel, args.full)
-        else:
-            listing.show_novel(args.novel)
-    else:
-        listing.show_all()
+    try:
+        args.func(args)
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':

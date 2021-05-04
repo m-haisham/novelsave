@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-import novelsave
+from novelsave import meta
 
 with open('README.md', 'r') as f:
     long_description = f.read()
@@ -10,24 +10,24 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='novelsave',
-    version=novelsave.__version__,
+    version=meta.__version__,
     author="Schicksal",
-    description="Tool to convert webnovel to epub",
+    description="This is a commandline tool to download and convert novels from numerous sources to epub files",
     author_email='mhaisham79@gmail.com',
     long_description=long_description,
     long_description_content_type='text/markdown',
     install_requires=requirements,
     classifiers=[
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: APACHE-2.0 License',
         'Programming Language :: Python :: 3.8',
         "Operating System :: OS Independent",
     ],
-    license="MIT license",
-    keywords='webnovel novel scrape save own',
+    license="APACHE-2.0 license",
+    keywords='webnovel novel lightnovel scrape download epub save',
 
-    url='https://github.com/mHaisham/novelsave',
+    url=meta.github,
     project_urls={
-        'Source code': 'https://github.com/mHaisham/novelsave'
+        'Source code': meta.github,
     },
     entry_points={
         'console_scripts': [

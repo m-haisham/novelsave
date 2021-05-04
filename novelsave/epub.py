@@ -2,7 +2,6 @@ import hashlib
 from pathlib import Path
 
 from ebooklib import epub
-from yattag import Doc
 
 from .models import MetaData
 from .utils.helpers import StringHelper
@@ -92,20 +91,12 @@ class NovelEpub:
         title = f'{prefix}{chapter.title}'
         epub_chapter = epub.EpubHtml(title=title, file_name=f'{chapter.index}.xhtml', lang='en')
 
-        # html content
-        doc, tag, text = Doc().tagtext()
-        with tag('h1'):
-            text(title)
-
-        # for the more neatly scraped
+        content = f'''<h1>{title}</h1>'''
         if type(chapter.paragraphs) == list:
-            for para in chapter.paragraphs:
-                with tag('p'):
-                    text(para)
+            content += '<p>' + '</p><p>'.join(chapter.paragraphs) + '<\p>'
+        else:
+            content += chapter.paragraphs
 
-        # those that are scraped as a single blob
-        elif type(chapter.paragraphs) == str:
-            doc.asis(chapter.paragraphs)
+        epub_chapter.content = content
 
-        epub_chapter.content = doc.getvalue()
         return epub_chapter

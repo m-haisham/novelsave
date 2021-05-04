@@ -1,5 +1,4 @@
 appdirs==1.4.4
-yattag==1.14.0
 tinydb
 requests>=2.25.0
 beautifulsoup4==4.9.3

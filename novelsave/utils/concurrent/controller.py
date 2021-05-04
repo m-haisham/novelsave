@@ -61,3 +61,9 @@ class ConcurrentActionsController:
         while not self.done:
             yield self.queue_out.get()
             self.queue_out.task_done()
+
+        self.close()
+
+    def close(self):
+        for thread in self.threads:
+            thread.join()

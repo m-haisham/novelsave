@@ -9,9 +9,8 @@ from .database import NovelData, CookieDatabase, UserConfig
 from .epub import NovelEpub
 from .exceptions import ChapterException, UnsupportedBrowserException, CookieAuthException, DownloadLimitException
 from .logger import NovelLogger
-from .metasources import parse_metasource
+from .sources import parse_source, parse_metasource
 from .models import Chapter, MetaData
-from .sources import parse_source
 from .utils.concurrent import ConcurrentActionsController
 from .utils.ui import Loader, ConsoleHandler
 

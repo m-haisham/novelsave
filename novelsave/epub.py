@@ -93,7 +93,7 @@ class NovelEpub:
 
         content = f'''<h1>{title}</h1>'''
         if type(chapter.paragraphs) == list:
-            content += '<p>' + '</p><p>'.join(chapter.paragraphs) + '<\p>'
+            content += '<p>' + '</p><p>'.join(chapter.paragraphs) + '</p>'
         else:
             content += chapter.paragraphs
 

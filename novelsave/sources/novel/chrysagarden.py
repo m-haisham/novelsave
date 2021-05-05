@@ -37,6 +37,10 @@ class Chrysanthemumgarden(Source):
             url=url,
         )
 
+        raw_title = soup.select_one('.novel-raw-title')
+        if raw_title:
+            novel.add_meta('title', raw_title.text.strip(), others={'role': 'alternative'})
+
         for a in soup.select('.series-tag'):
             novel.add_meta('subject', a.text.strip())
 
@@ -73,8 +77,7 @@ class Chrysanthemumgarden(Source):
 
         # this removes hidden elements
         try:
-            style = element['style']
-            if re.match(r'(height:\s*1px|width:\s*0)', style, flags=re.IGNORECASE):
+            if re.match(r'(height:\s*1px|width:\s*0)', element['style'], flags=re.IGNORECASE):
                 element.extract()
                 return
         except KeyError:

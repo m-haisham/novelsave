@@ -18,4 +18,4 @@ def parse_metasource(url):
         if source.of(url):
             return source()
 
-    raise MissingSource(url)
+    raise MissingSource(url, metadata=True)

@@ -64,7 +64,8 @@ class Source(Crawler):
             for cookie in cookies:
                 self.session.cookies.set(**cookie)
         else:
-            raise TypeError(f"Unexpected type received: {type(cookies)}; Require either 'RequestsCookieJar' or 'Tuple[dict]'")
+            raise TypeError(
+                f"Unexpected type received: {type(cookies)}; Require either 'RequestsCookieJar' or 'Tuple[dict]'")
 
     def novel(self, url: str) -> Tuple[Novel, List[Chapter]]:
         """
@@ -153,4 +154,9 @@ class Source(Crawler):
 
         # Remove attributes
         elif hasattr(element, 'attrs'):
-            element.attrs = {}
+
+            # preserve href attribute of <a>
+            if element.name == 'a':
+                element.attrs = {'href': element.get('href') or '#'}
+            else:
+                element.attrs = {}

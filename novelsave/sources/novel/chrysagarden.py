@@ -14,7 +14,6 @@ class Chrysanthemumgarden(Source):
     ]
 
     blacklist_patterns = [
-        r'^[\W\D]*(volume|chapter)[\W\D]+\d+[\W\D]*$',
         r'^(\s| )+$',  # non-breaking whitespace
     ]
 

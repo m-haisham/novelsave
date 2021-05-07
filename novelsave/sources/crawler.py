@@ -16,7 +16,6 @@ class Crawler:
 
         self._soup_cache = {}
 
-
     def set_cookies(self, cookies: RequestsCookieJar):
         self.session.cookies = cookies
 
@@ -48,13 +47,13 @@ class Crawler:
 
         return BeautifulSoup(response.content, 'lxml')
 
-    def request_get(self, url, _tries=0):
+    def request_get(self, url, _tries=0, **kwargs):
         # limiting retry requests
         if _tries >= self.retry_count:
             return
 
         # request
-        response = self.session.get(url, headers=header)
+        response = self.session.get(url, headers=header, **kwargs)
         if response.status_code == 200:  # ok
             return response
 

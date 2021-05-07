@@ -7,10 +7,6 @@ from ...models import MetaData
 class NovelUpdates(MetaSource):
     base = 'https://www.novelupdates.com'
 
-    @staticmethod
-    def of(value):
-        return value.startswith(NovelUpdates.base)
-
     def retrieve(self, url) -> List[MetaData]:
         metadata = []
         soup = self.soup(url)

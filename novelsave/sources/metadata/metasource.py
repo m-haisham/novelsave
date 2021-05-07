@@ -11,13 +11,14 @@ header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWe
 
 
 class MetaSource(Crawler):
-    @staticmethod
-    def of(value):
+    base: str
+
+    @classmethod
+    def of(cls, url: str):
         """
-        :param value: value to test
-        :return: whether the value is from this source
+        :return: whether the url is from this source
         """
-        raise NotImplementedError
+        return url.startswith(cls.base)
 
     def retrieve(self, url) -> List[MetaData]:
         """

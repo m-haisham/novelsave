@@ -10,10 +10,6 @@ class WlnUpdates(MetaSource):
     base = 'https://www.wlnupdates.com/'
     api_endpoint = 'https://www.wlnupdates.com/api'
 
-    @staticmethod
-    def of(value):
-        return value.startswith(WlnUpdates.base)
-
     def retrieve(self, url) -> List[MetaData]:
         metadata = []
         
@@ -55,5 +51,4 @@ class WlnUpdates(MetaSource):
         return metadata
 
     def api_request(self, id: int, mode: str):
-        response = requests.post(self.api_endpoint, json={'id': id, 'mode': mode})
-        return self._verify_response(response).json()
+        return self.request_get(self.api_endpoint, json={'id': id, 'mode': mode}).json()

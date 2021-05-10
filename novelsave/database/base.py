@@ -8,7 +8,7 @@ class NovelData(Database):
     def __init__(self, directory, should_create=True, load_chapters=True):
         super(NovelData, self).__init__(directory, should_create)
 
-        self.novel = SingleClassTable(self.db, 'novel', Novel,
+        self.novel = SingleClassTable(self, 'novel', Novel,
                                       ['title', 'author', 'synopsis', 'thumbnail', 'lang', 'meta_source', 'url'])
         self.metadata = SetTable(self.db, 'metadata', field1='name', field2='value')
         self.pending = MultiClassDecoupledTable(self.db, self.path.parent, 'pending', Chapter,

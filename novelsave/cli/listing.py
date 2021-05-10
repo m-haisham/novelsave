@@ -158,7 +158,7 @@ class CliListing:
 
         try:
             path = self.user.directory.get() / Path(source.source_folder_name()) / source.novel_folder_name(url)
-            data = NovelData(path, create=False, load_chapters=load)
+            data = NovelData(path, should_create=False, load_chapters=load)
         except FileNotFoundError:
             self.console.error('Record of novel does not exist\n')
             sys.exit(1)

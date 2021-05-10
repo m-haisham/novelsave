@@ -1,7 +1,19 @@
-from ..accessors import KeyValueAccessor
+from .template import Table
 
 
-class KeyValueTable(KeyValueAccessor):
+class KeyValueTable(Table):
     def __init__(self, db, table):
-        super(KeyValueTable, self).__init__(db)
-        self.table_name = table
+        super(KeyValueTable, self).__init__(db, table)
+
+    def put(self, key, value):
+        self.data[key] = value
+        self.save()
+
+    def get(self, key, default=None):
+        return self.data.get(key, default)
+
+    def remove(self, key):
+        del self.data[key]
+
+    def all(self):
+        return dict(self.data)

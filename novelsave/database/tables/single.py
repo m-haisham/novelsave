@@ -1,11 +1,10 @@
 from typing import List
 
 from .template import Table
-from ..template import Database
 
 
 class SingleClassTable(Table):
-    def __init__(self, db: Database, table: str, cls, fields: List[str]):
+    def __init__(self, db, table: str, cls, fields: List[str]):
         super(SingleClassTable, self).__init__(db, table)
 
         self.cls = cls

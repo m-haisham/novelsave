@@ -1,12 +1,12 @@
 from typing import Dict, Union, List, Callable
 
-from ..template import Database
+from ..template import DatabaseTemplate
 
 Serializable = Union[Dict, List]
 
 
 class Table:
-    def __init__(self, db: Database, table: str, default_factory: Callable[[], Serializable] = lambda: {}):
+    def __init__(self, db: DatabaseTemplate, table: str, default_factory: Callable[[], Serializable] = lambda: {}):
         self.db = db
         self.table = table
         self.default_factory = default_factory

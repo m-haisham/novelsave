@@ -1,13 +1,12 @@
 import json
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Optional, Dict, Union
 
 
 class DatabaseTemplate:
-    def __init__(self, path, should_create=True):
-        self.path = path / Path('data')
-        self.db_path = self.path / Path('meta.db')
-        self.should_create = should_create
+    def __init__(self, file: Union[str, Path], should_create=True):
+        self.file: Path = Path(file)
+        self.path: Path = getattr(file, 'parent', '')
 
         self._data = {}
 
@@ -26,42 +25,42 @@ class DatabaseTemplate:
 
 class Database(DatabaseTemplate):
     def __new__(cls, *args, **kwargs):
-        path = kwargs.get('path', args[0])
+        file = kwargs.get('file', args[0])
 
-        if path == ':memory:':
+        if file == ':memory:':
             return MemoryDatabase(*args, **kwargs)
         else:
             return FileDatabase(*args, **kwargs)
 
     def save(self):
-        raise NotImplementedError
+        pass
 
     def load(self):
-        raise NotImplementedError
+        pass
 
 
 class FileDatabase(DatabaseTemplate):
-    def __init__(self, path, should_create=True):
-        super(FileDatabase, self).__init__(path, should_create)
-        self._load_or_create()
+    def __init__(self, file, should_create=True):
+        super(FileDatabase, self).__init__(file)
+        self._load_or_create(should_create)
 
     def save(self):
-        with self.db_path.open('w') as f:
+        with self.file.open('w') as f:
             json.dump(self._data, f)
 
     def load(self):
-        with self.db_path.open('r') as f:
+        with self.file.open('r') as f:
             self._data = json.load(f)
 
     def _create(self):
         self.path.mkdir(parents=True, exist_ok=True)
         self.save()
 
-    def _load_or_create(self):
+    def _load_or_create(self, should_create):
         try:
             self.load()
         except FileNotFoundError:
-            if self.should_create:
+            if should_create:
                 self._create()
 
 

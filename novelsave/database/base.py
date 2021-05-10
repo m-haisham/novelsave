@@ -1,4 +1,4 @@
-from .__template__ import Database
+from .template import Database
 from .tables import KeyValueTable, SingleClassTable, MultiClassExternalTable, MultiClassDecoupledTable, \
     SetTable
 from ..models import Novel, Chapter

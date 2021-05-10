@@ -1,7 +1,7 @@
 from typing import List
 
-from .__template__ import Table
-from ..__template__ import Database
+from .template import Table
+from ..template import Database
 
 
 class SingleClassTable(Table):
@@ -15,4 +15,4 @@ class SingleClassTable(Table):
         self.data = {field: getattr(values, field) for field in self.fields}
 
     def parse(self):
-        return self.cls(**{key: value for key, value in self.data if key in self.fields})
+        return self.cls(**{key: value for key, value in self.data.items() if key in self.fields})

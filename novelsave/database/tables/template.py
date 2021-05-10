@@ -1,4 +1,4 @@
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Callable
 
 from ..template import Database
 
@@ -6,14 +6,18 @@ Serializable = Union[Dict, List]
 
 
 class Table:
-    def __init__(self, db: Database, table: str):
+    def __init__(self, db: Database, table: str, default_factory: Callable[[], Serializable] = lambda: {}):
         self.db = db
         self.table = table
-        self.default = lambda: {}
+        self.default_factory = default_factory
 
     @property
     def data(self) -> Serializable:
-        return self.db.get_table(self.table, self.default())
+        try:
+            return self.db.get_table(self.table)
+        except KeyError:
+            self.db.set_table(self.table, self.default_factory())
+            return self.db.get_table(self.table)
 
     @data.setter
     def data(self, data: Serializable):
@@ -24,4 +28,4 @@ class Table:
         self.db.save()
 
     def truncate(self):
-        self.data = self.default()
+        self.data = self.default_factory()

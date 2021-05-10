@@ -11,8 +11,8 @@ class DatabaseTemplate:
 
         self._data = {}
 
-    def get_table(self, key: str, default: Optional = None):
-        return self._data.get(key, default or {})
+    def get_table(self, key: str):
+        return self._data[key]
 
     def set_table(self, key: str, data: Dict):
         self._data[key] = data

@@ -1,9 +1,9 @@
 from typing import List
 
-from .template import Table
+from .keyvalue import KeyValueTable
 
 
-class SingleClassTable(Table):
+class SingleClassTable(KeyValueTable):
     def __init__(self, db, table: str, cls, fields: List[str]):
         super(SingleClassTable, self).__init__(db, table)
 

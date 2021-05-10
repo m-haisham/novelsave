@@ -267,7 +267,7 @@ class NovelSave:
         return NovelData(path), path
 
     def cover_path(self):
-        return self.db.path.parent / Path('cover.jpg')
+        return self.db.path / Path('cover.jpg')
 
     def task(self, partial_c) -> Union[Chapter, Exception]:
         try:

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from .template import FileDatabase
 from .tables import KeyValueTable, SingleClassTable, MultiClassExternalTable, MultiClassDecoupledTable, \
     SetTable
@@ -6,7 +8,7 @@ from ..models import Novel, Chapter
 
 class NovelData(FileDatabase):
     def __init__(self, directory, should_create=True, load_chapters=True):
-        super(NovelData, self).__init__(directory, should_create)
+        super(NovelData, self).__init__(Path(directory) / Path('data') / 'meta.db', should_create)
 
         self.novel = SingleClassTable(self, 'novel', Novel,
                                       ['title', 'author', 'synopsis', 'thumbnail', 'lang', 'meta_source', 'url'])

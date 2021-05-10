@@ -1,7 +1,5 @@
 from typing import List, Iterable
 
-from tinydb import where
-
 from .template import Table
 from ...models import Chapter
 

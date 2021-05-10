@@ -96,3 +96,28 @@ class TestSetSequenceTable(unittest.TestCase):
         data = self.table.all()
         self.assertIsInstance(data, list)
         self.assertEqual(2, len(data))
+
+    def test_search_where(self):
+        self.table.put(dict(id='something', name='this'))
+        self.table.put(dict(id='ad', name='is'))
+        self.table.put(dict(id='ad', name='a'))
+        self.table.put(dict(id='ad', name='name'))
+        self.table.put(dict(id='this', name='.',))
+        self.table.put(dict(id='this', name='a'))
+
+        results = self.table.search_where('id', 'ad')
+
+        self.assertEqual(3, len(results))
+
+    def test_remove_where(self):
+        self.table.put(dict(id='something', name='this'))
+        self.table.put(dict(id='ad', name='is'))
+        self.table.put(dict(id='ad', name='a'))
+        self.table.put(dict(id='ad', name='name'))
+        self.table.put(dict(id='this', name='.',))
+        self.table.put(dict(id='this', name='a'))
+
+        self.table.remove_where('name', 'a')
+
+        data = self.db._data[self.table_name]
+        self.assertEqual(4, len(data))

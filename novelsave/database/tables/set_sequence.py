@@ -34,3 +34,32 @@ class SetTable(Table):
                 del data[i]
 
         self.save()
+
+    def search_where(self, key, value):
+        docs = []
+        data = self.data
+
+        for item in data:
+            try:
+                if item[key] == value:
+                    docs.append(dict(item))
+            except KeyError:
+                pass
+
+        return docs
+
+    def remove_where(self, key, value):
+        data = self.data
+
+        if not data:
+            return
+
+        for i in range(len(data) - 1, -1, -1):
+            item = data[i]
+            try:
+                if item[key] == value:
+                    del data[i]
+            except KeyError:
+                pass
+
+        self.save()

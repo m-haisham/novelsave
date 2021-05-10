@@ -1,35 +1,12 @@
-from pathlib import Path
-from typing import Tuple
-
-from tinydb import TinyDB
-
+from .__template__ import Database
 from .tables import KeyValueTable, SingleClassTable, MultiClassExternalTable, MultiClassDecoupledTable, \
     SetTable
 from ..models import Novel, Chapter
 
 
-class Database:
-    def __init__(self, directory, create=True):
-        self.db, self.path = self.open_db(directory, create)
-
-    def open_db(self, directory, create) -> Tuple[TinyDB, Path]:
-        path = directory / Path('data') / Path('meta.db')
-
-        if not path.exists() or not path.is_file():
-            if create:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                if not path.is_file():
-                    with path.open('w'):
-                        pass
-            else:
-                raise FileNotFoundError(f'{path} does not exist')
-
-        return TinyDB(path), path
-
-
 class NovelData(Database):
-    def __init__(self, directory, create=True, load_chapters=True):
-        super(NovelData, self).__init__(directory, create)
+    def __init__(self, directory, should_create=True, load_chapters=True):
+        super(NovelData, self).__init__(directory, should_create)
 
         self.novel = SingleClassTable(self.db, 'novel', Novel,
                                       ['title', 'author', 'synopsis', 'thumbnail', 'lang', 'meta_source', 'url'])

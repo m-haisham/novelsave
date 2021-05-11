@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Optional, Dict, Union
+from typing import Dict, Union
 
 
 class DatabaseTemplate:
@@ -59,7 +59,7 @@ class FileDatabase(DatabaseTemplate):
     def _load_or_create(self, should_create):
         try:
             self.load()
-        except FileNotFoundError:
+        except (FileNotFoundError, json.JSONDecodeError):
             if should_create:
                 self._create()
 

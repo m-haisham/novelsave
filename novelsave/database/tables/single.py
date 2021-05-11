@@ -11,7 +11,8 @@ class SingleClassTable(KeyValueTable):
         self.fields = fields
 
     def set(self, values):
-        self.data = {field: getattr(values, field) for field in self.fields}
+        self.data.update({field: getattr(values, field) for field in self.fields})
+        self.save()
 
     def parse(self):
         return self.cls(**{key: value for key, value in self.data.items() if key in self.fields})

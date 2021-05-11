@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from .template import FileDatabase
-from .tables import KeyValueTable, SingleClassTable, MultiClassExternalTable, MultiClassDecoupledTable, \
+from .tables import KeyValueTable, SingleClassTable, MultiClassExternalTable, MultiClassTable, Decoupled, \
     SetTable
 from ..models import Novel, Chapter
 
@@ -13,8 +13,9 @@ class NovelData(FileDatabase):
         self.novel = SingleClassTable(self, 'novel', Novel,
                                       ['title', 'author', 'synopsis', 'thumbnail', 'lang', 'meta_source', 'url'])
         self.metadata = SetTable(self, 'metadata', ['name', 'value'])
-        self.pending = MultiClassDecoupledTable(self, self.path, 'pending', Chapter,
-                                                ['index', 'title', 'volume', 'url'], 'url')
+        self.pending = Decoupled(
+            MultiClassTable(self, 'pending', Chapter, ['index', 'title', 'volume', 'url'], 'url'),
+        )
         self.chapters = MultiClassExternalTable(
             self, self.path, 'chapters',
             Chapter, ['index', 'title', 'paragraphs', 'volume', 'url'], 'url',

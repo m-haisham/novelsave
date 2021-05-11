@@ -1,15 +1,12 @@
-from typing import List
+from typing import List, Iterable
 
-from tinydb import where
-
-from ..accessors import IAccessor
+from .template import Table
 from ...models import Chapter
 
 
-class MultiClassTable(IAccessor):
+class MultiClassTable(Table):
     def __init__(self, db, table: str, cls, fields: List[str], identifier: str):
-        super(MultiClassTable, self).__init__(db)
-        self.table_name = table
+        super(MultiClassTable, self).__init__(db, table)
 
         # error checks
         if identifier not in fields:
@@ -28,7 +25,14 @@ class MultiClassTable(IAccessor):
         :param obj: object to be added
         :return: None
         """
-        self.table.insert(self._to_dict(obj))
+        id = getattr(obj, self.identifier)
+        try:
+            self.data[id]
+            raise ValueError
+        except KeyError:
+            self.data[id] = self._to_dict(obj)
+
+        self.save()
 
     def put(self, obj):
         """
@@ -37,23 +41,24 @@ class MultiClassTable(IAccessor):
         :param obj: object to be added
         :return: None
         """
-        self.table.upsert(self._to_dict(obj), where(self.identifier) == getattr(obj, self.identifier))
+        self.data[getattr(obj, self.identifier)] = self._to_dict(obj)
+        self.save()
 
-    def put_all(self, objs: List):
+    def put_all(self, objs: Iterable):
         """
         put obj with unique identifier into database
 
         :param objs: object to be added
         :return: None
         """
-        docs = [self._to_dict(c) for c in objs]
-        self.table.insert_multiple(docs)
+        self.data.update({getattr(obj, self.identifier): self._to_dict(obj) for obj in objs})
+        self.save()
 
     def all(self) -> List:
         """
         :return: all objects
         """
-        return [self._from_dict(o) for o in self.table.all()]
+        return [self._from_dict(o) for o in self.data.values()]
 
     def get(self, id) -> Chapter:
         """
@@ -61,20 +66,17 @@ class MultiClassTable(IAccessor):
         :return: chapter with corresponding id
         :raises ValueError: if more than one value corresponds to key
         """
-        docs = self.table.search(where('id') == id)
-        if len(docs) == 1:
-            return self._from_dict(docs[0])
-        else:
-            raise ValueError(f'More than one value with id: {id}')
+        return self._from_dict(self.data[id])
 
-    def remove(self, value):
+    def remove(self, id):
         """
         removes value from pending
 
-        :param value: value to remove
+        :param id: id of obj to remove
         :return: None
         """
-        self.table.remove(where(self.identifier) == value)
+        del self.data[id]
+        self.save()
 
     def _to_dict(self, obj) -> dict:
         return {field: getattr(obj, field) for field in self.fields}

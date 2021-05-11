@@ -1,23 +1,18 @@
 from typing import List
 
-from ..accessors import KeyValueAccessor
+from .keyvalue import KeyValueTable
 
 
-class SingleClassTable(KeyValueAccessor):
+class SingleClassTable(KeyValueTable):
     def __init__(self, db, table: str, cls, fields: List[str]):
-        super(SingleClassTable, self).__init__(db)
+        super(SingleClassTable, self).__init__(db, table)
 
-        # error checks
-        if not fields:
-            raise ValueError("'fields' must not be empty")
-
-        self.table_name = table
         self.cls = cls
         self.fields = fields
 
     def set(self, values):
-        for field in self.fields:
-            self.put(field, getattr(values, field))
+        self.data.update({field: getattr(values, field) for field in self.fields})
+        self.save()
 
     def parse(self):
-        return self.cls(**{key: value for key, value in self.all().items() if key in self.fields})
+        return self.cls(**{key: value for key, value in self.data.items() if key in self.fields})

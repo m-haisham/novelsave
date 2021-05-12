@@ -15,6 +15,7 @@ from .novelfull import NovelFull
 from .novelhall import NovelHall
 from .novelonlinefull import NovelOnlineFull
 from .novelsite import NovelSite
+from .novelsrock import NovelsRock
 from .peachpitting import PeachPitting
 from .readlightnovel import ReadLightNovel
 from .royalroad import RoyalRoad
@@ -61,6 +62,7 @@ sources = [
     NovelPassion,
     NovelFun,
     NovelHall,
+    NovelsRock,
 ]
 
 

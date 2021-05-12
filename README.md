@@ -269,6 +269,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [novelpassion.com] |  |  |
 | [novelfun.net] |  |  |
 | [novelhall.com] |  |  |
+| [novelsrock.com] |  |  |
 
 <!-- SOURCE LINKS -->
 
@@ -301,6 +302,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [novelpassion.com]: https://www.novelpassion.com
 [novelfun.net]: https://novelfun.net
 [novelhall.com]: https://www.novelhall.com
+[novelsrock.com]: https://novelsrock.com
 
 ### Metadata
 

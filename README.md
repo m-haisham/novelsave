@@ -267,6 +267,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [wuxiaworld.online] |  |  |
 | [novelonlinefull.com] |  |  |
 | [novelpassion.com] |  |  |
+| [novelfun.net] |  |  |
 
 <!-- SOURCE LINKS -->
 
@@ -297,6 +298,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [wuxiaworld.online]: https://wuxiaworld.online
 [novelonlinefull.com]: https://novelonlinefull.com
 [novelpassion.com]: https://www.novelpassion.com
+[novelfun.net]: https://novelfun.net
 
 ### Metadata
 

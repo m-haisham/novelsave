@@ -7,13 +7,16 @@ class KeyValueTable(Table):
 
     def put(self, key, value):
         self.data[key] = value
-        self.save()
+        self.flush()
 
     def get(self, key, default=None):
         return self.data.get(key, default)
 
     def remove(self, key):
-        del self.data[key]
+        try:
+            del self.data[key]
+        except KeyError:
+            pass
 
     def all(self):
         return dict(self.data)

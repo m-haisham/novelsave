@@ -49,28 +49,64 @@ class TestMultiClassTable(unittest.TestCase):
         self.db = Database(':memory:')
         self.table = MultiClassTable(self.db, self.table_name, TestClass, self.fields, 'id')
 
-    def test_insert(self):
-        self.table.insert(self.tc1)
+    def test_pre_process(self):
+        test_data = [
+            vars(self.tc1),
+            vars(self.tc2),
+        ]
 
-        data = self.db._data[self.table_name]
+        processed_data = self.table.pre_process(test_data)
 
-        self.assertIsInstance(data, dict)
-        self.assertEqual(1, len(data))
-        self.assertEqual(self.tc1, TestClass(**data[1]))
+        self.assertIsInstance(processed_data, dict)
+        self.assertEqual(2, len(processed_data))
+        self.assertDictEqual(vars(self.tc1), processed_data[self.tc1.id])
+        self.assertDictEqual(vars(self.tc2), processed_data[self.tc2.id])
 
-    def test_insert_conflict(self):
-        self.table.insert(self.tc1)
-        with self.assertRaises(ValueError):
-            self.table.insert(self.tc1c)
+    def test_pre_process_dict_format(self):
+        test_data = {
+            self.tc1.id: vars(self.tc1),
+            self.tc2.id: vars(self.tc2),
+        }
+
+        processed_data = self.table.pre_process(test_data)
+
+        self.assertIsInstance(processed_data, dict)
+        self.assertEqual(2, len(processed_data))
+        self.assertDictEqual(test_data, processed_data)
+
+    def test_post_process(self):
+        test_data = {
+            self.tc1.id: vars(self.tc1),
+            self.tc2.id: vars(self.tc2),
+        }
+
+        processed_data = self.table.post_process(test_data)
+
+        self.assertIsInstance(processed_data, list)
+        self.assertEqual(2, len(processed_data))
+        self.assertDictEqual(vars(self.tc1), processed_data[0])
+        self.assertDictEqual(vars(self.tc2), processed_data[1])
+
+    def test_process_cycle(self):
+        test_data = [
+            vars(self.tc1),
+            vars(self.tc2),
+        ]
+
+        pre_processed = self.table.pre_process(test_data)
+        post_processed = self.table.post_process(pre_processed)
+
+        for i in range(len(test_data)):
+            self.assertDictEqual(test_data[i], post_processed[i])
 
     def test_put(self):
         self.table.put(self.tc1)
 
         data = self.db._data[self.table_name]
 
-        self.assertIsInstance(data, dict)
+        self.assertIsInstance(data, list)
         self.assertEqual(1, len(data))
-        self.assertEqual(self.tc1, TestClass(**data[self.tc1.id]))
+        self.assertEqual(self.tc1, TestClass(**data[0]))
 
     def test_put_conflict(self):
         self.table.put(self.tc1)
@@ -78,16 +114,16 @@ class TestMultiClassTable(unittest.TestCase):
 
         data = self.db._data[self.table_name]
 
-        self.assertIsInstance(data, dict)
+        self.assertIsInstance(data, list)
         self.assertEqual(1, len(data))
-        self.assertEqual(self.tc1c, TestClass(**data[self.tc1.id]))
+        self.assertEqual(self.tc1c, TestClass(**data[0]))
 
     def test_put_all(self):
         self.table.put_all([self.tc1, self.tc2])
 
         data = self.db._data[self.table_name]
 
-        self.assertIsInstance(data, dict)
+        self.assertIsInstance(data, list)
         self.assertEqual(2, len(data))
 
     def test_put_all_duplicate(self):
@@ -95,7 +131,7 @@ class TestMultiClassTable(unittest.TestCase):
 
         data = self.db._data[self.table_name]
 
-        self.assertIsInstance(data, dict)
+        self.assertIsInstance(data, list)
         self.assertEqual(1, len(data))
 
     def test_put_all_conflict(self):
@@ -104,29 +140,36 @@ class TestMultiClassTable(unittest.TestCase):
 
         data = self.db._data[self.table_name]
 
-        self.assertIsInstance(data, dict)
+        self.assertIsInstance(data, list)
         self.assertEqual(2, len(data))
 
     def test_get(self):
-        self.table.insert(self.tc1)
+        self.table.put(self.tc1)
 
         data = self.db._data[self.table_name]
-        self.assertIsInstance(data, dict)
+        self.assertIsInstance(data, list)
         self.assertEqual(1, len(data))
         self.assertEqual(self.tc1, self.table.get(1))
 
+    def test_get_default(self):
+        self.assertIsNone(self.table.get('missing'))
+        self.assertEqual('default', self.table.get('missing', 'default'))
+
     def test_remove(self):
-        self.table.insert(self.tc1)
+        self.table.put(self.tc1)
         self.table.remove(self.tc1.id)
 
         data = self.db._data[self.table_name]
 
-        self.assertIsInstance(data, dict)
+        self.assertIsInstance(data, list)
         self.assertEqual(0, len(data))
 
+    def test_remove_nonexistent(self):
+        self.table.remove('something')
+
     def test_all(self):
-        self.table.insert(self.tc1)
-        self.table.insert(self.tc2)
+        self.table.put(self.tc1)
+        self.table.put(self.tc2)
 
         data = self.table.all()
 

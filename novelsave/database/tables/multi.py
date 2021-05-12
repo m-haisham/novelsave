@@ -1,10 +1,10 @@
-from typing import List, Iterable
+from typing import List, Iterable, Dict, Union, Optional
 
-from .template import Table
+from .template import ProcessedTable
 from ...models import Chapter
 
 
-class MultiClassTable(Table):
+class MultiClassTable(ProcessedTable):
     def __init__(self, db, table: str, cls, fields: List[str], identifier: str):
         super(MultiClassTable, self).__init__(db, table)
 
@@ -18,22 +18,6 @@ class MultiClassTable(Table):
         self.fields = fields
         self.identifier = identifier
 
-    def insert(self, obj):
-        """
-        put object without checking if it already exists
-
-        :param obj: object to be added
-        :return: None
-        """
-        id = getattr(obj, self.identifier)
-        try:
-            self.data[id]
-            raise ValueError
-        except KeyError:
-            self.data[id] = self._to_dict(obj)
-
-        self.save()
-
     def put(self, obj):
         """
         put object with unique identifier chapter.id into database
@@ -42,7 +26,7 @@ class MultiClassTable(Table):
         :return: None
         """
         self.data[getattr(obj, self.identifier)] = self._to_dict(obj)
-        self.save()
+        self.flush()
 
     def put_all(self, objs: Iterable):
         """
@@ -52,7 +36,7 @@ class MultiClassTable(Table):
         :return: None
         """
         self.data.update({getattr(obj, self.identifier): self._to_dict(obj) for obj in objs})
-        self.save()
+        self.flush()
 
     def all(self) -> List:
         """
@@ -60,13 +44,17 @@ class MultiClassTable(Table):
         """
         return [self._from_dict(o) for o in self.data.values()]
 
-    def get(self, id) -> Chapter:
+    def get(self, id, default=None) -> Optional[Chapter]:
         """
         :param id: unique identifier
+        :param default: return this value when key doesnt exist
         :return: chapter with corresponding id
         :raises ValueError: if more than one value corresponds to key
         """
-        return self._from_dict(self.data[id])
+        try:
+            return self._from_dict(self.data[id])
+        except KeyError:
+            return default
 
     def remove(self, id):
         """
@@ -75,8 +63,20 @@ class MultiClassTable(Table):
         :param id: id of obj to remove
         :return: None
         """
-        del self.data[id]
-        self.save()
+        try:
+            del self.data[id]
+            self.flush()
+        except KeyError:
+            pass
+
+    def pre_process(self, data: Union[List[Dict], Dict]) -> Dict:
+        if type(data) == list:
+            return {item[self.identifier]: item for item in data}
+        else:
+            return data
+
+    def post_process(self, data: Dict) -> List[Dict]:
+        return list(data.values())
 
     def _to_dict(self, obj) -> dict:
         return {field: getattr(obj, field) for field in self.fields}

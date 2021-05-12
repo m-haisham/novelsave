@@ -15,6 +15,7 @@ class DatabaseTemplate:
 
     def set_table(self, key: str, data: Dict):
         self._data[key] = data
+        return data
 
     def save(self):
         raise NotImplementedError

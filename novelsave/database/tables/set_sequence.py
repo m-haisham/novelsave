@@ -19,9 +19,10 @@ class SetTable(Table):
         for i, item in enumerate(data):
             if all([obj[field] == item[field] for field in self.fields]):
                 del data[i]
+                break
 
         data.append(obj)
-        self.save()
+        self.flush()
 
     def all(self) -> List[dict]:
         return self.data
@@ -33,7 +34,7 @@ class SetTable(Table):
             if all([obj[field] == item[field] for field in self.fields]):
                 del data[i]
 
-        self.save()
+        self.flush()
 
     def search_where(self, key, value):
         docs = []
@@ -62,4 +63,4 @@ class SetTable(Table):
             except KeyError:
                 pass
 
-        self.save()
+        self.flush()

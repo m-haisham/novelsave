@@ -16,8 +16,6 @@ class Decoupled:
 
     def __new__(cls, table: Table, path: Optional[Path] = None) -> Table:
         new_path = table.db.path / (path or f'{table.table}.db')
-        assert new_path.is_file()
-
         table.db = FileDatabase(new_path, should_create=True)
 
         return table

@@ -1,10 +1,10 @@
-from typing import List, Iterable
+from typing import List, Iterable, Dict
 
-from .template import Table
+from .template import ProcessedTable
 from ...models import Chapter
 
 
-class MultiClassTable(Table):
+class MultiClassTable(ProcessedTable):
     def __init__(self, db, table: str, cls, fields: List[str], identifier: str):
         super(MultiClassTable, self).__init__(db, table)
 
@@ -17,22 +17,6 @@ class MultiClassTable(Table):
         self.cls = cls
         self.fields = fields
         self.identifier = identifier
-
-    def insert(self, obj):
-        """
-        put object without checking if it already exists
-
-        :param obj: object to be added
-        :return: None
-        """
-        id = getattr(obj, self.identifier)
-        try:
-            self.data[id]
-            raise ValueError
-        except KeyError:
-            self.data[id] = self._to_dict(obj)
-
-        self.flush()
 
     def put(self, obj):
         """
@@ -77,6 +61,17 @@ class MultiClassTable(Table):
         """
         del self.data[id]
         self.flush()
+
+    def pre_process(self, data: List[Dict]) -> Dict:
+        processed = {}
+
+        for item in data:
+            processed[item[self.identifier]] = item
+
+        return processed
+
+    def post_process(self, data: Dict) -> List[Dict]:
+        return list(data.values())
 
     def _to_dict(self, obj) -> dict:
         return {field: getattr(obj, field) for field in self.fields}

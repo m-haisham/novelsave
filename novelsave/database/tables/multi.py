@@ -1,4 +1,4 @@
-from typing import List, Iterable, Dict, Union
+from typing import List, Iterable, Dict, Union, Optional
 
 from .template import ProcessedTable
 from ...models import Chapter
@@ -44,13 +44,17 @@ class MultiClassTable(ProcessedTable):
         """
         return [self._from_dict(o) for o in self.data.values()]
 
-    def get(self, id) -> Chapter:
+    def get(self, id, default=None) -> Optional[Chapter]:
         """
         :param id: unique identifier
+        :param default: return this value when key doesnt exist
         :return: chapter with corresponding id
         :raises ValueError: if more than one value corresponds to key
         """
-        return self._from_dict(self.data[id])
+        try:
+            return self._from_dict(self.data[id])
+        except KeyError:
+            return default
 
     def remove(self, id):
         """
@@ -59,8 +63,11 @@ class MultiClassTable(ProcessedTable):
         :param id: id of obj to remove
         :return: None
         """
-        del self.data[id]
-        self.flush()
+        try:
+            del self.data[id]
+            self.flush()
+        except KeyError:
+            pass
 
     def pre_process(self, data: Union[List[Dict], Dict]) -> Dict:
         if type(data) == list:

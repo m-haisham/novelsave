@@ -19,6 +19,7 @@ class SetTable(Table):
         for i, item in enumerate(data):
             if all([obj[field] == item[field] for field in self.fields]):
                 del data[i]
+                break
 
         data.append(obj)
         self.flush()

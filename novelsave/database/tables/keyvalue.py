@@ -13,7 +13,10 @@ class KeyValueTable(Table):
         return self.data.get(key, default)
 
     def remove(self, key):
-        del self.data[key]
+        try:
+            del self.data[key]
+        except KeyError:
+            pass
 
     def all(self):
         return dict(self.data)

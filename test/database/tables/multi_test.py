@@ -151,6 +151,10 @@ class TestMultiClassTable(unittest.TestCase):
         self.assertEqual(1, len(data))
         self.assertEqual(self.tc1, self.table.get(1))
 
+    def test_get_default(self):
+        self.assertIsNone(self.table.get('missing'))
+        self.assertEqual('default', self.table.get('missing', 'default'))
+
     def test_remove(self):
         self.table.put(self.tc1)
         self.table.remove(self.tc1.id)
@@ -159,6 +163,9 @@ class TestMultiClassTable(unittest.TestCase):
 
         self.assertIsInstance(data, list)
         self.assertEqual(0, len(data))
+
+    def test_remove_nonexistent(self):
+        self.table.remove('something')
 
     def test_all(self):
         self.table.put(self.tc1)

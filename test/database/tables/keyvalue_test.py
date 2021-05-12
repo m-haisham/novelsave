@@ -29,6 +29,7 @@ class TestKeyValueTable(unittest.TestCase):
         self.assertEqual('value', self.table.get('key'))
 
     def test_get_default(self):
+        self.assertIsNone(self.table.get('key'))
         self.assertEqual('default', self.table.get('key', 'default'))
 
     def test_remove(self):
@@ -40,8 +41,7 @@ class TestKeyValueTable(unittest.TestCase):
         self.assertEqual(0, len(self.db._data[self.table_name]))
 
     def test_remove_nonexistent(self):
-        with self.assertRaises(KeyError):
-            self.table.remove('key')
+        self.table.remove('key')
 
     def test_all(self):
         d = {'key': 'value', 'key1': 'value1', 'key2': 'value2'}

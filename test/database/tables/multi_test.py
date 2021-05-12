@@ -62,6 +62,18 @@ class TestMultiClassTable(unittest.TestCase):
         self.assertDictEqual(vars(self.tc1), processed_data[self.tc1.id])
         self.assertDictEqual(vars(self.tc2), processed_data[self.tc2.id])
 
+    def test_pre_process_dict_format(self):
+        test_data = {
+            self.tc1.id: vars(self.tc1),
+            self.tc2.id: vars(self.tc2),
+        }
+
+        processed_data = self.table.pre_process(test_data)
+
+        self.assertIsInstance(processed_data, dict)
+        self.assertEqual(2, len(processed_data))
+        self.assertDictEqual(test_data, processed_data)
+
     def test_post_process(self):
         test_data = {
             self.tc1.id: vars(self.tc1),

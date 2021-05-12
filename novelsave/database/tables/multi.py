@@ -1,4 +1,4 @@
-from typing import List, Iterable, Dict
+from typing import List, Iterable, Dict, Union
 
 from .template import ProcessedTable
 from ...models import Chapter
@@ -62,13 +62,11 @@ class MultiClassTable(ProcessedTable):
         del self.data[id]
         self.flush()
 
-    def pre_process(self, data: List[Dict]) -> Dict:
-        processed = {}
-
-        for item in data:
-            processed[item[self.identifier]] = item
-
-        return processed
+    def pre_process(self, data: Union[List[Dict], Dict]) -> Dict:
+        if type(data) == list:
+            return {item[self.identifier]: item for item in data}
+        else:
+            return data
 
     def post_process(self, data: Dict) -> List[Dict]:
         return list(data.values())

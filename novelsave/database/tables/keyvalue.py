@@ -7,7 +7,7 @@ class KeyValueTable(Table):
 
     def put(self, key, value):
         self.data[key] = value
-        self.save()
+        self.flush()
 
     def get(self, key, default=None):
         return self.data.get(key, default)

@@ -32,7 +32,7 @@ class MultiClassTable(Table):
         except KeyError:
             self.data[id] = self._to_dict(obj)
 
-        self.save()
+        self.flush()
 
     def put(self, obj):
         """
@@ -42,7 +42,7 @@ class MultiClassTable(Table):
         :return: None
         """
         self.data[getattr(obj, self.identifier)] = self._to_dict(obj)
-        self.save()
+        self.flush()
 
     def put_all(self, objs: Iterable):
         """
@@ -52,7 +52,7 @@ class MultiClassTable(Table):
         :return: None
         """
         self.data.update({getattr(obj, self.identifier): self._to_dict(obj) for obj in objs})
-        self.save()
+        self.flush()
 
     def all(self) -> List:
         """
@@ -76,7 +76,7 @@ class MultiClassTable(Table):
         :return: None
         """
         del self.data[id]
-        self.save()
+        self.flush()
 
     def _to_dict(self, obj) -> dict:
         return {field: getattr(obj, field) for field in self.fields}

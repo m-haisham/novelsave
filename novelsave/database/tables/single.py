@@ -12,7 +12,7 @@ class SingleClassTable(KeyValueTable):
 
     def set(self, values):
         self.data.update({field: getattr(values, field) for field in self.fields})
-        self.save()
+        self.flush()
 
     def parse(self):
         return self.cls(**{key: value for key, value in self.data.items() if key in self.fields})

@@ -18,6 +18,10 @@ class TestDatabaseTemplate(unittest.TestCase):
         data = self.dbt.get_table(self.table_name)
         self.assertDictEqual(data, self.data)
 
+    def test_get_table_nonexistent(self):
+        with self.assertRaises(KeyError):
+            self.dbt.get_table(self.table_name)
+
     def test_set_table(self):
         self.dbt.set_table(self.table_name, dict(self.data))
 

@@ -18,9 +18,10 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=requirements,
     classifiers=[
-        'License :: OSI Approved :: APACHE-2.0 License',
+        'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3.8',
-        "Operating System :: OS Independent",
+        'Operating System :: OS Independent',
+        'Topic :: Games/Entertainment',
     ],
     license="APACHE-2.0 license",
     keywords='webnovel novel lightnovel scrape download epub save',

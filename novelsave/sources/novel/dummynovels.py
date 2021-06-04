@@ -33,7 +33,7 @@ class DummyNovels(Source):
             novel.add_meta('subject', element.text.strip())
 
         chapters = []
-        for element in soup.select('.elementor-tab-content a:not(.elementor-accordion-title)'):
+        for element in soup.select('.elementor-tab-content a[href*="novel"]:not(.elementor-accordion-title)'):
 
             # this removes the text '(NEW)'
             highlight = element.select_one('.new-highlight')

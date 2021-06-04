@@ -11,8 +11,7 @@ class SetTable(Table):
 
     def put(self, obj: dict):
         # test object for needed fields
-        for field in self.fields:
-            obj[field]
+        [obj[field] for field in self.fields]
 
         data = self.data
 

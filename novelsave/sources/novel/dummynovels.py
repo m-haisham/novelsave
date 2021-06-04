@@ -53,7 +53,7 @@ class DummyNovels(Source):
     def chapter(self, url: str) -> Chapter:
         soup = self.soup(url)
 
-        content = soup.select_one('#wtr-content')
+        content = soup.select_one('.elementor-widget-theme-post-content > div')
 
         # removes ads
         for element in content.select('.code-block'):

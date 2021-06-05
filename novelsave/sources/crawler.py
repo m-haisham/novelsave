@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from requests.cookies import RequestsCookieJar
+from typing import List, Dict, Set
 
 from ..exceptions import ResponseException
 
@@ -69,3 +70,20 @@ class Crawler:
         #     return self.request_get(url, _tries + 1)
 
         raise ResponseException(response, f'{response.status_code}: {response.url}')
+
+    # ---- url parser ----
+
+    def parse_query(self, query: str) -> Dict[str, List[str]]:
+        parts = query.split('&')
+        params = {}
+
+        for part in parts:
+            name, raw_value = part.split('=', maxsplit=1)
+            values = set(raw_value.split(','))
+
+            try:
+                params[name] = params[name].union(values)
+            except KeyError:
+                params[name] = values
+
+        return {key: list(value) for key, value in params.items()}

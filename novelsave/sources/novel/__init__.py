@@ -29,6 +29,7 @@ from .wuxiacom import WuxiaCom
 from .wuxiaonline import WuxiaOnline
 from .novelpassion import NovelPassion
 from .novelfun import NovelFun
+from .creativenovels import CreativeNovels
 from ...exceptions import MissingSource
 
 sources = [
@@ -63,6 +64,7 @@ sources = [
     NovelFun,
     NovelHall,
     NovelsRock,
+    CreativeNovels,
 ]
 
 

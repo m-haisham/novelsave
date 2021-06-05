@@ -270,6 +270,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [novelfun.net] |  |  |
 | [novelhall.com] |  |  |
 | [novelsrock.com] |  |  |
+| [creativenovels.com] |  |  |
 
 <!-- SOURCE LINKS -->
 
@@ -303,6 +304,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [novelfun.net]: https://novelfun.net
 [novelhall.com]: https://www.novelhall.com
 [novelsrock.com]: https://novelsrock.com
+[creativenovels.com]: https://creativenovels.com
 
 ### Metadata
 

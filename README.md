@@ -271,6 +271,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [novelhall.com] |  |  |
 | [novelsrock.com] |  |  |
 | [creativenovels.com] |  |  |
+| [wuxiaworld.site] |  |  |
 
 <!-- SOURCE LINKS -->
 
@@ -305,6 +306,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [novelhall.com]: https://www.novelhall.com
 [novelsrock.com]: https://novelsrock.com
 [creativenovels.com]: https://creativenovels.com
+[wuxiaworld.site]: https://wuxiaworld.site
 
 ### Metadata
 

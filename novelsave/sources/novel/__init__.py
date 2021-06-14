@@ -12,6 +12,7 @@ from .ktlchamber import Ktlchamber
 from .lightnovelworld import LightNovelWorld
 from .mtlnovel import MtlNovel
 from .novelfull import NovelFull
+from .novelgate import NovelGate
 from .novelhall import NovelHall
 from .novelonlinefull import NovelOnlineFull
 from .novelsite import NovelSite
@@ -67,6 +68,7 @@ sources = [
     NovelsRock,
     CreativeNovels,
     WuxiaSite,
+    NovelGate,
 ]
 
 

@@ -272,6 +272,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 | [novelsrock.com] |  |  |
 | [creativenovels.com] |  |  |
 | [wuxiaworld.site] |  |  |
+| [novelgate.net] |  |  |
 
 <!-- SOURCE LINKS -->
 
@@ -307,6 +308,7 @@ you can access the database by using the `db` attribute of `NovelSave`
 [novelsrock.com]: https://novelsrock.com
 [creativenovels.com]: https://creativenovels.com
 [wuxiaworld.site]: https://wuxiaworld.site
+[novelgate.net]: https://novelgate.net
 
 ### Metadata
 

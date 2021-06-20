@@ -44,6 +44,8 @@ class NovelEpub:
                 book.set_cover('cover.jpg', f.read())
 
         # create chapters
+        book_preface = self._preface()
+        book.add_item(book_preface)
         book_chapters = {}
         for chapter in self.chapters:
             epub_chapter = self._epub_chapter(chapter)
@@ -60,19 +62,20 @@ class NovelEpub:
                 book_chapters[volume] = [epub_chapter]
 
         # table of contents
+        book.toc = [book_preface]
         if len(book_chapters.keys()) == 1:  # no volume sections
-            book.toc = list(book_chapters.values())[0]
+            book.toc += list(book_chapters.values())[0]
         else:
-            book.toc = (
+            book.toc += [
                 (epub.Section(volume[1]), tuple(book_chapters[volume]))
                 for volume in sorted(book_chapters.keys(), key=lambda k: k[0])
-            )
+            ]
 
         # add default NCX and Nav file
         book.add_item(epub.EpubNcx())
         book.add_item(epub.EpubNav())
 
-        book.spine = [c for volume in book_chapters.values() for c in volume]
+        book.spine = [book_preface] + [c for volume in book_chapters.values() for c in volume]
 
         epub.write_epub(self.path, book, {})
 
@@ -89,7 +92,7 @@ class NovelEpub:
         """
         prefix = f'{f"{StringHelper.from_float(chapter.no)} " if chapter.no and chapter.no > 0 else ""}'
         title = f'{prefix}{chapter.title}'
-        epub_chapter = epub.EpubHtml(title=title, file_name=f'{chapter.index}.xhtml', lang='en')
+        epub_chapter = epub.EpubHtml(title=title, file_name=f'{chapter.index}.xhtml', lang=self.novel.lang)
 
         content = f'''<h1>{title}</h1>'''
         if type(chapter.paragraphs) == list:
@@ -100,3 +103,43 @@ class NovelEpub:
         epub_chapter.content = content
 
         return epub_chapter
+
+    def _preface(self) -> epub.EpubHtml:
+
+        content = f'''
+            <h1 style="margin-bottom: 0;">{self.novel.title}</h1>
+            <div>Writtten by: {self.novel.author}</div>
+        '''
+
+        if self.novel.synopsis:
+            content += '<p>'
+            content += f'<div style="margin-bottom: 0.2rem;"><b>Synopsis:</b></div>'
+            for para in self.novel.synopsis.split('\n'):
+                content += f'<div style="padding: 0 1rem;">{para.strip()}</div>'
+            content += '</p>'
+
+        meta = {}
+        for item in self.novel.meta:
+            try:
+                meta[item['name']].append(item)
+            except KeyError:
+                meta[item['name']] = [item]
+
+        for key, value in sorted(meta.items()):
+            content += '<p>'
+            content += f'<div style="margin-bottom: 0.2rem;"><b>{key}:</b></div>'
+
+            values = []
+            for item in value:
+                postfix = ''
+                if len(item.get('others', {})) > 0:
+                    postfix = '(' + ', '.join([f'{key}={value}' for key, value in item.get('others', {}).items()]) + ')'
+
+                values.append(f'{item["value"]}{postfix}')
+
+            content += '<div style="padding: 0 1rem;">' + ', '.join(values) + '</div>'
+            content += '</p>'
+
+        content += f'<p><a href="{self.novel.url}">{self.novel.url}</a></p>'
+
+        return epub.EpubHtml(title='Preface', file_name=f'preface.xhtml', content=content, lang=self.novel.lang)

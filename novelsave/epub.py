@@ -112,11 +112,11 @@ class NovelEpub:
         '''
 
         if self.novel.synopsis:
-            content += '<p>'
-            content += f'<div style="margin-bottom: 0.2rem;"><b>Synopsis:</b></div>'
+            content += '<div style="margin-bottom: 0.2rem">'
+            content += f'<h4 style="margin-bottom: 0.2rem">Synopsis:</h4>'
             for para in self.novel.synopsis.split('\n'):
-                content += f'<div style="padding: 0 1rem;">{para.strip()}</div>'
-            content += '</p>'
+                content += f'<p>{para.strip()}</p>'
+            content += '</div>'
 
         meta = {}
         for item in self.novel.meta:
@@ -126,8 +126,8 @@ class NovelEpub:
                 meta[item['name']] = [item]
 
         for key, value in sorted(meta.items()):
-            content += '<p>'
-            content += f'<div style="margin-bottom: 0.2rem;"><b>{key}:</b></div>'
+            content += '<div style="margin-bottom: 0.2rem">'
+            content += f'<h4 style="margin-bottom: 0.2rem">{key}:</h4>'
 
             values = []
             for item in value:
@@ -135,11 +135,12 @@ class NovelEpub:
                 if len(item.get('others', {})) > 0:
                     postfix = '(' + ', '.join([f'{key}={value}' for key, value in item.get('others', {}).items()]) + ')'
 
-                values.append(f'{item["value"]}{postfix}')
+                values.append(f'{item["value"]} {postfix}')
 
-            content += '<div style="padding: 0 1rem;">' + ', '.join(values) + '</div>'
-            content += '</p>'
+            content += '<p>' + ', '.join(values) + '</p>'
+            content += '</div>'
 
+        content += f'<h4 style="margin-bottom: 0.2rem">Source:</h4>'
         content += f'<p><a href="{self.novel.url}">{self.novel.url}</a></p>'
 
         return epub.EpubHtml(title='Preface', file_name=f'preface.xhtml', content=content, lang=self.novel.lang)

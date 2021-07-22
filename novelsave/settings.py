@@ -12,6 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # operating system specific configuration file
 # config directory is used to place logs, config, cache
 CONFIG_DIR = Path(user_config_dir(NAME, AUTHOR))
+DATA_DIR = CONFIG_DIR / 'data'
 
 DATABASE_URL = 'sqlite:///' + str(CONFIG_DIR / 'data.sqlite')
 
@@ -22,8 +23,6 @@ __dict__ = {
     'author': AUTHOR,
     'base_dir': BASE_DIR,
     'config_dir': CONFIG_DIR,
+    'data_dir': DATA_DIR,
     'database_url': DATABASE_URL,
 }
-
-# setup injectors
-ApplicationContainer.config.from_dict(__dict__)

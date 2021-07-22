@@ -10,11 +10,22 @@ from novelsave.services.file_service import FileService
 class TestFileService(unittest.TestCase):
 
     temp_dir = Path(tempfile.gettempdir())
-    file_service = FileService(temp_dir)
+    data_division = {'.html': 'web'}
+    file_service = FileService(temp_dir, data_division)
 
-    def test_get_relative(self):
+    def test_from_relative(self):
         r_path = 'ns_test_dir/atc_file.html'
-        path = self.file_service._get_relative(r_path)
+        path = self.file_service.from_relative(r_path)
+
+        # test path was created correctly
+        self.assertEqual(self.temp_dir / r_path, path)
+
+        # assert parent directory was not created
+        self.assertFalse(path.parent.exists())
+
+    def test_from_relative_mkdir(self):
+        r_path = 'ns_test_dir/atc_file.html'
+        path = self.file_service.from_relative(r_path, mkdir=True)
 
         # test path was created correctly
         self.assertEqual(self.temp_dir / r_path, path)
@@ -26,12 +37,21 @@ class TestFileService(unittest.TestCase):
         # cleanup: remove created dir
         shutil.rmtree(path.parent)
 
-    def test_write_str(self):
-        r_path = 'ns_test_dir/atc_file.html'
-        data = '<h1>testing data</h1>'
-        self.file_service.write_str(r_path, data)
+    def test_apply_division(self):
+        # when there is a specified directory
+        r_path = 'subdivide_test_dir/test_file.html'
+        s_path = self.file_service.apply_division(r_path)
+        self.assertEqual(Path(r_path).parent / 'web' / 'test_file.html', s_path)
 
-        path = self.temp_dir / r_path
+        # when there is no specified directory
+        r_path = 'subdivide_test_dir/test_file.json'
+        s_path = self.file_service.apply_division(r_path)
+        self.assertEqual(Path(r_path), s_path)
+
+    def test_write_str(self):
+        path = self.file_service.from_relative('ns_test_dir/atc_file.html', mkdir=True)
+        data = '<h1>testing data</h1>'
+        self.file_service.write_str(path, data)
 
         # test file was created
         self.assertTrue(path.exists(), 'path does not exist')
@@ -45,11 +65,9 @@ class TestFileService(unittest.TestCase):
         shutil.rmtree(path.parent)
 
     def test_write_bytes(self):
-        r_path = 'ns_test_dir/atc_file.html'
+        path = self.file_service.from_relative('ns_test_dir/atc_file.html', mkdir=True)
         data = b'<h1>testing data</h1>'
-        self.file_service.write_bytes(r_path, data)
-
-        path = self.temp_dir / r_path
+        self.file_service.write_bytes(path, data)
 
         # test file was created
         self.assertTrue(path.exists(), 'path does not exist')
@@ -63,9 +81,8 @@ class TestFileService(unittest.TestCase):
         shutil.rmtree(path.parent)
 
     def test_read_str(self):
-        r_path = 'ns_test_dir/atc_file.html'
+        path = self.file_service.from_relative('ns_test_dir/atc_file.html')
         data = '<h1>testing data read</h1>'
-        path = self.temp_dir / r_path
 
         # create file and write data
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -73,7 +90,7 @@ class TestFileService(unittest.TestCase):
             f.write(data)
 
         # read and test written data
-        read_data = self.file_service.read_str(r_path)
+        read_data = self.file_service.read_str(path)
         self.assertEqual(data, read_data)
 
         # cleanup: remove created dir
@@ -82,10 +99,10 @@ class TestFileService(unittest.TestCase):
     def test_read_str_no_file(self):
         # non existent file
         with self.assertRaises(FileNotFoundError):
-            self.file_service.read_str('ns_ne_dir/non.html')
+            self.file_service.read_str(self.file_service.from_relative('ns_ne_dir/non.html'))
 
         # throw when its not a file
-        dir = 'ns_ne_nfile'
+        dir = self.file_service.from_relative('ns_ne_n_file')
         path = self.temp_dir / dir
         path.mkdir(parents=True, exist_ok=True)
         with self.assertRaises(FileNotFoundError):
@@ -95,9 +112,8 @@ class TestFileService(unittest.TestCase):
         shutil.rmtree(path)
 
     def test_read_bytes(self):
-        r_path = 'ns_test_dir/atc_file.html'
+        path = self.file_service.from_relative('ns_test_dir/atc_file.html')
         data = b'<h1>testing data read</h1>'
-        path = self.temp_dir / r_path
 
         # create file and write data
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -105,7 +121,7 @@ class TestFileService(unittest.TestCase):
             f.write(data)
 
         # read and test written data
-        read_data = self.file_service.read_bytes(r_path)
+        read_data = self.file_service.read_bytes(path)
         self.assertEqual(data, read_data)
 
         # cleanup: remove created dir
@@ -114,10 +130,10 @@ class TestFileService(unittest.TestCase):
     def test_read_bytes_no_file(self):
         # non existent file
         with self.assertRaises(FileNotFoundError):
-            self.file_service.read_bytes('ns_ne_dir/non.html')
+            self.file_service.read_bytes(self.file_service.from_relative('ns_ne_dir/non.html'))
 
         # throw when its not a file
-        dir = 'ns_ne_nfile'
+        dir = self.file_service.from_relative('ns_ne_n_file')
         path = self.temp_dir / dir
         path.mkdir(parents=True, exist_ok=True)
         with self.assertRaises(FileNotFoundError):

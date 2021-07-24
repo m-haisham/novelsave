@@ -39,7 +39,7 @@ class CliConfig:
         config.display()
 
     def set_dir(self, _dir):
-        with self.console.line('Updating novels location, ') as line:
+        with self.console.line('Updating novels data_dir, ') as line:
             # could throw an OSError: illegal directory names
             dir = Path(_dir).resolve().absolute()
 

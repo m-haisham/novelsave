@@ -1,26 +1,18 @@
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
 
 
 @dataclass
 class Novel:
-    title: str = None
+    id: Optional[int]
+    title: str
+    url: str
     author: str = '<Not specified>'
     synopsis: str = None
-    thumbnail: str = None
+
+    thumbnail_url: str = None
+    thumbnail_path: str = None
+
     lang: str = 'en'
-    url: str = None
-
-    meta_source: str = None
-    meta: List[dict] = field(default_factory=lambda: [])
-
-    def add_meta(self, name: str, value: str, namespace: str = 'DC', others: dict = None):
-        if others is None:
-            others = {}
-
-        self.meta.append({
-            'namespace': namespace,
-            'name': name,
-            'value': value,
-            'others': others
-        })
+    last_updated: datetime = None

@@ -1,4 +1,9 @@
-from requests import Response
+class NovelSaveException(Exception):
+    """base novelsave exception"""
+
+
+class SourceNotAvailableException(NovelSaveException):
+    """thrown if the source is not available"""
 
 
 class UnsupportedBrowserException(Exception):

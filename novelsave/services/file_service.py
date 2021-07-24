@@ -1,27 +1,30 @@
 import os
 from pathlib import Path
-from typing import Union, Optional, Dict
+from typing import Union, Dict
 
 _path_type = Union[str, Path, os.PathLike]
 
 
 class FileService(object):
 
-    def __init__(self, location: Path, data_division: Dict[str, str]):
-        self.location = location
+    def __init__(self, data_dir: Path, data_division: Dict[str, str]):
+        self.data_dir = data_dir
         self.data_division = data_division
 
     def from_relative(self, r_path: _path_type, mkdir=False) -> Path:
-        """create the directories if they dont exist and return the actual path"""
-        path = self.location / r_path
+        """create the directories if specified and return the actual path"""
+        path = self.data_dir / r_path
         if mkdir:
             path.parent.mkdir(parents=True, exist_ok=True)
 
         return path
 
     def apply_division(self, r_path: _path_type) -> Path:
+        """add additional sub folder to the parent depending on the file type"""
         path = Path(r_path)
-        return (path.parent / self.data_division.get(path.suffix, '')).resolve() / path.name
+        parent = path.parent / self.data_division.get(path.suffix, '')
+
+        return parent.resolve() / path.name
 
     def write_str(self, path: Path, data: str):
         """write and replace strings to a file"""

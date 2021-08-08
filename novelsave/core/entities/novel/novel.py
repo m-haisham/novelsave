@@ -9,6 +9,7 @@ class Novel(Model):
 
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
+    author = Column(String)
     synopsis = Column(String)
 
     thumbnail_url = Column(String)
@@ -22,4 +23,5 @@ class Novel(Model):
     source = relationship('Source', back_populates='novels')
 
     volumes = relationship('Volume', back_populates='novel')
+    metadata = relationship('Metadata', back_populates='novel')
     assets = relationship('Asset', back_populates='novel')

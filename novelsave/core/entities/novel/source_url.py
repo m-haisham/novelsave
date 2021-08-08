@@ -11,4 +11,4 @@ class SourceUrl(Model):
     base_url = Column(String, nullable=False)
 
     source_id = Column(Integer, ForeignKey('sources.id'))
-    source = relationship('Source', back_populates='urls')
+    source = relationship('Source', back_populates='urls', lazy='joined')

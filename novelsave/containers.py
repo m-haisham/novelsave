@@ -8,7 +8,7 @@ from novelsave.utils.adapters import SourceAdapter
 
 class AdapterContainer(containers.DeclarativeContainer):
 
-    source_novel_adapter = providers.Factory(
+    novel_source_adapter = providers.Factory(
         SourceAdapter,
     )
 
@@ -17,7 +17,7 @@ class InfrastructureContainer(containers.DeclarativeContainer):
     database_url = providers.Dependency()
 
     engine = providers.Singleton(create_engine, url=database_url, future=True)
-    session = providers.Singleton(sessionmaker, bind=engine, future=True)
+    Session = providers.Singleton(sessionmaker, bind=engine, future=True)
 
 
 class ServiceContainer(containers.DeclarativeContainer):

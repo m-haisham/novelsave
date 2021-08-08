@@ -11,4 +11,4 @@ class NovelUrl(Model):
     url = Column(String, nullable=False)
 
     novel_id = Column(Integer, ForeignKey('novels.id'))
-    novel = relationship('Novel', back_populates='urls')
+    novel = relationship('Novel', back_populates='urls', lazy='joined')

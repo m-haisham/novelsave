@@ -1,1 +1,1 @@
-from .novel_adapter import SourceAdapter
+from .source_adapter import SourceAdapter

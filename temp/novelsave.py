@@ -258,7 +258,7 @@ class NovelSave:
             self.source.login(self.username, self.password)
 
             # set new cookies
-            self.cookies.insert(self.source.session.cookies)
+            self.cookies.insert(self.source.session_builder.cookies)
 
     def open_db(self):
         # trailing slash adds nothing

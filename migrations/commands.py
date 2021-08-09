@@ -15,8 +15,10 @@ def make_config(dir_: Path, url_: str, config_='alembic.ini'):
     config_file = dir_ / config_
 
     config = Config(file_=config_file)
-    config.set_main_option('script_location', dir_)
+    config.set_main_option('script_location', str(dir_))
     config.set_main_option('sqlalchemy.url', url_)
+
+    config.attributes['configure_logger'] = False
 
     return config
 

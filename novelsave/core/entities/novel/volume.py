@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-from ..model import Model
+from ..base import Base
 
 
-class Volume(Model):
+class Volume(Base):
     __tablename__ = 'volumes'
 
     id = Column(Integer, primary_key=True)

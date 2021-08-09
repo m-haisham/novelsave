@@ -1,42 +1,39 @@
-from pathlib import Path
-from typing import Optional
+from typing import Optional, Callable
 
-from sqlalchemy.orm import Session, Query
+from sqlalchemy.orm import Session
 
-from novelsave.core.entities import novel as novel_entities
-from novelsave.view_models import Novel, Chapter
+from novelsave.core.dtos import NovelDTO
+from novelsave.core.entities.novel import Novel, NovelUrl
+from novelsave.utils.adapters import DTOAdapter
 
 
-class NovelService(object):
+class NovelService:
 
-    def __main__(self, session: Session):
-        self.session = session
+    def __init__(
+            self,
+            session_builder: Callable[[], Session],
+            dto_adapter: DTOAdapter,
+    ):
+        self.session_builder = session_builder
+        self.dto_adapter = dto_adapter
 
-    def get_novel_by_id(self, id_: int) -> Optional[Novel]:
+    def get_novel_by_id(self, id_: int) -> Novel:
         """retrieve a novel from persistence using its id"""
-        return self.session.get(novel_entities.Novel, id_)
+        with self.session_builder() as session:
+            return session.get(Novel, id_)
 
     def get_novel_by_url(self, url: str) -> Optional[Novel]:
         """retrieve a novel from persistence using its url"""
-        entity = self.session.query(novel_entities.NovelUrl, url=url).first()
-        if entity is None:
-            return None
+        with self.session_builder() as session:
+            return session.query(Novel).join(NovelUrl).filter(NovelUrl.url == url).first()
 
+    def insert_novel(self, novel_dto: NovelDTO) -> Novel:
+        with self.session_builder() as session:
+            novel, url = self.dto_adapter.novel_from_dto(novel_dto)
+            session.add(novel)
+            session.flush()
 
+            url.novel_id = novel.id
+            session.add(url)
 
-    def upsert_novel(self, novel: Novel):
-        """insert or update a novel by id"""
-
-    def delete_novel(self, novel: Novel):
-        """delete a novel by its id"""
-
-    def save_thumbnail(self, novel: Novel, exists_ok=False) -> Path:
-        """
-        download and save the thumbnail image to file and return the file path
-
-        :param novel: novel whose thumbnail to save
-        :param exists_ok: return the file path without overriding
-        """
-
-    def save_chapter_content(self, chapter: Chapter) -> Path:
-        """saves the chapter content into a file and updates the database to point to the file"""
+        return novel

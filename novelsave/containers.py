@@ -2,53 +2,67 @@ from dependency_injector import containers, providers
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from novelsave.services import FileService, SourceService
-from novelsave.utils.adapters import SourceAdapter
+from novelsave.services import FileService, NovelService
+from novelsave.services.source import SourceGateway, SourceGatewayProvider
+from novelsave.utils.adapters import SourceAdapter, DTOAdapter
 
 
-class AdapterContainer(containers.DeclarativeContainer):
-
-    novel_source_adapter = providers.Factory(
+class Adapters(containers.DeclarativeContainer):
+    source_adapter = providers.Factory(
         SourceAdapter,
     )
 
-
-class InfrastructureContainer(containers.DeclarativeContainer):
-    database_url = providers.Dependency()
-
-    engine = providers.Singleton(create_engine, url=database_url, future=True)
-    Session = providers.Singleton(sessionmaker, bind=engine, future=True)
+    dto_adapter = providers.Factory(
+        DTOAdapter,
+    )
 
 
-class ServiceContainer(containers.DeclarativeContainer):
-    data_dir = providers.Dependency()
-    data_division = providers.Dependency()
+class Infrastructure(containers.DeclarativeContainer):
+    config = providers.Configuration()
 
-    novel_url = providers.Dependency()
+    engine = providers.Singleton(create_engine, url=config.database.url, future=True)
+    session_builder = providers.Singleton(sessionmaker, bind=engine, future=True)
+
+
+class Services(containers.DeclarativeContainer):
+    data_config = providers.Configuration()
+
+    adapters = providers.DependenciesContainer()
+    infrastructure = providers.DependenciesContainer()
 
     file_service = providers.Factory(
         FileService,
-        location=data_dir(),
-        data_division=data_division(),
+        location=data_config.dir,
+        data_division=data_config.division_rules,
     )
 
-    source_service = providers.Singleton(
-        SourceService,
-        novel_url=novel_url(),
+    novel_service = providers.Factory(
+        NovelService,
+        session_builder=infrastructure.session_builder,
+        dto_adapter=adapters.dto_adapter,
+    )
+
+    source_gateway_provider = providers.Factory(
+        SourceGatewayProvider,
+        source_adapter=adapters.source_adapter,
     )
 
 
-class ApplicationContainer(containers.DeclarativeContainer):
+class Application(containers.DeclarativeContainer):
     config = providers.Configuration(strict=True)
 
-    adapter = AdapterContainer()
-
-    infrastructure = InfrastructureContainer(
-        database_url=config.database_url(),
+    adapters = providers.Container(
+        Adapters,
     )
 
-    service = ServiceContainer(
-        data_dir=config.data_dir(),
-        data_division=config.data_division(),
-        novel_url=config.novel_url(),
+    infrastructure = providers.Container(
+        Infrastructure,
+        config=config.infrastructure,
+    )
+
+    services = providers.Container(
+        Services,
+        data_config=config.data,
+        adapters=adapters,
+        infrastructure=infrastructure,
     )

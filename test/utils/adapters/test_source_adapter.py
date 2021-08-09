@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 
 from novelsave_sources import models as sm
-from novelsave.models import source_models as im
+from novelsave.core import dtos
 from novelsave.utils.adapters import SourceAdapter
 
 
@@ -20,7 +20,7 @@ class TestSourceAdapter(unittest.TestCase):
             url='link',
         )
 
-        expected_novel = im.Novel(
+        expected_novel = dtos.NovelDTO(
             id=None,
             title='title',
             author='author',
@@ -36,7 +36,7 @@ class TestSourceAdapter(unittest.TestCase):
         self.assertEqual(expected_novel, actual_novel)
 
     def test_novel_from_internal(self):
-        test_novel = im.Novel(
+        test_novel = dtos.NovelDTO(
             id=1,
             title='title',
             author='author',
@@ -57,7 +57,7 @@ class TestSourceAdapter(unittest.TestCase):
             url='link',
         )
 
-        actual_novel = self.source_adapter.novel_from_internal(test_novel)
+        actual_novel = self.source_adapter.novel_to_external(test_novel)
         self.assertEqual(expected_novel, actual_novel)
 
     def test_chapter_to_internal(self):
@@ -70,7 +70,7 @@ class TestSourceAdapter(unittest.TestCase):
             url="https://",
         )
 
-        expected_chapter = im.Chapter(
+        expected_chapter = dtos.ChapterDTO(
             id=None,
             index=1,
             title="title",
@@ -83,7 +83,7 @@ class TestSourceAdapter(unittest.TestCase):
         self.assertEqual(expected_chapter, actual_chapter)
 
     def test_chapter_from_internal(self):
-        test_chapter = im.Chapter(
+        test_chapter = dtos.ChapterDTO(
             id=None,
             index=1,
             title="title",
@@ -101,7 +101,7 @@ class TestSourceAdapter(unittest.TestCase):
             url="https://",
         )
 
-        actual_chapter = self.source_adapter.chapter_from_internal(test_chapter)
+        actual_chapter = self.source_adapter.chapter_to_external(test_chapter)
         self.assertEqual(expected_chapter, actual_chapter)
 
     def test_chapter_content_to_internal(self):
@@ -114,7 +114,7 @@ class TestSourceAdapter(unittest.TestCase):
             url="https://",
         )
 
-        expected_chapter = im.Chapter(
+        expected_chapter = dtos.ChapterDTO(
             id=None,
             index=-1,
             title="",
@@ -133,7 +133,7 @@ class TestSourceAdapter(unittest.TestCase):
             namespace="DC",
         )
 
-        expected_metadata = im.MetaData(
+        expected_metadata = dtos.MetaDataDTO(
             name="name",
             value="value",
             others={"role": "something"},
@@ -144,7 +144,7 @@ class TestSourceAdapter(unittest.TestCase):
         self.assertEqual(expected_metadata, actual_metadata)
 
     def test_metadata_from_internal(self):
-        test_metadata = im.MetaData(
+        test_metadata = dtos.MetaDataDTO(
             name="name",
             value="value",
             others={"role": "something"},
@@ -158,5 +158,5 @@ class TestSourceAdapter(unittest.TestCase):
             namespace="DC",
         )
 
-        actual_metadata = self.source_adapter.metadata_from_internal(test_metadata)
+        actual_metadata = self.source_adapter.metadata_to_external(test_metadata)
         self.assertEqual(expected_metadata, actual_metadata)

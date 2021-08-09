@@ -4,7 +4,7 @@ from typing import List, Union, Tuple, Optional
 
 
 @dataclass
-class Chapter:
+class ChapterDTO:
     id: Optional[int]
     index: int
     title: str

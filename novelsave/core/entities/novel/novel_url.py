@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-from ..model import Model
+from ..base import Base
 
 
-class NovelUrl(Model):
+class NovelUrl(Base):
     __tablename__ = 'novel_urls'
 
     id = Column(Integer, primary_key=True)

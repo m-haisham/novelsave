@@ -4,7 +4,7 @@ from typing import Optional
 
 
 @dataclass
-class Novel:
+class NovelDTO:
     id: Optional[int]
     title: str
     url: str

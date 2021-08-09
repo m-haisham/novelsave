@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 
 @dataclass
-class MetaData:
+class MetaDataDTO:
     DEFAULT_NAMESPACE = 'DC'
     SOURCE_INTERNAL = 'int'
     SOURCE_EXTERNAL = 'ext'
@@ -12,4 +12,3 @@ class MetaData:
     others: dict = field(default_factory=lambda: {})
     namespace: str = DEFAULT_NAMESPACE
     src: str = SOURCE_INTERNAL
-

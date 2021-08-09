@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, TIMESTAMP, func
 from sqlalchemy.orm import relationship
 
-from ..model import Model
+from ..base import Base
 
 
-class Metadata(Model):
+class MetaData(Base):
     __tablename__ = 'novel_metadata'
 
     id = Column(Integer, primary_key=True)
@@ -14,4 +14,4 @@ class Metadata(Model):
     others = Column(String)
 
     novel_id = Column(Integer, ForeignKey('novels.id'))
-    novel = relationship('Novel', back_populates='metadata')
+    novel = relationship('Novel', back_populates='novel_metadata')

@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, func
 from sqlalchemy.orm import relationship
 
-from ..model import Model
+from ..base import Base
 
 
-class Chapter(Model):
+class Chapter(Base):
     __tablename__ = 'chapters'
 
     id = Column(Integer, primary_key=True)
@@ -17,4 +17,4 @@ class Chapter(Model):
     last_updated = Column(TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())
 
     volume_id = Column(Integer, ForeignKey('volumes.id'))
-    volume = relationship('Volume', back_populates='chapters')
+    volume = relationship('Volume', back_populates='chapters', lazy='joined')

@@ -14,7 +14,7 @@ CONFIG_DIR = Path(user_config_dir(NAME, AUTHOR))
 CONFIG_FILE = CONFIG_DIR / 'config.yml'
 DATA_DIR = CONFIG_DIR / 'data'
 
-DATABASE_URL = 'sqlite:///' + str(CONFIG_DIR / 'data.sqlite')
+DATABASE_URL = 'sqlite:///' + str((CONFIG_DIR / 'data.sqlite').resolve())
 
 # defined the extension format of the file
 # where chapter content is stored
@@ -22,7 +22,7 @@ CHAPTER_EXTENSION = '.nschtml'
 
 # the following map defines how files are stored
 # by further subdivision into sub-folders
-DATA_DIVISION = {
+DIVISION_RULES = {
     CHAPTER_EXTENSION: 'chapters',
     **{
         key: 'assets'
@@ -30,18 +30,29 @@ DATA_DIVISION = {
     },
 }
 
+
 # same information just as a dict for convenience with injector
-__config__ = {
-    'name': NAME,
-    'author': AUTHOR,
-    'base_dir': BASE_DIR,
-    'config_dir': CONFIG_DIR,
-    'config_file': CONFIG_FILE,
-    'data_dir': DATA_DIR,
-    'database_url': DATABASE_URL,
-    'chapter_extension': CHAPTER_EXTENSION,
-    'data_division': DATA_DIVISION,
-}
+def as_dict():
+    return {
+        'name': NAME,
+        'author': AUTHOR,
+        'base_dir': BASE_DIR,
+        'config': {
+            'dir': CONFIG_DIR,
+            'file': CONFIG_FILE,
+        },
+        'data': {
+            'dir': DATA_DIR,
+            'chapter_extension': CHAPTER_EXTENSION,
+            'division_rules': DIVISION_RULES,
+        },
+        'infrastructure': {
+            'database': {
+                'url': DATABASE_URL,
+            }
+        }
+    }
+
 
 # defines the editable configurations
 __editable__ = {'database_url', 'chapter_extension', 'data_division'}

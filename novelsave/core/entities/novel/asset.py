@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-from ..model import Model
+from ..base import Base
 
 
-class Asset(Model):
+class Asset(Base):
     __tablename__ = 'assets'
 
     id = Column(Integer, primary_key=True)

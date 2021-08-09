@@ -2,7 +2,8 @@ appdirs==1.4.4
 requests>=2.26.0
 ebooklib==0.17.1
 loguru==0.5.3
-sqlalchemy==1.4.21
-dependency-injector~=4.34.0
+sqlalchemy==1.4.22
+dependency-injector==4.35.2
 alembic~=1.6.5
 novelsave-sources>=0.1.0
+click==8.0.1

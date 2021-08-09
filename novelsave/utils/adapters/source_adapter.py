@@ -1,11 +1,11 @@
 from novelsave_sources import models as sm
-from novelsave.models import source_models as im
+from novelsave.core import dtos
 
 
 class SourceAdapter(object):
     """adapter responsible for converting models from view_models to source and vice versa"""
 
-    def novel_to_internal(self, novel: sm.Novel) -> im.Novel:
+    def novel_to_internal(self, novel: sm.Novel) -> dtos.NovelDTO:
         """convert novel from internal to source"""
 
         arguments = {
@@ -14,9 +14,9 @@ class SourceAdapter(object):
             if key in {'title', 'url', 'author', 'synopsis', 'thumbnail_url', 'lang'}
         }
 
-        return im.Novel(id=None, **arguments)
+        return dtos.NovelDTO(id=None, **arguments)
 
-    def novel_from_internal(self, novel: im.Novel) -> sm.Novel:
+    def novel_to_external(self, novel: dtos.NovelDTO) -> sm.Novel:
         """convert novel from source to internal"""
 
         arguments = {
@@ -27,10 +27,10 @@ class SourceAdapter(object):
 
         return sm.Novel(**arguments)
 
-    def chapter_to_internal(self, chapter: sm.Chapter) -> im.Chapter:
+    def chapter_to_internal(self, chapter: sm.Chapter) -> dtos.ChapterDTO:
         """convert chapter from source to internal"""
 
-        return im.Chapter(
+        return dtos.ChapterDTO(
             id=None,
             index=chapter.index,
             title=chapter.title,
@@ -39,7 +39,7 @@ class SourceAdapter(object):
             volume=chapter.volume,
         )
 
-    def chapter_from_internal(self, chapter: im.Chapter) -> sm.Chapter:
+    def chapter_to_external(self, chapter: dtos.ChapterDTO) -> sm.Chapter:
         """convert chapter from internal to source"""
 
         return sm.Chapter(
@@ -50,17 +50,17 @@ class SourceAdapter(object):
             volume=chapter.volume,
         )
 
-    def metadata_to_internal(self, metadata: sm.Metadata) -> im.MetaData:
+    def metadata_to_internal(self, metadata: sm.Metadata) -> dtos.MetaDataDTO:
         """convert metadata from source to internal"""
 
-        return im.MetaData(
+        return dtos.MetaDataDTO(
             name=metadata.name,
             value=metadata.value,
             namespace=metadata.namespace,
             others=metadata.others,
         )
 
-    def metadata_from_internal(self, metadata: im.MetaData) -> sm.Metadata:
+    def metadata_to_external(self, metadata: dtos.MetaDataDTO) -> sm.Metadata:
         """convert metadata from internal to source"""
 
         return sm.Metadata(
@@ -70,6 +70,6 @@ class SourceAdapter(object):
             others=metadata.others,
         )
 
-    def chapter_content_to_internal(self, source_chapter: sm.Chapter, internal_chapter: im.Chapter):
+    def chapter_content_to_internal(self, source_chapter: sm.Chapter, internal_chapter: dtos.ChapterDTO):
         """map content from source chapter to internal chapter"""
         internal_chapter.content = source_chapter.paragraphs

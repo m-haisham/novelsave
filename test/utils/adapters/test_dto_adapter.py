@@ -34,5 +34,9 @@ class TestDTOAdapter(unittest.TestCase):
             url='link',
         )
 
-        actual_tuple = self.dto_adapter.novel_from_dto(test_dto)
-        self.assertTupleEqual((expected_novel, expected_url), actual_tuple)
+        actual_novel, actual_url = self.dto_adapter.novel_from_dto(test_dto)
+        for attrib in {'title', 'author', 'synopsis', 'thumbnail_url', 'lang'}:
+            self.assertEqual(getattr(expected_novel, attrib), getattr(actual_novel, attrib))
+
+        for attrib in {'url'}:
+            self.assertEqual(getattr(expected_url, attrib), getattr(actual_url, attrib))

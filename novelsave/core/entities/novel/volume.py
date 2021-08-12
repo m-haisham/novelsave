@@ -7,14 +7,14 @@ from ..base import Base
 class Volume(Base):
     __tablename__ = 'volumes'
     __table_args__ = (
-        UniqueConstraint('novel_id', 'index', name='novel_index_uc'),
+        UniqueConstraint('novel_id', 'index'),
     )
 
     id = Column(Integer, primary_key=True)
-    index = Column(Integer)
-    name = Column(String)
+    index = Column(Integer, nullable=False)
+    name = Column(String, nullable=False)
 
-    novel_id = Column(Integer, ForeignKey('novels.id'))
+    novel_id = Column(Integer, ForeignKey('novels.id'), nullable=False)
     novel = relationship('Novel', back_populates='volumes')
 
-    chapters = relationship('Chapter', back_populates='volume')
+    chapters = relationship('Chapter', backref='volume', passive_deletes=True)

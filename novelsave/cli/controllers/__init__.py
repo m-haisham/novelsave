@@ -1,1 +1,1 @@
-from .update import update
+from ._update import update

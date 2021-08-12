@@ -1,29 +1,25 @@
 import sys
-from typing import Union, Optional
+from typing import Optional
 
-from loguru import logger
 from dependency_injector.wiring import inject, Provide
+from loguru import logger
 
+from novelsave.cli.helpers.source import get_source_gateway
 from novelsave.containers import Application
 from novelsave.core.entities.novel import Novel
 from novelsave.services import NovelService
-from novelsave.services.source import SourceGatewayProvider
 
 
 @inject
 def create_novel(
         url: str,
         novel_service: NovelService = Provide[Application.services.novel_service],
-        source_provider: SourceGatewayProvider = Provide[Application.services.source_gateway_provider],
 ) -> Novel:
     """
     retrieve information about the novel from webpage and insert novel into database.
     this includes chapter list and metadata.
     """
-    source_gateway = source_provider.source_from_url(url)
-    if source_gateway is None:
-        logger.error(f'Could not find source corresponding to url, {url}')
-        sys.exit(1)
+    source_gateway = get_source_gateway(url)
 
     logger.info(f'Retrieving novel (url={url}) information')
     novel_dto, chapter_dtos, metadata_dtos = source_gateway.novel_by_url(url)
@@ -37,10 +33,39 @@ def create_novel(
 
 
 @inject
+def update_novel(
+        novel: Novel,
+        novel_service: NovelService = Provide[Application.services.novel_service],
+):
+    url = novel_service.get_url(novel)
+
+    source_gateway = get_source_gateway(url)
+    logger.debug(f'Acquired source (name={source_gateway.source_name()})')
+
+    logger.info(f'Retrieving novel (url={url}) information...')
+    novel_dto, chapter_dtos, metadata_dtos = source_gateway.novel_by_url(url)
+
+    novel_service.update_novel(novel, novel_dto)
+    novel_service.update_chapters(novel, chapter_dtos)
+    novel_service.update_metadata(novel, metadata_dtos)
+
+    logger.info(f'Updated novel (id={novel.id}, title={novel.title}, chapters={len(chapter_dtos)})')
+    return novel
+
+
+@inject
+def download_pending(
+        novel: Novel,
+        novel_service: NovelService = Provide[Application.services.novel_service],
+):
+    pass
+
+
+@inject
 def get_novel(
         id_or_url: str,
         novel_service: NovelService = Provide[Application.services.novel_service],
-):
+) -> Optional[Novel]:
     """retrieve novel is it exists in the database otherwise return none"""
     is_url = id_or_url.startswith("http")
     if is_url:
@@ -65,11 +90,10 @@ def get_or_create_novel(
     """retrieve specified novel from database or web-crawl and create the novel"""
     novel = get_novel(id_or_url)
 
-    # novel was retrieved successfully from database
-    if novel:
-        return novel
+    if novel is None:
+        if not id_or_url.startswith("http"):
+            sys.exit(1)
 
-    if not id_or_url.startswith("http"):
-        sys.exit(1)
+        novel = create_novel(id_or_url)
 
-    return create_novel(id_or_url)
+    return novel

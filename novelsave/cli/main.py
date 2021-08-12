@@ -26,7 +26,7 @@ def setup_logger():
 def inject_dependencies():
     application = Application()
     application.config.from_dict(settings.as_dict())
-    application.wire(packages=[controllers, groups])
+    application.wire(packages=[controllers, helpers, groups])
 
 
 def update_database_schema():

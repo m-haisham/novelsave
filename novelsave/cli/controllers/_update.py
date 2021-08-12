@@ -2,7 +2,7 @@ import sys
 
 from loguru import logger
 
-from ..helpers import get_novel, create_novel
+from ..helpers import get_novel, create_novel, update_novel, download_pending
 
 
 def update(
@@ -28,4 +28,7 @@ def update(
         create_novel(id_or_url)
         return
 
+    update_novel(novel)
 
+    if not skip_chapters:
+        download_pending(novel)

@@ -41,6 +41,31 @@ class TestDTOAdapter(unittest.TestCase):
         for attrib in {'url'}:
             self.assertEqual(getattr(expected_url, attrib), getattr(actual_url, attrib))
 
+    def test_update_novel_from_dto(self):
+        novel_dto = NovelDTO(
+            id=None,
+            title='title',
+            author='author',
+            synopsis='a nice description',
+            thumbnail_url='thumbnail',
+            thumbnail_path=None,
+            lang='language',
+            url='link',
+            last_updated=None,
+        )
+
+        expected_novel = Novel(
+            title="title",
+            author="author",
+            synopsis="a nice description",
+            thumbnail_url='thumbnail',
+            lang='language',
+        )
+
+        actual_novel = self.dto_adapter.update_novel_from_dto(Novel(), novel_dto)
+        for attrib in {'title', 'author', 'synopsis', 'thumbnail_url', 'lang'}:
+            self.assertEqual(getattr(expected_novel, attrib), getattr(actual_novel, attrib))
+
     def test_volume_from_chapter_dtos(self):
         novel = Novel(id=2)
 
@@ -105,10 +130,10 @@ class TestDTOAdapter(unittest.TestCase):
             name='name',
             value='value',
             namespace='ns',
-            others='{"role":"this"}',
+            others='{"role": "this"}',
             novel_id=novel.id,
         )
 
-        actual_metadata = self.dto_adapter.chapter_from_dto(novel, metadata_dto)
-        for attrib in {'id', 'name', 'value', 'namespace', 'others', 'novel_id'}:
+        actual_metadata = self.dto_adapter.metadata_from_dto(novel, metadata_dto)
+        for attrib in {'name', 'value', 'namespace', 'others', 'novel_id'}:
             self.assertEqual(getattr(expected_metadata, attrib), getattr(actual_metadata, attrib))

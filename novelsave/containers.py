@@ -1,11 +1,19 @@
 from dependency_injector import containers, providers
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from novelsave.services import FileService, NovelService
 from novelsave.services.source import SourceGateway, SourceGatewayProvider
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
 from novelsave.utils.helpers import StringHelper
+
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 
 class Utils(containers.DeclarativeContainer):

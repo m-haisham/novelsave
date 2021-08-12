@@ -22,6 +22,15 @@ class DTOAdapter:
 
         return novel, url
 
+    def update_novel_from_dto(self, novel: Novel, novel_dto: NovelDTO) -> Novel:
+        novel.title = novel_dto.title
+        novel.author = novel_dto.author
+        novel.synopsis = novel_dto.synopsis
+        novel.thumbnail_url = novel_dto.thumbnail_url
+        novel.lang = novel_dto.lang
+
+        return novel
+
     def volumes_from_chapter_dtos(self, novel: Novel, chapter_dtos: List[ChapterDTO]) -> Dict[Volume, List[ChapterDTO]]:
         volumes = {}
         for dto in chapter_dtos:

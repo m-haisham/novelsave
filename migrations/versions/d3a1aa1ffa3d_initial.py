@@ -1,8 +1,8 @@
-"""init
+"""initial
 
-Revision ID: f37cec007123
+Revision ID: d3a1aa1ffa3d
 Revises: 
-Create Date: 2021-08-11 23:10:19.602898
+Create Date: 2021-08-12 15:51:01.375937
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f37cec007123'
+revision = 'd3a1aa1ffa3d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -57,24 +57,24 @@ def upgrade():
     )
     op.create_table('volumes',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('index', sa.Integer(), nullable=True),
-    sa.Column('name', sa.String(), nullable=True),
-    sa.Column('novel_id', sa.Integer(), nullable=True),
+    sa.Column('index', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('novel_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['novel_id'], ['novels.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('novel_id', 'index', name='novel_index_uc')
+    sa.UniqueConstraint('novel_id', 'index')
     )
     op.create_table('chapters',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('index', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(), nullable=True),
-    sa.Column('url', sa.String(), nullable=True),
+    sa.Column('title', sa.String(), nullable=False),
+    sa.Column('url', sa.String(), nullable=False),
     sa.Column('content_path', sa.String(), nullable=True),
     sa.Column('last_updated', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
-    sa.Column('volume_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['volume_id'], ['volumes.id'], ),
+    sa.Column('volume_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['volume_id'], ['volumes.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('volume_id', 'index', name='volume_index_uc')
+    sa.UniqueConstraint('volume_id', 'index')
     )
     # ### end Alembic commands ###
 

@@ -9,7 +9,7 @@ from ..main import cli
 @click.option('--limit', type=int, help='Maximum count of chapters to update. Set to 0 or less to skip.')
 def update(
         id_or_url: str,
-        skip_chapters: bool,
+        limit: int,
 ):
     """check and update a novel"""
-    controllers.update(id_or_url, skip_chapters)
+    controllers.update(id_or_url, limit)

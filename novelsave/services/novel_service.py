@@ -1,5 +1,6 @@
 from typing import Optional, Callable, List, Dict
 
+from loguru import logger
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
@@ -35,11 +36,11 @@ class NovelService:
     def get_all_chapters(self, novel: Novel) -> List[Chapter]:
         return self.session.execute(
             select(Chapter).join(Volume).where(Volume.novel_id == novel.id)
-        ).all()
+        ).scalars().all()
 
     def get_pending_chapters(self, novel: Novel, limit: int = -1):
         stmt = select(Chapter).join(Volume).where((Chapter.content == None) & (Volume.novel_id == novel.id))
-        if limit > 0:
+        if limit is not None and limit > 0:
             stmt = stmt.limit(limit)
 
         return self.session.execute(stmt).scalars().all()
@@ -90,15 +91,67 @@ class NovelService:
         self.session.commit()
 
     def update_chapters(self, novel: Novel, chapter_dtos: List[ChapterDTO]):
-        stmt = select(Chapter).join(Volume).where((Chapter.content != None) & (Volume.novel_id == novel.id))
-        url_mapped_chapters = {c.url: c for c in self.session.execute(stmt).all()}
+        volumes = self.session.execute(select(Volume).where(Volume.novel_id == novel.id)).scalars().all()
+        chapters = self.get_all_chapters(novel)
+        volume_mapped_chapters = self.dto_adapter.volumes_from_chapter_dtos(novel, chapter_dtos)
 
-        # delete current chapters
-        self.session.execute(delete(Volume).where(Volume.novel_id == novel.id))
-        self.session.commit()
+        indexed_volumes = {v.index: v for v in volumes}
+        volumes_to_add = []
+        for v in list(volume_mapped_chapters.keys()):
+            try:
+                existing_volume = indexed_volumes.pop(v.index)
 
-        # insert new chapters
-        self.insert_chapters(novel, chapter_dtos, url_mapped_chapters)
+                # update names of volumes that already exist
+                logger.debug(f'Updating volume name (index={v.index}, name={existing_volume.name} -> {v.name})')
+                self.session.execute(update(Volume).where(Volume.id == existing_volume.id).values(name=v.name))
+
+                # index exists so map the chapters into existing volume
+                volume_mapped_chapters[existing_volume] = volume_mapped_chapters.pop(v)
+            except KeyError:
+                volumes_to_add.append(v)
+
+        # add new volume rows that are new
+        logger.debug(f'adding newly found volumes (count={len(volumes_to_add)})')
+        self.session.add_all(volumes_to_add)
+        self.session.flush()
+
+        # indexed by url which is unique across table
+        indexed_chapters = {c.url: c for c in chapters}
+        chapters_to_add = []
+
+        # iterate all new chapters
+        for volume, chapter_dtos in volume_mapped_chapters.items():
+            for chapter_dto in chapter_dtos:
+                chapter = self.dto_adapter.chapter_from_dto(volume, chapter_dto)
+                try:
+                    # existing chapter equivalent
+                    ece = indexed_chapters.pop(chapter.url)
+
+                    # update chapters that need to be updated
+                    if ece.volume_id != volume.id \
+                            or ece.index != chapter.index:
+                        logger.debug(f'Updating chapter parent volume (index={ece.index} -> {chapter.index}, '
+                                     f'volume_id={ece.volume_id} -> {volume.id})')
+                        self.session.execute(
+                            update(Chapter).where(Chapter.url == chapter.url).values(index=chapter.index,
+                                                                                     volume_id=volume.id)
+                        )
+                except KeyError:
+                    chapters_to_add.append(chapter)
+
+        # add all new chapters
+        logger.debug(f'adding newly found chapters (count={len(chapters_to_add)}).')
+        self.session.add_all(chapters_to_add)
+
+        # delete chapters that dont exist anymore
+        logger.debug(f'deleting chapter rows that dont exist anymore (count={len(indexed_chapters)}).')
+        for old in indexed_chapters.values():
+            self.session.delete(old)
+
+        # delete volumes that dont exist anymore
+        logger.debug(f'deleting volume rows that dont exist anymore (count={len(indexed_volumes)}).')
+        for old in indexed_volumes.values():
+            self.session.delete(old)
 
     def update_metadata(self, novel: Novel, metadata_dtos: List[MetaDataDTO]):
         # delete existing

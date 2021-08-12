@@ -59,13 +59,13 @@ def update_novel(
 @inject
 def download_pending(
         novel: Novel,
-        limit: int,
+        limit: Optional[int],
         novel_service: NovelService = Provide[Application.services.novel_service],
         dto_adapter: DTOAdapter = Provide[Application.adapters.dto_adapter],
 ):
     chapters = novel_service.get_pending_chapters(novel, limit)
     if not chapters:
-        logger.error(f'Novel (title={novel.title}) has no pending chapters.')
+        logger.info(f'Novel (title={novel.title}) has no pending chapters.')
 
     url = novel_service.get_url(novel)
     logger.debug(f'Using (url={url})')
@@ -80,6 +80,7 @@ def download_pending(
     logger.info(f'Downloading pending chapters (count={len(chapters)}, threads={len(controller.threads)})...')
     for chapter_dto in controller.iter():
         novel_service.update_content(chapter_dto)
+        logger.debug(f'Chapter content downloaded (index={chapter_dto.index}, title={chapter_dto.title})')
 
     logger.info(f'Download complete.')
 
@@ -97,11 +98,11 @@ def get_novel(
         try:
             novel = novel_service.get_novel_by_id(int(id_or_url))
         except ValueError:
-            logger.error(f'Value provided ({id_or_url}) is neither a url or an id.')
+            logger.info(f'Value provided ({id_or_url}) is neither a url or an id.')
             sys.exit(1)
 
     if not novel:
-        logger.error(f'Novel ({"url" if is_url else "id"}={id_or_url}) not found.')
+        logger.info(f'Novel ({"url" if is_url else "id"}={id_or_url}) not found.')
 
     return novel
 

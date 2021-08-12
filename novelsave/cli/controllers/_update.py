@@ -27,5 +27,5 @@ def update(
     else:
         update_novel(novel)
 
-    if limit > 0:
+    if limit is None or limit > 0:
         download_pending(novel, limit)

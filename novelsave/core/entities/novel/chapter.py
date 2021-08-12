@@ -17,5 +17,6 @@ class Chapter(Base):
 
     content = Column(String, nullable=True)
     volume_id = Column(Integer, ForeignKey('volumes.id', ondelete='CASCADE'), nullable=False)
+    volume = relationship('Volume', back_populates='chapters')
 
     last_updated = Column(TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())

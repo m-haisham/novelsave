@@ -11,7 +11,10 @@ manage {config, clean, novel}
 periodical (--every-minutes SECONDS)
 manage {startup} {add, remove}
 """
+import sys
+
 import click
+from loguru import logger
 
 from . import controllers, helpers, groups
 from .. import settings
@@ -20,7 +23,13 @@ from migrations import commands as migration_commands
 
 
 def setup_logger():
-    pass
+    logger.remove()
+    logger.add(
+        sys.stdout,
+        colorize=True,
+        format='<level>{level:<8}</level> | <level>{message}</level>',
+        level='TRACE',
+    )
 
 
 def inject_dependencies():

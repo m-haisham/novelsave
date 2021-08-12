@@ -1,10 +1,17 @@
 from dependency_injector import containers, providers
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 from novelsave.services import FileService, NovelService
 from novelsave.services.source import SourceGateway, SourceGatewayProvider
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
+from novelsave.utils.helpers import StringHelper
+
+
+class Utils(containers.DeclarativeContainer):
+    string_helper = providers.Factory(
+        StringHelper,
+    )
 
 
 class Adapters(containers.DeclarativeContainer):
@@ -21,7 +28,7 @@ class Infrastructure(containers.DeclarativeContainer):
     config = providers.Configuration()
 
     engine = providers.Singleton(create_engine, url=config.database.url, future=True)
-    session_builder = providers.Singleton(sessionmaker, bind=engine, future=True)
+    session = providers.Singleton(Session, engine, future=True)
 
 
 class Services(containers.DeclarativeContainer):
@@ -38,7 +45,7 @@ class Services(containers.DeclarativeContainer):
 
     novel_service = providers.Factory(
         NovelService,
-        session_builder=infrastructure.session_builder,
+        session=infrastructure.session,
         dto_adapter=adapters.dto_adapter,
     )
 
@@ -50,6 +57,10 @@ class Services(containers.DeclarativeContainer):
 
 class Application(containers.DeclarativeContainer):
     config = providers.Configuration(strict=True)
+
+    utils = providers.Container(
+        Utils,
+    )
 
     adapters = providers.Container(
         Adapters,

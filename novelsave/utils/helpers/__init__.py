@@ -1,7 +1,6 @@
 from typing import Iterable, Tuple
 
 from .string import StringHelper
-from .pattern import url_pattern
 
 
 def unzip_arguments(args: tuple, kwargs: dict, pairs: Iterable[Tuple[int, str]]):

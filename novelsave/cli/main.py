@@ -13,9 +13,10 @@ manage {startup} {add, remove}
 """
 import click
 
-from . import controllers, groups
+from . import controllers, helpers, groups
 from .. import settings
 from ..containers import Application
+from migrations import commands as migration_commands
 
 
 def setup_logger():
@@ -26,13 +27,14 @@ def inject_dependencies():
     application = Application()
     application.config.from_dict(settings.as_dict())
     application.wire(packages=[controllers, groups])
-    print()
 
 
 def update_database_schema():
-    pass
+    migration_commands.migrate(settings.DATABASE_URL)
 
 
 @click.group()
 def cli():
+    setup_logger()
+    update_database_schema()
     inject_dependencies()

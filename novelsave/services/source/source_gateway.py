@@ -15,6 +15,9 @@ class SourceGateway(object):
         self.source = source
         self.source_adapter = source_adapter
 
+    def source_name(self) -> str:
+        return self.source.__name__
+
     def is_search_capable(self) -> bool:
         """denotes whether the source has search capability"""
         return self.source.__search__

@@ -10,11 +10,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # operating system specific configuration file
 # config directory is used to place logs, config, cache
 CONFIG_DIR = Path(user_config_dir(NAME, AUTHOR))
+CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
 CONFIG_FILE = CONFIG_DIR / 'config.yml'
 DATA_DIR = CONFIG_DIR / 'data'
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-DATABASE_URL = 'sqlite:///' + str((CONFIG_DIR / 'data.sqlite').resolve())
+DATABASE_FILE = str((CONFIG_DIR / 'data.sqlite').resolve())
+DATABASE_URL = 'sqlite:///' + DATABASE_FILE
 
 # defined the extension format of the file
 # where chapter content is stored

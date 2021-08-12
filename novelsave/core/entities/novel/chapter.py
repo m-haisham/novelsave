@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, func
+from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, func, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from ..base import Base
@@ -6,9 +6,12 @@ from ..base import Base
 
 class Chapter(Base):
     __tablename__ = 'chapters'
+    __table_args__ = (
+        UniqueConstraint('volume_id', 'index', name='volume_index_uc'),
+    )
 
     id = Column(Integer, primary_key=True)
-    index = Column(Integer, unique=True, nullable=False)
+    index = Column(Integer, nullable=False)
     title = Column(String)
     url = Column(String)
 

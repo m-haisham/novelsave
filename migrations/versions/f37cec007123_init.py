@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 67cc70f1d3e5
+Revision ID: f37cec007123
 Revises: 
-Create Date: 2021-08-09 22:09:28.499173
+Create Date: 2021-08-11 23:10:19.602898
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '67cc70f1d3e5'
+revision = 'f37cec007123'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -38,6 +38,16 @@ def upgrade():
     sa.ForeignKeyConstraint(['novel_id'], ['novels.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('novel_metadata',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.Column('namespace', sa.String(), nullable=True),
+    sa.Column('others', sa.String(), nullable=True),
+    sa.Column('novel_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['novel_id'], ['novels.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('novel_urls',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('url', sa.String(), nullable=False),
@@ -51,7 +61,8 @@ def upgrade():
     sa.Column('name', sa.String(), nullable=True),
     sa.Column('novel_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['novel_id'], ['novels.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('novel_id', 'index', name='novel_index_uc')
     )
     op.create_table('chapters',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -63,7 +74,7 @@ def upgrade():
     sa.Column('volume_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['volume_id'], ['volumes.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('index')
+    sa.UniqueConstraint('volume_id', 'index', name='volume_index_uc')
     )
     # ### end Alembic commands ###
 
@@ -73,6 +84,7 @@ def downgrade():
     op.drop_table('chapters')
     op.drop_table('volumes')
     op.drop_table('novel_urls')
+    op.drop_table('novel_metadata')
     op.drop_table('assets')
     op.drop_table('novels')
     # ### end Alembic commands ###

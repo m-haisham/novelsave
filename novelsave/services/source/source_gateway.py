@@ -44,9 +44,10 @@ class SourceGateway(object):
 
         return internal_novel, internal_chapters, internal_metadata
 
-    def update_chapter_content(self, chapter: dtos.ChapterDTO):
+    def update_chapter_content(self, chapter: dtos.ChapterDTO) -> dtos.ChapterDTO:
         """update a chapter's content by following its url"""
         source_chapter = self.source_adapter.chapter_to_external(chapter)
         self.source.chapter(source_chapter)
-
         self.source_adapter.chapter_content_to_internal(source_chapter, chapter)
+
+        return chapter

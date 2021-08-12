@@ -70,18 +70,19 @@ class TestDTOAdapter(unittest.TestCase):
         novel = Novel(id=2)
 
         chapter_dtos = [
-            ChapterDTO(id=None, index=-1, title='', url='', volume=(1, 'volume')),
-            ChapterDTO(id=None, index=-1, title='', url='', volume=(1, 'volume')),
-            ChapterDTO(id=None, index=-1, title='', url='', volume=(1, 'volume')),
-            ChapterDTO(id=None, index=-1, title='', url='', volume=(2, 'volume 2')),
-            ChapterDTO(id=None, index=-1, title='', url='', volume=None),
-            ChapterDTO(id=None, index=-1, title='', url='', volume=(3, )),
+            ChapterDTO(index=-1, title='', url='', volume=(1, 'volume')),
+            ChapterDTO(index=-1, title='', url='', volume=(1, 'volume')),
+            ChapterDTO(index=-1, title='', url='', volume=(1, 'volume')),
+            ChapterDTO(index=-1, title='', url='', volume=(2, 'volume 2')),
+            ChapterDTO(index=-1, title='', url='', volume=None),
+            ChapterDTO(index=1, title='', url='', volume=None),
+            ChapterDTO(index=-1, title='', url='', volume=(3,)),
         ]
 
         expected_volumes = {
             Volume(index=1, name='volume', novel_id=novel.id): chapter_dtos[:3],
             Volume(index=2, name='volume 2', novel_id=novel.id): chapter_dtos[3:4],
-            Volume(index=-1, name='_default', novel_id=novel.id): chapter_dtos[4:5],
+            Volume(index=-1, name='_default', novel_id=novel.id): chapter_dtos[4:6],
         }
 
         actual_volumes = self.dto_adapter.volumes_from_chapter_dtos(novel, chapter_dtos)
@@ -96,7 +97,6 @@ class TestDTOAdapter(unittest.TestCase):
         volume = Volume(id=1)
 
         chapter_dto = ChapterDTO(
-            id=None,
             index=1,
             title='chapter title',
             url='https://my.chapter.org',
@@ -115,6 +115,22 @@ class TestDTOAdapter(unittest.TestCase):
         actual_chapter = self.dto_adapter.chapter_from_dto(volume, chapter_dto)
         for attrib in {'id', 'index', 'title', 'url', 'volume_id'}:
             self.assertEqual(getattr(expected_chapter, attrib), getattr(actual_chapter, attrib))
+
+    def test_chapter_to_dto(self):
+        test_chapter = Chapter(
+            index=1,
+            title="something",
+            url="url",
+        )
+
+        expected_dto = ChapterDTO(
+            index=1,
+            title='something',
+            url='url',
+        )
+
+        actual_dto = self.dto_adapter.chapter_to_dto(test_chapter)
+        self.assertEqual(expected_dto, actual_dto)
 
     def test_metadata_from_dto(self):
         novel = Novel(id=1)

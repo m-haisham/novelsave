@@ -47,14 +47,15 @@ class Services(containers.DeclarativeContainer):
 
     file_service = providers.Factory(
         FileService,
-        location=data_config.dir,
-        data_division=data_config.division_rules,
+        data_dir=data_config.dir,
+        division_rules=data_config.division_rules,
     )
 
     novel_service = providers.Factory(
         NovelService,
         session=infrastructure.session,
         dto_adapter=adapters.dto_adapter,
+        file_service=file_service,
     )
 
     source_gateway_provider = providers.Factory(

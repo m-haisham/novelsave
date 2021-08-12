@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: d3a1aa1ffa3d
+Revision ID: d137a4515bd9
 Revises: 
-Create Date: 2021-08-12 15:51:01.375937
+Create Date: 2021-08-12 17:21:43.803161
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd3a1aa1ffa3d'
+revision = 'd137a4515bd9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -69,9 +69,9 @@ def upgrade():
     sa.Column('index', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('url', sa.String(), nullable=False),
-    sa.Column('content_path', sa.String(), nullable=True),
-    sa.Column('last_updated', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('content', sa.String(), nullable=True),
     sa.Column('volume_id', sa.Integer(), nullable=False),
+    sa.Column('last_updated', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.ForeignKeyConstraint(['volume_id'], ['volumes.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('volume_id', 'index')

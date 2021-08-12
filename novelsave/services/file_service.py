@@ -7,9 +7,9 @@ _path_type = Union[str, Path, os.PathLike]
 
 class FileService(object):
 
-    def __init__(self, data_dir: Path, data_division: Dict[str, str]):
+    def __init__(self, data_dir: Path, division_rules: Dict[str, str]):
         self.data_dir = data_dir
-        self.data_division = data_division
+        self.division_rules = division_rules
 
     def from_relative(self, r_path: _path_type, mkdir=False) -> Path:
         """create the directories if specified and return the actual path"""
@@ -19,10 +19,10 @@ class FileService(object):
 
         return path
 
-    def apply_division(self, r_path: _path_type) -> Path:
+    def divide(self, r_path: _path_type) -> Path:
         """add additional sub folder to the parent depending on the file type"""
         path = Path(r_path)
-        parent = path.parent / self.data_division.get(path.suffix, '')
+        parent = path.parent / self.division_rules.get(path.suffix, '')
 
         return parent.resolve() / path.name
 

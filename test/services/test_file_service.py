@@ -40,12 +40,12 @@ class TestFileService(unittest.TestCase):
     def test_apply_division(self):
         # when there is a specified directory
         r_path = 'subdivide_test_dir/test_file.html'
-        s_path = self.file_service.apply_division(r_path)
+        s_path = self.file_service.divide(r_path)
         self.assertEqual(Path(r_path).parent / 'web' / 'test_file.html', s_path)
 
         # when there is no specified directory
         r_path = 'subdivide_test_dir/test_file.json'
-        s_path = self.file_service.apply_division(r_path)
+        s_path = self.file_service.divide(r_path)
         self.assertEqual(Path(r_path), s_path)
 
     def test_write_str(self):

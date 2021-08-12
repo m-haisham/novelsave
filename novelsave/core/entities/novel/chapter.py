@@ -15,7 +15,7 @@ class Chapter(Base):
     title = Column(String, nullable=False)
     url = Column(String, nullable=False)
 
-    content_path = Column(String, nullable=True)
+    content = Column(String, nullable=True)
     volume_id = Column(Integer, ForeignKey('volumes.id', ondelete='CASCADE'), nullable=False)
 
     last_updated = Column(TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())

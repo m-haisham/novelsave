@@ -21,7 +21,7 @@ DATABASE_URL = 'sqlite:///' + DATABASE_FILE
 
 # defined the extension format of the file
 # where chapter content is stored
-CHAPTER_EXTENSION = '.nschtml'
+CHAPTER_EXTENSION = '.html'
 
 # the following map defines how files are stored
 # by further subdivision into sub-folders

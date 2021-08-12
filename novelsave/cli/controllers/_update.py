@@ -1,13 +1,11 @@
 import sys
 
-from loguru import logger
-
 from ..helpers import get_novel, create_novel, update_novel, download_pending
 
 
 def update(
         id_or_url: str,
-        skip_chapters: bool,
+        limit: int = -1,
 ):
     """
     update the novel metadata and downloads any new chapters if not specified otherwise
@@ -16,7 +14,7 @@ def update(
     however if id is provided the process will be terminated
 
     :param id_or_url: id or url of the novel
-    :param skip_chapters: whether to skip updating chapters
+    :param limit: no. of chapters to update
     :return: None
     """
     novel = get_novel(id_or_url)
@@ -25,10 +23,9 @@ def update(
         if not is_url:
             sys.exit(1)
 
-        create_novel(id_or_url)
-        return
+        novel = create_novel(id_or_url)
+    else:
+        update_novel(novel)
 
-    update_novel(novel)
-
-    if not skip_chapters:
-        download_pending(novel)
+    if limit > 0:
+        download_pending(novel, limit)

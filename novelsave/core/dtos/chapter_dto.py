@@ -5,7 +5,6 @@ from typing import List, Union, Tuple, Optional
 
 @dataclass
 class ChapterDTO:
-    id: Optional[int]
     index: int
     title: str
     url: str

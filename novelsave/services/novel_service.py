@@ -1,10 +1,11 @@
 from typing import Optional, Callable, List, Dict
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
 from novelsave.core.dtos import NovelDTO, ChapterDTO, MetaDataDTO
 from novelsave.core.entities.novel import Novel, NovelUrl, Chapter, Volume, MetaData
+from novelsave.services import FileService
 from novelsave.utils.adapters import DTOAdapter
 
 
@@ -14,9 +15,11 @@ class NovelService:
             self,
             session: Session,
             dto_adapter: DTOAdapter,
+            file_service: FileService,
     ):
         self.session = session
         self.dto_adapter = dto_adapter
+        self.file_service = file_service
 
     def get_novel_by_id(self, id_: int) -> Novel:
         """retrieve a novel from persistence using its id"""
@@ -34,10 +37,12 @@ class NovelService:
             select(Chapter).join(Volume).where(Volume.novel_id == novel.id)
         ).all()
 
-    def get_pending_chapters(self, novel: Novel):
-        return self.session.execute(
-            select(Chapter).join(Volume).where((Chapter.content_path == None) & (Volume.novel_id == novel.id))
-        ).all()
+    def get_pending_chapters(self, novel: Novel, limit: int = -1):
+        stmt = select(Chapter).join(Volume).where((Chapter.content == None) & (Volume.novel_id == novel.id))
+        if limit > 0:
+            stmt = stmt.limit(limit)
+
+        return self.session.execute(stmt).scalars().all()
 
     def insert_novel(self, novel_dto: NovelDTO) -> Novel:
         novel, url = self.dto_adapter.novel_from_dto(novel_dto)
@@ -69,7 +74,7 @@ class NovelService:
             # if we have previous chapters with content, use their content path
             if previous is not None:
                 for chapter in chapters:
-                    chapter.content_path = previous.get(chapter.url)
+                    chapter.content = previous.get(chapter.url)
 
             self.session.add_all(chapters)
 
@@ -85,7 +90,7 @@ class NovelService:
         self.session.commit()
 
     def update_chapters(self, novel: Novel, chapter_dtos: List[ChapterDTO]):
-        stmt = select(Chapter).join(Volume).where((Chapter.content_path != None) & (Volume.novel_id == novel.id))
+        stmt = select(Chapter).join(Volume).where((Chapter.content != None) & (Volume.novel_id == novel.id))
         url_mapped_chapters = {c.url: c for c in self.session.execute(stmt).all()}
 
         # delete current chapters
@@ -101,3 +106,8 @@ class NovelService:
 
         # add new
         self.insert_metadata(novel, metadata_dtos)
+
+    def update_content(self, chapter_dto: ChapterDTO):
+        stmt = update(Chapter).where(Chapter.url == chapter_dto.url).values(content=chapter_dto.content)
+        self.session.execute(stmt)
+        self.session.commit()

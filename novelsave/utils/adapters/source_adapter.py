@@ -31,7 +31,6 @@ class SourceAdapter(object):
         """convert chapter from source to internal"""
 
         return dtos.ChapterDTO(
-            id=None,
             index=chapter.index,
             title=chapter.title,
             url=chapter.url,

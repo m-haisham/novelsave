@@ -1,3 +1,4 @@
+import os
 import sys
 from typing import Optional
 
@@ -8,6 +9,8 @@ from novelsave.cli.helpers.source import get_source_gateway
 from novelsave.containers import Application
 from novelsave.core.entities.novel import Novel
 from novelsave.services import NovelService
+from novelsave.utils.adapters import DTOAdapter
+from novelsave.utils.concurrent import ConcurrentActionsController
 
 
 @inject
@@ -21,7 +24,7 @@ def create_novel(
     """
     source_gateway = get_source_gateway(url)
 
-    logger.info(f'Retrieving novel (url={url}) information')
+    logger.info(f'Retrieving novel (url={url})...')
     novel_dto, chapter_dtos, metadata_dtos = source_gateway.novel_by_url(url)
 
     novel = novel_service.insert_novel(novel_dto)
@@ -38,11 +41,11 @@ def update_novel(
         novel_service: NovelService = Provide[Application.services.novel_service],
 ):
     url = novel_service.get_url(novel)
+    logger.debug(f'Using (url={url})')
 
     source_gateway = get_source_gateway(url)
-    logger.debug(f'Acquired source (name={source_gateway.source_name()})')
 
-    logger.info(f'Retrieving novel (url={url}) information...')
+    logger.info(f'Retrieving novel (url={url})...')
     novel_dto, chapter_dtos, metadata_dtos = source_gateway.novel_by_url(url)
 
     novel_service.update_novel(novel, novel_dto)
@@ -56,9 +59,29 @@ def update_novel(
 @inject
 def download_pending(
         novel: Novel,
+        limit: int,
         novel_service: NovelService = Provide[Application.services.novel_service],
+        dto_adapter: DTOAdapter = Provide[Application.adapters.dto_adapter],
 ):
-    pass
+    chapters = novel_service.get_pending_chapters(novel, limit)
+    if not chapters:
+        logger.error(f'Novel (title={novel.title}) has no pending chapters.')
+
+    url = novel_service.get_url(novel)
+    logger.debug(f'Using (url={url})')
+
+    source_gateway = get_source_gateway(url)
+
+    # setup controller
+    controller = ConcurrentActionsController(min(os.cpu_count(), len(chapters)), source_gateway.update_chapter_content)
+    for chapter in chapters:
+        controller.add(dto_adapter.chapter_to_dto(chapter))
+
+    logger.info(f'Downloading pending chapters (count={len(chapters)}, threads={len(controller.threads)})...')
+    for chapter_dto in controller.iter():
+        novel_service.update_content(chapter_dto)
+
+    logger.info(f'Download complete.')
 
 
 @inject

@@ -35,7 +35,10 @@ class DTOAdapter:
         volumes = {}
         for dto in chapter_dtos:
             if dto.volume is None:
-                volumes[-1] = (Volume(index=-1, name='_default', novel_id=novel.id), [dto])
+                try:
+                    volumes[-1][1].append(dto)
+                except KeyError:
+                    volumes[-1] = (Volume(index=-1, name='_default', novel_id=novel.id), [dto])
             elif len(dto.volume) < 2:
                 continue
             elif dto.volume[0] in volumes.keys():
@@ -51,6 +54,13 @@ class DTOAdapter:
             title=chapter_dto.title,
             url=chapter_dto.url,
             volume_id=volume.id,
+        )
+
+    def chapter_to_dto(self, chapter: Chapter):
+        return ChapterDTO(
+            index=chapter.index,
+            title=chapter.title,
+            url=chapter.url,
         )
 
     def metadata_from_dto(self, novel: Novel, metadata_dto: MetaDataDTO) -> MetaData:

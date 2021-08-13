@@ -30,22 +30,22 @@ class TestUpdateController(unittest.TestCase):
         create_novel.assert_called_with('https://my.site.org')
 
     @patch('novelsave.cli.controllers._update.download_pending')
-    @patch('novelsave.cli.controllers._update.update_novel')
+    @patch('novelsave.cli.controllers._update.update')
     @patch('novelsave.cli.controllers._update.get_novel', return_value='novel')
     def test_update_exists(self, get_novel, update_novel, download_pending):
         url = 'https://novel.site'
-        update(url, False)
+        update(url, 1)
 
         get_novel.assert_called_with(url)
         update_novel.assert_called_with('novel')
-        download_pending.assert_called_with('novel')
+        download_pending.assert_called_with('novel', 1)
 
     @patch('novelsave.cli.controllers._update.download_pending')
-    @patch('novelsave.cli.controllers._update.update_novel')
+    @patch('novelsave.cli.controllers._update.update')
     @patch('novelsave.cli.controllers._update.get_novel', return_value='novel')
     def test_update_exists_skip_chapters(self, get_novel, update_novel, download_pending):
         url = 'https://novel.site'
-        update(url, skip_chapters=True)
+        update(url)
 
         get_novel.assert_called_with(url)
         update_novel.assert_called_with('novel')

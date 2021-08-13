@@ -71,7 +71,6 @@ class TestSourceAdapter(unittest.TestCase):
         )
 
         expected_chapter = dtos.ChapterDTO(
-            id=None,
             index=1,
             title="title",
             content="paragraphs this is",
@@ -84,7 +83,6 @@ class TestSourceAdapter(unittest.TestCase):
 
     def test_chapter_from_internal(self):
         test_chapter = dtos.ChapterDTO(
-            id=None,
             index=1,
             title="title",
             content="paragraphs this is",
@@ -115,7 +113,6 @@ class TestSourceAdapter(unittest.TestCase):
         )
 
         expected_chapter = dtos.ChapterDTO(
-            id=None,
             index=-1,
             title="",
             url="",

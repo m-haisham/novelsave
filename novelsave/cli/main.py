@@ -36,6 +36,7 @@ def inject_dependencies():
     application = Application()
     application.config.from_dict(settings.as_dict())
     application.wire(packages=[controllers, helpers, groups])
+    print()
 
 
 def update_database_schema():

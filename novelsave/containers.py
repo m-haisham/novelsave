@@ -1,12 +1,12 @@
 from dependency_injector import containers, providers
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session
 
 from novelsave.services import FileService, NovelService
-from novelsave.services.source import SourceGateway, SourceGatewayProvider
+from novelsave.services.compilers import EpubCompiler, CompilerProvider
+from novelsave.services.source import SourceGatewayProvider
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
-from novelsave.utils.helpers import StringHelper
 
 
 @event.listens_for(Engine, "connect")
@@ -14,12 +14,6 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
-
-
-class Utils(containers.DeclarativeContainer):
-    string_helper = providers.Factory(
-        StringHelper,
-    )
 
 
 class Adapters(containers.DeclarativeContainer):
@@ -64,12 +58,24 @@ class Services(containers.DeclarativeContainer):
     )
 
 
+class Compilers(containers.DeclarativeContainer):
+    novel_config = providers.Configuration()
+    services = providers.DependenciesContainer()
+
+    epub_compiler = providers.Factory(
+        EpubCompiler,
+        novels_dir=novel_config.dir,
+        novel_service=services.novel_service,
+    )
+
+    compiler_provider = providers.Factory(
+        CompilerProvider,
+        epub=epub_compiler,
+    )
+
+
 class Application(containers.DeclarativeContainer):
     config = providers.Configuration(strict=True)
-
-    utils = providers.Container(
-        Utils,
-    )
 
     adapters = providers.Container(
         Adapters,
@@ -85,4 +91,10 @@ class Application(containers.DeclarativeContainer):
         data_config=config.data,
         adapters=adapters,
         infrastructure=infrastructure,
+    )
+
+    compilers = providers.Container(
+        Compilers,
+        novel_config=config.novel,
+        services=services,
     )

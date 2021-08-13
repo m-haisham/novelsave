@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 
 from novelsave.core.dtos import NovelDTO, ChapterDTO, MetaDataDTO
 from novelsave.core.entities.novel import Novel, NovelUrl, Chapter, Volume, MetaData
+from novelsave.core.services import BaseNovelService
 from novelsave.services import FileService
 from novelsave.utils.adapters import DTOAdapter
 
 
-class NovelService:
+class NovelService(BaseNovelService):
 
     def __init__(
             self,
@@ -30,10 +31,13 @@ class NovelService:
         """retrieve a novel from persistence using its url"""
         return self.session.query(Novel).join(NovelUrl).filter(NovelUrl.url == url).first()
 
-    def get_url(self, novel: Novel) -> str:
+    def get_primary_url(self, novel: Novel) -> str:
         return novel.urls[0].url
 
-    def get_all_chapters(self, novel: Novel) -> List[Chapter]:
+    def get_urls(self, novel) -> List[NovelUrl]:
+        return novel.urls
+
+    def get_chapters(self, novel: Novel) -> List[Chapter]:
         return self.session.execute(
             select(Chapter).join(Volume).where(Volume.novel_id == novel.id)
         ).scalars().all()
@@ -44,6 +48,22 @@ class NovelService:
             stmt = stmt.limit(limit)
 
         return self.session.execute(stmt).scalars().all()
+
+    def get_volumes(self, novel: Novel) -> List[Volume]:
+        return self.session.execute(select(Volume).where(Volume.novel_id == novel.id)).scalars.all()
+
+    def get_volumes_with_chapters(self, novel: Novel) -> Dict[Volume, List[Chapter]]:
+        volumes = self.session.execute(select(Volume).where(Volume.novel_id == novel.id)).scalars().all()
+
+        return {
+            volume: self.session.execute(
+                select(Chapter).where((Chapter.content != None) & (Chapter.volume_id == volume.id))
+            ).scalars().all()
+            for volume in volumes
+        }
+
+    def get_metadata(self, novel: Novel) -> List[MetaData]:
+        return novel.novel_metadata
 
     def insert_novel(self, novel_dto: NovelDTO) -> Novel:
         novel, url = self.dto_adapter.novel_from_dto(novel_dto)
@@ -92,7 +112,7 @@ class NovelService:
 
     def update_chapters(self, novel: Novel, chapter_dtos: List[ChapterDTO]):
         volumes = self.session.execute(select(Volume).where(Volume.novel_id == novel.id)).scalars().all()
-        chapters = self.get_all_chapters(novel)
+        chapters = self.get_chapters(novel)
         volume_mapped_chapters = self.dto_adapter.volumes_from_chapter_dtos(novel, chapter_dtos)
 
         indexed_volumes = {v.index: v for v in volumes}
@@ -152,6 +172,8 @@ class NovelService:
         logger.debug(f'deleting volume rows that dont exist anymore (count={len(indexed_volumes)}).')
         for old in indexed_volumes.values():
             self.session.delete(old)
+
+        self.session.commit()
 
     def update_metadata(self, novel: Novel, metadata_dtos: List[MetaDataDTO]):
         # delete existing

@@ -25,7 +25,7 @@ def update(
 
         novel = create_novel(id_or_url)
     else:
-        update_novel(novel)
+        update(novel)
 
     if limit is None or limit > 0:
         download_pending(novel, limit)

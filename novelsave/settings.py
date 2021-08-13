@@ -19,6 +19,8 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 DATABASE_FILE = str((CONFIG_DIR / 'data.sqlite').resolve())
 DATABASE_URL = 'sqlite:///' + DATABASE_FILE
 
+NOVEL_DIR = Path.home() / 'novels'
+
 # defined the extension format of the file
 # where chapter content is stored
 CHAPTER_EXTENSION = '.html'
@@ -48,6 +50,9 @@ def as_dict():
             'dir': DATA_DIR,
             'chapter_extension': CHAPTER_EXTENSION,
             'division_rules': DIVISION_RULES,
+        },
+        'novel': {
+            'dir': NOVEL_DIR,
         },
         'infrastructure': {
             'database': {

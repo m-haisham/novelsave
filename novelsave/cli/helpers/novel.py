@@ -40,7 +40,7 @@ def update_novel(
         novel: Novel,
         novel_service: NovelService = Provide[Application.services.novel_service],
 ):
-    url = novel_service.get_url(novel)
+    url = novel_service.get_primary_url(novel)
     logger.debug(f'Using (url={url})')
 
     source_gateway = get_source_gateway(url)
@@ -67,7 +67,7 @@ def download_pending(
     if not chapters:
         logger.info(f'Novel (title={novel.title}) has no pending chapters.')
 
-    url = novel_service.get_url(novel)
+    url = novel_service.get_primary_url(novel)
     logger.debug(f'Using (url={url})')
 
     source_gateway = get_source_gateway(url)
@@ -98,11 +98,11 @@ def get_novel(
         try:
             novel = novel_service.get_novel_by_id(int(id_or_url))
         except ValueError:
-            logger.info(f'Value provided ({id_or_url}) is neither a url or an id.')
+            logger.info(f'Value provided is neither a url or an id. (value={({id_or_url})})')
             sys.exit(1)
 
     if not novel:
-        logger.info(f'Novel ({"url" if is_url else "id"}={id_or_url}) not found.')
+        logger.info(f'Novel not found. ({"url" if is_url else "id"}={id_or_url})')
 
     return novel
 

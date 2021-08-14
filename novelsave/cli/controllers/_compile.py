@@ -1,6 +1,7 @@
 import sys
 
 from dependency_injector.wiring import inject, Provide
+from loguru import logger
 
 from novelsave.cli.helpers import get_novel
 from novelsave.containers import Application
@@ -24,4 +25,5 @@ def compile(
         sys.exit(1)
 
     for compiler in compiler_provider.compilers():
-        compiler.compile(novel)
+        path = compiler.compile(novel)
+        logger.info(f'Compiled (keywords: {compiler.keywords()}, loc="{path}")')

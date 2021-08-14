@@ -22,16 +22,6 @@ from ..containers import Application
 from migrations import commands as migration_commands
 
 
-def setup_logger():
-    logger.remove()
-    logger.add(
-        sys.stdout,
-        colorize=True,
-        format='<level>{level:<8}</level> | <level>{message}</level>',
-        level='TRACE',
-    )
-
-
 def inject_dependencies():
     application = Application()
     application.config.from_dict(settings.as_dict())
@@ -45,6 +35,6 @@ def update_database_schema():
 
 @click.group()
 def cli():
-    setup_logger()
+    logger.configure(**settings.LOGGER_CONFIG)
     update_database_schema()
     inject_dependencies()

@@ -4,10 +4,11 @@ from novelsave_sources.exceptions import UnknownSourceException
 from novelsave_sources.utils import parse_source
 
 from .source_gateway import SourceGateway
+from ...core.services.source import BaseSourceGatewayProvider
 from ...utils.adapters import SourceAdapter
 
 
-class SourceGatewayProvider:
+class SourceGatewayProvider(BaseSourceGatewayProvider):
     def __init__(self, source_adapter: SourceAdapter):
         self.source_adapter = source_adapter
 

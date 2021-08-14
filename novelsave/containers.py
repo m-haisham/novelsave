@@ -66,6 +66,7 @@ class Compilers(containers.DeclarativeContainer):
         EpubCompiler,
         novels_dir=novel_config.dir,
         novel_service=services.novel_service,
+        source_provider=services.source_gateway_provider,
     )
 
     compiler_provider = providers.Factory(

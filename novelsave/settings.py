@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 from appdirs import user_config_dir
@@ -35,6 +36,17 @@ DIVISION_RULES = {
     },
 }
 
+
+LOGGER_CONFIG = {
+    "handlers": [
+        {
+            "sink": sys.stdout,
+            "format": "<level>{level:<8}</level> | <level>{message}</level>",
+            'level': 'TRACE',
+            'colorize': True,
+        },
+    ],
+}
 
 # same information just as a dict for convenience with injector
 def as_dict():

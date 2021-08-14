@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Tuple
 
 from novelsave.core.entities.novel import Novel
@@ -11,5 +12,5 @@ class BaseCompiler(ABC):
         """keywords that identify this compiler. for example, output format"""
 
     @abstractmethod
-    def compile(self, novel: Novel):
+    def compile(self, novel: Novel) -> Path:
         """compile the a select novel from the database into another format."""

@@ -12,6 +12,7 @@ from novelsave.core.services.compilers import BaseCompiler
 
 from lxml.html import builder as E
 
+from novelsave.core.services.source import BaseSourceGatewayProvider
 from novelsave.utils.helpers import string_helper
 
 
@@ -21,9 +22,11 @@ class EpubCompiler(BaseCompiler):
             self,
             novels_dir: Path,
             novel_service: BaseNovelService,
+            source_provider: BaseSourceGatewayProvider,
     ):
         self.novels_dir = novels_dir
         self.novel_service = novel_service
+        self.source_provider = source_provider
 
     def keywords(self) -> Tuple[str]:
         return 'epub',
@@ -51,7 +54,7 @@ class EpubCompiler(BaseCompiler):
 
         if novel.synopsis:
             book.add_metadata('DC', 'synopsis', novel.synopsis)
-            logger.debug(f'Bound attributes to epub (synopsis={novel.synopsis[:min(20, len(novel.synopsis))]}…)')
+            logger.debug(f'Bound attributes to epub (synopsis={novel.synopsis[:min(30, len(novel.synopsis))]}…)')
         else:
             logger.debug(f'Bound attributes to epub (synopsis=None')
 
@@ -95,12 +98,24 @@ class EpubCompiler(BaseCompiler):
         book.spine = [book_preface] + [c for volume in book_chapters.values() for c in volume]
         logger.debug(f'Built epub spine (count={len(book.spine)})')
 
-        epub.write_epub(self.save_path(novel), book, {})
-        logger.debug(f'Saved epub file (location="{self.save_path(novel)}")')
+        path = self.save_path(novel)
+        path.parent.mkdir(parents=True, exist_ok=True)
 
-    def save_path(self, novel):
-        # TODO add subdirectory by source
-        return self.novels_dir / f'{string_helper.slugify(novel.title, "_")}.epub'
+        epub.write_epub(path, book, {})
+        logger.debug(f'Saved epub file (loc="{path}")')
+
+        return path
+
+    def save_path(self, novel: Novel):
+        url = self.novel_service.get_primary_url(novel)
+        source_gateway = self.source_provider.source_from_url(url)
+
+        source_folder_name = source_gateway.source_name() if source_gateway else ''
+        logger.debug(f'Retrieved source name for epub file (source={source_gateway.source_name() if source_gateway else None})')
+
+        novel_name_slug = string_helper.slugify(novel.title, "_")
+
+        return self.novels_dir / source_folder_name / novel_name_slug / f'{novel_name_slug}.epub'
 
     def chapter_html(self, novel: Novel, chapter: Chapter) -> epub.EpubHtml:
         content = f'<h1>{chapter.title}</h1>{chapter.content}'

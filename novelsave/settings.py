@@ -22,20 +22,14 @@ DATABASE_URL = 'sqlite:///' + DATABASE_FILE
 
 NOVEL_DIR = Path.home() / 'novels'
 
-# defined the extension format of the file
-# where chapter content is stored
-CHAPTER_EXTENSION = '.html'
-
 # the following map defines how files are stored
 # by further subdivision into sub-folders
 DIVISION_RULES = {
-    CHAPTER_EXTENSION: 'chapters',
     **{
         key: 'assets'
         for key in {'.jpeg', '.jpg', '.png', '.webp', '.gif'}
     },
 }
-
 
 LOGGER_CONFIG = {
     "handlers": [
@@ -47,6 +41,7 @@ LOGGER_CONFIG = {
         },
     ],
 }
+
 
 # same information just as a dict for convenience with injector
 def as_dict():
@@ -60,7 +55,6 @@ def as_dict():
         },
         'data': {
             'dir': DATA_DIR,
-            'chapter_extension': CHAPTER_EXTENSION,
             'division_rules': DIVISION_RULES,
         },
         'novel': {
@@ -70,7 +64,8 @@ def as_dict():
             'database': {
                 'url': DATABASE_URL,
             }
-        }
+        },
+        'logger': LOGGER_CONFIG,
     }
 
 

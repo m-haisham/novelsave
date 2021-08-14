@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional, Callable, List, Dict
 
 from loguru import logger
@@ -108,6 +109,13 @@ class NovelService(BaseNovelService):
 
     def update_novel(self, novel: Novel, novel_dto: NovelDTO):
         self.dto_adapter.update_novel_from_dto(novel, novel_dto)
+        self.session.commit()
+
+    def set_thumbnail_asset(self, novel: Novel, r_path: Path):
+        if novel.thumbnail_path == str(r_path):
+            return
+
+        novel.thumbnail_path = str(r_path)
         self.session.commit()
 
     def update_chapters(self, novel: Novel, chapter_dtos: List[ChapterDTO]):

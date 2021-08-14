@@ -34,8 +34,8 @@ DIVISION_RULES = {
 LOGGER_CONFIG = {
     "handlers": [
         {
-            "sink": sys.stdout,
-            "format": "<level>{level:<8}</level> | <level>{message}</level>",
+            'sink': sys.stdout,
+            'format': '<level>{level:<8}</level> | <level>{message}</level>',
             'level': 'TRACE',
             'colorize': True,
         },

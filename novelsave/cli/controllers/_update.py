@@ -1,6 +1,6 @@
 import sys
 
-from ..helpers import get_novel, create_novel, update_novel, download_pending
+from .. import helpers
 
 
 def update(
@@ -17,15 +17,17 @@ def update(
     :param limit: no. of chapters to update
     :return: None
     """
-    novel = get_novel(id_or_url)
+    novel = helpers.get_novel(id_or_url)
     if novel is None:
         is_url = id_or_url.startswith('https')
         if not is_url:
             sys.exit(1)
 
-        novel = create_novel(id_or_url)
+        novel = helpers.create_novel(id_or_url)
     else:
-        update(novel)
+        helpers.update_novel(novel)
+
+    helpers.download_thumbnail(novel)
 
     if limit is None or limit > 0:
-        download_pending(novel, limit)
+        helpers.download_pending(novel, limit)

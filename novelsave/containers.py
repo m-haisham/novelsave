@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from novelsave.services import FileService, NovelService, SaveService
+from novelsave.services import FileService, NovelService, PathService
 from novelsave.services.compilers import EpubCompiler, CompilerProvider
 from novelsave.services.source import SourceGatewayProvider
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
@@ -58,8 +58,9 @@ class Services(containers.DeclarativeContainer):
         source_adapter=adapters.source_adapter,
     )
 
-    save_service = providers.Factory(
-        SaveService,
+    path_service = providers.Factory(
+        PathService,
+        data_dir=data_config.dir,
         novels_dir=novel_config.dir,
         novel_service=novel_service,
         source_provider=source_gateway_provider,
@@ -73,7 +74,7 @@ class Compilers(containers.DeclarativeContainer):
     epub_compiler = providers.Factory(
         EpubCompiler,
         novel_service=services.novel_service,
-        save_service=services.save_service,
+        path_service=services.path_service,
     )
 
     compiler_provider = providers.Factory(

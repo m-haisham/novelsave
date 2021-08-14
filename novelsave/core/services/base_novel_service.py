@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Optional, List, Dict
 
 from novelsave.core.dtos import NovelDTO, ChapterDTO, MetaDataDTO
@@ -54,6 +55,10 @@ class BaseNovelService(ABC):
     @abstractmethod
     def insert_metadata(self, novel: Novel, metadata_dtos: List[MetaDataDTO]):
         """insert new metadata into the database"""
+
+    @abstractmethod
+    def set_thumbnail_asset(self, novel: Novel, r_path: Path):
+        """update the cover asset path of the novel"""
 
     @abstractmethod
     def update_novel(self, novel: Novel, novel_dto: NovelDTO):

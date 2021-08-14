@@ -1,2 +1,2 @@
 from .base_novel_service import BaseNovelService
-from .base_save_service import BaseSaveService
+from .base_path_service import BasePathService

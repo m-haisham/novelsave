@@ -8,7 +8,7 @@ from loguru import logger
 from lxml.html import builder as E
 
 from novelsave.core.entities.novel import Novel, Chapter, MetaData, NovelUrl
-from novelsave.core.services import BaseNovelService, BaseSaveService
+from novelsave.core.services import BaseNovelService, BasePathService
 from novelsave.core.services.compilers import BaseCompiler
 
 
@@ -17,10 +17,10 @@ class EpubCompiler(BaseCompiler):
     def __init__(
             self,
             novel_service: BaseNovelService,
-            save_service: BaseSaveService,
+            path_service: BasePathService,
     ):
         self.novel_service = novel_service
-        self.save_service = save_service
+        self.path_service = path_service
 
     def keywords(self) -> Tuple[str]:
         return 'epub',
@@ -58,7 +58,7 @@ class EpubCompiler(BaseCompiler):
 
         book_preface = self.preface_html(novel, urls, metadata)
         book.add_item(book_preface)
-        logger.debug(f'Added pages to epub (pages.count=1, page=preface)')
+        logger.debug(f'Added pages to epub (pages.count=1, type=preface)')
 
         book_chapters = {}
         for volume, chapters in volumes.items():
@@ -70,7 +70,7 @@ class EpubCompiler(BaseCompiler):
                 book.add_item(epub_chapter)
                 book_chapters[volume_tuple].append(epub_chapter)
 
-        logger.debug(f'Added pages to epub (pages.count={chapter_count})')
+        logger.debug(f'Added pages to epub (pages.count={chapter_count}, type=chapter)')
 
         # table of contents
         book.toc = [book_preface]
@@ -102,7 +102,7 @@ class EpubCompiler(BaseCompiler):
 
     @lru_cache(maxsize=3)
     def destination(self, novel: Novel):
-        path = self.save_service.get_novel_path(novel)
+        path = self.path_service.get_novel_path(novel)
         return path / (path.name + '.epub')
 
     def chapter_html(self, novel: Novel, chapter: Chapter) -> epub.EpubHtml:

@@ -39,6 +39,10 @@ LOGGER_CONFIG = {
             'level': 'TRACE',
             'colorize': True,
         },
+        {
+            'sink': CONFIG_DIR / 'logs' / 'dev' / '{time:YYYY-MM-DD}.log',
+            'level': 'TRACE',
+        }
     ],
 }
 

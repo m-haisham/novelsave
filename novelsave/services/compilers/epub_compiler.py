@@ -1,32 +1,26 @@
 import json
-from pathlib import Path
+from functools import lru_cache
 from typing import Tuple, List, Dict
 
 import lxml.html
 from ebooklib import epub
 from loguru import logger
-
-from novelsave.core.entities.novel import Novel, Chapter, MetaData, NovelUrl
-from novelsave.core.services import BaseNovelService
-from novelsave.core.services.compilers import BaseCompiler
-
 from lxml.html import builder as E
 
-from novelsave.core.services.source import BaseSourceGatewayProvider
-from novelsave.utils.helpers import string_helper
+from novelsave.core.entities.novel import Novel, Chapter, MetaData, NovelUrl
+from novelsave.core.services import BaseNovelService, BaseSaveService
+from novelsave.core.services.compilers import BaseCompiler
 
 
 class EpubCompiler(BaseCompiler):
 
     def __init__(
             self,
-            novels_dir: Path,
             novel_service: BaseNovelService,
-            source_provider: BaseSourceGatewayProvider,
+            save_service: BaseSaveService,
     ):
-        self.novels_dir = novels_dir
         self.novel_service = novel_service
-        self.source_provider = source_provider
+        self.save_service = save_service
 
     def keywords(self) -> Tuple[str]:
         return 'epub',
@@ -98,7 +92,7 @@ class EpubCompiler(BaseCompiler):
         book.spine = [book_preface] + [c for volume in book_chapters.values() for c in volume]
         logger.debug(f'Built epub spine (count={len(book.spine)})')
 
-        path = self.save_path(novel)
+        path = self.destination(novel)
         path.parent.mkdir(parents=True, exist_ok=True)
 
         epub.write_epub(path, book, {})
@@ -106,16 +100,10 @@ class EpubCompiler(BaseCompiler):
 
         return path
 
-    def save_path(self, novel: Novel):
-        url = self.novel_service.get_primary_url(novel)
-        source_gateway = self.source_provider.source_from_url(url)
-
-        source_folder_name = source_gateway.source_name() if source_gateway else ''
-        logger.debug(f'Retrieved source name for epub file (source={source_gateway.source_name() if source_gateway else None})')
-
-        novel_name_slug = string_helper.slugify(novel.title, "_")
-
-        return self.novels_dir / source_folder_name / novel_name_slug / f'{novel_name_slug}.epub'
+    @lru_cache(maxsize=3)
+    def destination(self, novel: Novel):
+        path = self.save_service.get_novel_path(novel)
+        return path / (path.name + '.epub')
 
     def chapter_html(self, novel: Novel, chapter: Chapter) -> epub.EpubHtml:
         content = f'<h1>{chapter.title}</h1>{chapter.content}'

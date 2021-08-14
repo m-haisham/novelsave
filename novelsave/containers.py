@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from novelsave.services import FileService, NovelService
+from novelsave.services import FileService, NovelService, SaveService
 from novelsave.services.compilers import EpubCompiler, CompilerProvider
 from novelsave.services.source import SourceGatewayProvider
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
@@ -35,6 +35,7 @@ class Infrastructure(containers.DeclarativeContainer):
 
 class Services(containers.DeclarativeContainer):
     data_config = providers.Configuration()
+    novel_config = providers.Configuration()
 
     adapters = providers.DependenciesContainer()
     infrastructure = providers.DependenciesContainer()
@@ -57,6 +58,13 @@ class Services(containers.DeclarativeContainer):
         source_adapter=adapters.source_adapter,
     )
 
+    save_service = providers.Factory(
+        SaveService,
+        novels_dir=novel_config.dir,
+        novel_service=novel_service,
+        source_provider=source_gateway_provider,
+    )
+
 
 class Compilers(containers.DeclarativeContainer):
     novel_config = providers.Configuration()
@@ -64,9 +72,8 @@ class Compilers(containers.DeclarativeContainer):
 
     epub_compiler = providers.Factory(
         EpubCompiler,
-        novels_dir=novel_config.dir,
         novel_service=services.novel_service,
-        source_provider=services.source_gateway_provider,
+        save_service=services.save_service,
     )
 
     compiler_provider = providers.Factory(
@@ -90,12 +97,12 @@ class Application(containers.DeclarativeContainer):
     services = providers.Container(
         Services,
         data_config=config.data,
+        novel_config=config.novel,
         adapters=adapters,
         infrastructure=infrastructure,
     )
 
     compilers = providers.Container(
         Compilers,
-        novel_config=config.novel,
         services=services,
     )

@@ -14,3 +14,7 @@ class BaseCompiler(ABC):
     @abstractmethod
     def compile(self, novel: Novel) -> Path:
         """compile the a select novel from the database into another format."""
+
+    @abstractmethod
+    def destination(self, novel: Novel) -> Path:
+        """provide file or directory where the novel has been compiled to, file is preferred."""

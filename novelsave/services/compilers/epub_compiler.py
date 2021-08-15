@@ -1,5 +1,6 @@
 import json
 from functools import lru_cache
+from pathlib import Path
 from typing import Tuple, List, Dict
 
 import lxml.html
@@ -8,7 +9,7 @@ from loguru import logger
 from lxml.html import builder as E
 
 from novelsave.core.entities.novel import Novel, Chapter, MetaData, NovelUrl
-from novelsave.core.services import BaseNovelService, BasePathService
+from novelsave.core.services import BaseNovelService, BasePathService, BaseFileService
 from novelsave.core.services.compilers import BaseCompiler
 
 
@@ -17,9 +18,11 @@ class EpubCompiler(BaseCompiler):
     def __init__(
             self,
             novel_service: BaseNovelService,
+            file_service: BaseFileService,
             path_service: BasePathService,
     ):
         self.novel_service = novel_service
+        self.file_service = file_service
         self.path_service = path_service
 
     def keywords(self) -> Tuple[str]:
@@ -45,6 +48,8 @@ class EpubCompiler(BaseCompiler):
         book.add_author(novel.author)
         logger.debug(
             f'Bound attributes to epub (id={novel.id}, title={novel.title}, lang={novel.lang}, author={novel.author})')
+
+        self.set_cover(book, novel)
 
         if novel.synopsis:
             book.add_metadata('DC', 'synopsis', novel.synopsis)
@@ -96,7 +101,7 @@ class EpubCompiler(BaseCompiler):
         path.parent.mkdir(parents=True, exist_ok=True)
 
         epub.write_epub(path, book, {})
-        logger.debug(f'Saved epub file (loc="{path}")')
+        logger.debug(f'Saved epub file (path="{path}")')
 
         return path
 
@@ -104,6 +109,20 @@ class EpubCompiler(BaseCompiler):
     def destination(self, novel: Novel):
         path = self.path_service.get_novel_path(novel)
         return path / (path.name + '.epub')
+
+    def set_cover(self, book: epub.EpubBook, novel: Novel):
+        cover = None
+        if novel.thumbnail_path is not None:
+            possible_cover = self.path_service.resolve_data_path(Path(novel.thumbnail_path))
+            if possible_cover.exists() and possible_cover.is_file():
+                cover = possible_cover
+
+        if cover is None:
+            logger.debug(f'Copying cover image aborted (path="{novel.thumbnail_path}", reason=file does not exist)')
+            return
+
+        book.set_cover(cover.name, self.file_service.read_bytes(cover))
+        logger.debug(f'Copied cover image to epub (path="{novel.thumbnail_path}")')
 
     def chapter_html(self, novel: Novel, chapter: Chapter) -> epub.EpubHtml:
         content = f'<h1>{chapter.title}</h1>{chapter.content}'

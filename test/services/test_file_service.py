@@ -11,7 +11,7 @@ class TestFileService(unittest.TestCase):
 
     temp_dir = Path(tempfile.gettempdir())
     data_division = {'.html': 'web'}
-    file_service = FileService(temp_dir, data_division)
+    file_service = FileService(temp_dir)
 
     def test_from_relative(self):
         r_path = 'ns_test_dir/atc_file.html'

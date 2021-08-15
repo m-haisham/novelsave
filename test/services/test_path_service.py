@@ -46,6 +46,19 @@ class TestPathService(unittest.TestCase):
 
         self.assertEqual(self.data_dir / '1' / 'cover.jpg', path)
 
+    def test_resolve_data_path(self, source_provider, novel_service):
+        path_service = PathService(self.data_dir, self.save_dir, novel_service, source_provider)
+
+        test_paths = {
+            Path('1/cover.jpg'): self.data_dir / Path('1/cover.jpg'),
+            Path('../1/cover.jpg'): self.data_dir / Path('1/cover.jpg'),
+            Path('./1/cover.jpg'): self.data_dir / Path('1/cover.jpg'),
+        }
+
+        for test_path, expected in test_paths.items():
+            path = path_service.resolve_data_path(test_path)
+            self.assertEqual(expected, path)
+
     def test_relative_to_data_dir(self, source_provider, novel_service):
         test_path = self.data_dir / Path('file')
 

@@ -42,8 +42,6 @@ class Services(containers.DeclarativeContainer):
 
     file_service = providers.Factory(
         FileService,
-        data_dir=data_config.dir,
-        division_rules=data_config.division_rules,
     )
 
     novel_service = providers.Factory(
@@ -62,6 +60,7 @@ class Services(containers.DeclarativeContainer):
         PathService,
         data_dir=data_config.dir,
         novels_dir=novel_config.dir,
+        division_rules=data_config.division_rules,
         novel_service=novel_service,
         source_provider=source_gateway_provider,
     )
@@ -74,6 +73,7 @@ class Compilers(containers.DeclarativeContainer):
     epub_compiler = providers.Factory(
         EpubCompiler,
         novel_service=services.novel_service,
+        file_service=services.file_service,
         path_service=services.path_service,
     )
 

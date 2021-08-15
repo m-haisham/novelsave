@@ -20,8 +20,9 @@ def compile(
 
     :return: None
     """
-    novel = get_novel(id_or_url)
-    if novel is None:
+    try:
+        novel = get_novel(id_or_url)
+    except ValueError:
         sys.exit(1)
 
     for compiler in compiler_provider.compilers():

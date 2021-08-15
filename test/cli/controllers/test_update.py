@@ -6,22 +6,28 @@ from loguru import logger
 from novelsave.cli.controllers import update
 
 
+@patch('novelsave.cli.controllers._update.helpers.download_pending')
+@patch('novelsave.cli.controllers._update.helpers.download_thumbnail')
+@patch('novelsave.cli.controllers._update.helpers.update_novel')
+@patch('novelsave.cli.controllers._update.helpers.create_novel', return_value=None)
+@patch('novelsave.cli.controllers._update.helpers.get_novel', return_value=None)
 class TestUpdateController(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
         logger.remove()
 
-    @patch('novelsave.cli.controllers._update.create_novel', return_value=None)
-    @patch('novelsave.cli.controllers._update.get_novel', return_value=None)
-    def test_update_not_exists(self, get_novel, create_novel):
+    def test_update_not_exists(self, get_novel, create_novel, update_novel, download_thumbnail, download_pending):
+        get_novel.side_effect = ValueError()
+        create_novel.return_value = None
+
         with self.assertRaises(SystemExit):
-            update('not int', False)
+            update('not int', 0)
         get_novel.assert_called_with('not int')
         create_novel.assert_not_called()
 
         with self.assertRaises(SystemExit):
-            update('1', False)
+            update('1', 0)
         get_novel.assert_called_with('1')
         create_novel.assert_not_called()
 
@@ -29,10 +35,9 @@ class TestUpdateController(unittest.TestCase):
         get_novel.assert_called_with('https://my.site.org')
         create_novel.assert_called_with('https://my.site.org')
 
-    @patch('novelsave.cli.controllers._update.download_pending')
-    @patch('novelsave.cli.controllers._update.update')
-    @patch('novelsave.cli.controllers._update.get_novel', return_value='novel')
-    def test_update_exists(self, get_novel, update_novel, download_pending):
+    def test_update_exists(self, get_novel, create_novel, update_novel, download_thumbnail, download_pending):
+        get_novel.return_value = 'novel'
+
         url = 'https://novel.site'
         update(url, 1)
 
@@ -40,12 +45,12 @@ class TestUpdateController(unittest.TestCase):
         update_novel.assert_called_with('novel')
         download_pending.assert_called_with('novel', 1)
 
-    @patch('novelsave.cli.controllers._update.download_pending')
-    @patch('novelsave.cli.controllers._update.update')
-    @patch('novelsave.cli.controllers._update.get_novel', return_value='novel')
-    def test_update_exists_skip_chapters(self, get_novel, update_novel, download_pending):
+    def test_update_exists_skip_chapters(self, get_novel, create_novel, update_novel, download_thumbnail,
+                                         download_pending):
+        get_novel.return_value = 'novel'
+
         url = 'https://novel.site'
-        update(url)
+        update(url, limit=0)
 
         get_novel.assert_called_with(url)
         update_novel.assert_called_with('novel')

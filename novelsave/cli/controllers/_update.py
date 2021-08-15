@@ -17,8 +17,9 @@ def update(
     :param limit: no. of chapters to update
     :return: None
     """
-    novel = helpers.get_novel(id_or_url)
-    if novel is None:
+    try:
+        novel = helpers.get_novel(id_or_url)
+    except ValueError:
         is_url = id_or_url.startswith('https')
         if not is_url:
             sys.exit(1)

@@ -117,7 +117,7 @@ def download_pending(
 def get_novel(
         id_or_url: str,
         novel_service: NovelService = Provide[Application.services.novel_service],
-) -> Optional[Novel]:
+) -> Novel:
     """retrieve novel is it exists in the database otherwise return none"""
     is_url = id_or_url.startswith("http")
     if is_url:
@@ -131,6 +131,7 @@ def get_novel(
 
     if not novel:
         logger.info(f'Novel not found. ({"url" if is_url else "id"}={id_or_url})')
+        raise ValueError()
 
     return novel
 

@@ -32,9 +32,9 @@ class TestNovelHelper(unittest.TestCase):
     @patch('novelsave.services.NovelService')
     def test_get_novel_url(self, novel_service):
         novel_service.get_novel_by_url.return_value = None
-        result = novel_helper.get_novel('https://test.site', novel_service)
+        with self.assertRaises(ValueError):
+            novel_helper.get_novel('https://test.site', novel_service)
         novel_service.get_novel_by_url.assert_called_with('https://test.site')
-        self.assertIsNone(result)
 
         novel = MagicMock()
         novel_service.get_novel_by_url.return_value = novel
@@ -45,9 +45,9 @@ class TestNovelHelper(unittest.TestCase):
     @patch('novelsave.services.NovelService')
     def test_get_novel_id(self, novel_service):
         novel_service.get_novel_by_id.return_value = None
-        result = novel_helper.get_novel('1', novel_service)
+        with self.assertRaises(ValueError):
+            novel_helper.get_novel('1', novel_service)
         novel_service.get_novel_by_id.assert_called_with(1)
-        self.assertIsNone(result)
 
         novel = MagicMock()
         novel_service.get_novel_by_id.return_value = novel

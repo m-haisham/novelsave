@@ -29,7 +29,7 @@ setup(
     url=novelsave.__source__,
     entry_points={
         'console_scripts': [
-            'novelsave = novelsave.__main__:main'
+            'novelsave = novelsave.cli.main:cli'
         ]
     },
     packages=find_packages(),

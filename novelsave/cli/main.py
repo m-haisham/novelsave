@@ -19,14 +19,13 @@ from loguru import logger
 from . import controllers, helpers, groups
 from .. import settings
 from ..containers import Application
-from migrations import commands as migration_commands
+from ..insfrastructure.migrations import commands as migration_commands
 
 
 def inject_dependencies():
     application = Application()
     application.config.from_dict(settings.as_dict())
     application.wire(packages=[controllers, helpers, groups])
-    print()
 
 
 def update_database_schema():

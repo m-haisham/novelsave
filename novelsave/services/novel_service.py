@@ -130,8 +130,9 @@ class NovelService(BaseNovelService):
                 existing_volume = indexed_volumes.pop(v.index)
 
                 # update names of volumes that already exist
-                logger.debug(f'Updating volume name (index={v.index}, name={existing_volume.name} -> {v.name})')
-                self.session.execute(update(Volume).where(Volume.id == existing_volume.id).values(name=v.name))
+                logger.debug(f"Updating volume name (index={v.index}, name='{existing_volume.name}' -> '{v.name}')")
+                if existing_volume.name != v.name:
+                    self.session.execute(update(Volume).where(Volume.id == existing_volume.id).values(name=v.name))
 
                 # index exists so map the chapters into existing volume
                 volume_mapped_chapters[existing_volume] = volume_mapped_chapters.pop(v)
@@ -139,7 +140,7 @@ class NovelService(BaseNovelService):
                 volumes_to_add.append(v)
 
         # add new volume rows that are new
-        logger.debug(f'adding newly found volumes (count={len(volumes_to_add)})')
+        logger.debug(f"Adding newly found volumes (count={len(volumes_to_add)})")
         self.session.add_all(volumes_to_add)
         self.session.flush()
 
@@ -158,26 +159,26 @@ class NovelService(BaseNovelService):
                     # update chapters that need to be updated
                     if ece.volume_id != volume.id \
                             or ece.index != chapter.index:
-                        logger.debug(f'Updating chapter parent volume (index={ece.index} -> {chapter.index}, '
-                                     f'volume_id={ece.volume_id} -> {volume.id})')
+                        logger.debug(f"Updating chapter parent volume (index={ece.index} -> {chapter.index}, "
+                                     f"volume_id={ece.volume_id} -> {volume.id})")
                         self.session.execute(
-                            update(Chapter).where(Chapter.url == chapter.url).values(index=chapter.index,
-                                                                                     volume_id=volume.id)
+                            update(Chapter)
+                                .where(Chapter.url == chapter.url).values(index=chapter.index, volume_id=volume.id)
                         )
                 except KeyError:
                     chapters_to_add.append(chapter)
 
         # add all new chapters
-        logger.debug(f'adding newly found chapters (count={len(chapters_to_add)}).')
+        logger.debug(f"adding newly found chapters (count={len(chapters_to_add)}).")
         self.session.add_all(chapters_to_add)
 
         # delete chapters that dont exist anymore
-        logger.debug(f'deleting chapter rows that dont exist anymore (count={len(indexed_chapters)}).')
+        logger.debug(f"deleting chapter rows that dont exist anymore (count={len(indexed_chapters)}).")
         for old in indexed_chapters.values():
             self.session.delete(old)
 
         # delete volumes that dont exist anymore
-        logger.debug(f'deleting volume rows that dont exist anymore (count={len(indexed_volumes)}).')
+        logger.debug(f"deleting volume rows that dont exist anymore (count={len(indexed_volumes)}).")
         for old in indexed_volumes.values():
             self.session.delete(old)
 

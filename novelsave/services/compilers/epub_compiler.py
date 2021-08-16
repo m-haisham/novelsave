@@ -58,7 +58,7 @@ class EpubCompiler(BaseCompiler):
             logger.debug(f'Bound attributes to epub (synopsis=None')
 
         for data in metadata:
-            book.add_metadata(data.namespace, data.name, data.value, json.loads(getattr(data, 'others', '{}')))
+            book.add_metadata(data.namespace, data.name, data.value, json.loads(data.others))
         logger.debug(f'Bound attributes to epub (metadata.count={len(metadata)})')
 
         book_preface = self.preface_html(novel, urls, metadata)
@@ -105,7 +105,7 @@ class EpubCompiler(BaseCompiler):
 
         return path
 
-    @lru_cache(maxsize=3)
+    @lru_cache(maxsize=1)
     def destination(self, novel: Novel):
         path = self.path_service.get_novel_path(novel)
         return path / (path.name + '.epub')
@@ -124,7 +124,8 @@ class EpubCompiler(BaseCompiler):
         book.set_cover(cover.name, self.file_service.read_bytes(cover))
         logger.debug(f'Copied cover image to epub (path="{novel.thumbnail_path}")')
 
-    def chapter_html(self, novel: Novel, chapter: Chapter) -> epub.EpubHtml:
+    @staticmethod
+    def chapter_html(novel: Novel, chapter: Chapter) -> epub.EpubHtml:
         content = f'<h1>{chapter.title}</h1>{chapter.content}'
         file_name = f'{str(chapter.index).zfill(4)}.xhtml'
 
@@ -134,6 +135,18 @@ class EpubCompiler(BaseCompiler):
             file_name=file_name,
             lang=novel.lang,
         )
+
+    @staticmethod
+    def metadata_display_value(data: MetaData):
+        try:
+            others = json.loads(data.others)
+        except json.JSONDecodeError:
+            others = {}
+
+        others = [f'{key}={value}' for key, value in others.items()]
+        postfix = f'(' + ', '.join(others) + ')' if others else ''
+
+        return f'{data.value}{postfix}'
 
     def preface_html(self, novel: Novel, urls: List[NovelUrl], metadata: List[MetaData]) -> epub.EpubHtml:
         synopsis_section = E.DIV(
@@ -150,10 +163,12 @@ class EpubCompiler(BaseCompiler):
 
         metadata_sections = []
         for name, items in meta_by_name.items():
+            item_strings = [self.metadata_display_value(item) for item in items]
+
             section = E.DIV(
-                E.H4('Synopsis'),
+                E.H4(name),
                 E.DIV(
-                    ', '.join([item.value for item in items]),
+                    ', '.join(item_strings),
                     style="padding: 0 1rem",
                 ),
             )

@@ -11,45 +11,12 @@ class TestFileService(unittest.TestCase):
 
     temp_dir = Path(tempfile.gettempdir())
     data_division = {'.html': 'web'}
-    file_service = FileService(temp_dir)
-
-    def test_from_relative(self):
-        r_path = 'ns_test_dir/atc_file.html'
-        path = self.file_service.from_relative(r_path)
-
-        # test path was created correctly
-        self.assertEqual(self.temp_dir / r_path, path)
-
-        # assert parent directory was not created
-        self.assertFalse(path.parent.exists())
-
-    def test_from_relative_mkdir(self):
-        r_path = 'ns_test_dir/atc_file.html'
-        path = self.file_service.from_relative(r_path, mkdir=True)
-
-        # test path was created correctly
-        self.assertEqual(self.temp_dir / r_path, path)
-
-        # test parent directory was created
-        self.assertTrue(path.parent.exists())
-        self.assertTrue(path.parent.is_dir())
-
-        # cleanup: remove created dir
-        shutil.rmtree(path.parent)
-
-    def test_apply_division(self):
-        # when there is a specified directory
-        r_path = 'subdivide_test_dir/test_file.html'
-        s_path = self.file_service.divide(r_path)
-        self.assertEqual(Path(r_path).parent / 'web' / 'test_file.html', s_path)
-
-        # when there is no specified directory
-        r_path = 'subdivide_test_dir/test_file.json'
-        s_path = self.file_service.divide(r_path)
-        self.assertEqual(Path(r_path), s_path)
+    file_service = FileService()
 
     def test_write_str(self):
-        path = self.file_service.from_relative('ns_test_dir/atc_file.html', mkdir=True)
+        path = Path('ns_test_dir/atc_file.html')
+        path.parent.mkdir(parents=True, exist_ok=True)
+
         data = '<h1>testing data</h1>'
         self.file_service.write_str(path, data)
 
@@ -65,7 +32,9 @@ class TestFileService(unittest.TestCase):
         shutil.rmtree(path.parent)
 
     def test_write_bytes(self):
-        path = self.file_service.from_relative('ns_test_dir/atc_file.html', mkdir=True)
+        path = Path('ns_test_dir/atc_file.html')
+        path.parent.mkdir(parents=True, exist_ok=True)
+
         data = b'<h1>testing data</h1>'
         self.file_service.write_bytes(path, data)
 
@@ -81,7 +50,9 @@ class TestFileService(unittest.TestCase):
         shutil.rmtree(path.parent)
 
     def test_read_str(self):
-        path = self.file_service.from_relative('ns_test_dir/atc_file.html')
+        path = Path('ns_test_dir/atc_file.html')
+        path.parent.mkdir(parents=True, exist_ok=True)
+
         data = '<h1>testing data read</h1>'
 
         # create file and write data
@@ -99,10 +70,10 @@ class TestFileService(unittest.TestCase):
     def test_read_str_no_file(self):
         # non existent file
         with self.assertRaises(FileNotFoundError):
-            self.file_service.read_str(self.file_service.from_relative('ns_ne_dir/non.html'))
+            self.file_service.read_str(Path('ns_ne_dir/non.html'))
 
         # throw when its not a file
-        dir = self.file_service.from_relative('ns_ne_n_file')
+        dir = Path('ns_ne_n_file')
         path = self.temp_dir / dir
         path.mkdir(parents=True, exist_ok=True)
         with self.assertRaises(FileNotFoundError):
@@ -112,7 +83,7 @@ class TestFileService(unittest.TestCase):
         shutil.rmtree(path)
 
     def test_read_bytes(self):
-        path = self.file_service.from_relative('ns_test_dir/atc_file.html')
+        path = Path('ns_test_dir/atc_file.html')
         data = b'<h1>testing data read</h1>'
 
         # create file and write data
@@ -130,10 +101,10 @@ class TestFileService(unittest.TestCase):
     def test_read_bytes_no_file(self):
         # non existent file
         with self.assertRaises(FileNotFoundError):
-            self.file_service.read_bytes(self.file_service.from_relative('ns_ne_dir/non.html'))
+            self.file_service.read_bytes(Path('ns_ne_dir/non.html'))
 
         # throw when its not a file
-        dir = self.file_service.from_relative('ns_ne_n_file')
+        dir = Path('ns_ne_n_file')
         path = self.temp_dir / dir
         path.mkdir(parents=True, exist_ok=True)
         with self.assertRaises(FileNotFoundError):

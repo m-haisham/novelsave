@@ -51,7 +51,7 @@ class Services(containers.DeclarativeContainer):
         file_service=file_service,
     )
 
-    source_gateway_provider = providers.Factory(
+    source_gateway_provider = providers.Singleton(
         SourceGatewayProvider,
         source_adapter=adapters.source_adapter,
     )

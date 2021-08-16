@@ -33,3 +33,7 @@ class BaseSourceGateway(ABC):
     @abstractmethod
     def update_chapter_content(self, chapter: dtos.ChapterDTO) -> dtos.ChapterDTO:
         """update a chapter's content by following its url"""
+
+    @abstractmethod
+    def use_cookies_from_browser(self, browser: str):
+        """take the cookies from the browser and add them to following requests"""

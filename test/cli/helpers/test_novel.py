@@ -5,6 +5,7 @@ from loguru import logger
 
 from novelsave.cli.helpers import novel as novel_helper
 from novelsave.core.entities.novel import Novel
+from novelsave.exceptions import CookieBrowserNotSupportedException
 
 
 class TestNovelHelper(unittest.TestCase):
@@ -12,6 +13,22 @@ class TestNovelHelper(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         logger.remove()
+
+    def test_set_cookies(self):
+        with patch('novelsave.cli.helpers.novel.BaseSourceGateway') as source_gateway:
+            source_gateway.use_cookies_from_browser.side_effect = CookieBrowserNotSupportedException('')
+            novel_helper.set_cookies(source_gateway, None)
+            source_gateway.use_cookies_from_browser.assert_not_called()
+
+        with patch('novelsave.cli.helpers.novel.BaseSourceGateway') as source_gateway:
+            source_gateway.use_cookies_from_browser.side_effect = CookieBrowserNotSupportedException('chrome')
+            with self.assertRaises(SystemExit):
+                novel_helper.set_cookies(source_gateway, 'chrome')
+
+            source_gateway.use_cookies_from_browser.assert_called_with('chrome')
+
+        with patch('novelsave.cli.helpers.novel.BaseSourceGateway') as source_gateway:
+            novel_helper.set_cookies(source_gateway, 'chrome')
 
     @patch('novelsave.cli.helpers.novel.get_source_gateway')
     @patch('novelsave.services.source.SourceGateway')

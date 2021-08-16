@@ -10,14 +10,31 @@ from novelsave.cli.helpers.source import get_source_gateway
 from novelsave.containers import Application
 from novelsave.core.entities.novel import Novel
 from novelsave.core.services import BasePathService, BaseNovelService
+from novelsave.core.services.source import BaseSourceGateway
+from novelsave.exceptions import CookieBrowserNotSupportedException
 from novelsave.services import NovelService, FileService
 from novelsave.utils.adapters import DTOAdapter
 from novelsave.utils.concurrent import ConcurrentActionsController
 
 
+def set_cookies(source_gateway: BaseSourceGateway, browser: Optional[str]):
+    """sets the cookies in source gateway, process skipped if browser is none"""
+    if browser is None:
+        return
+
+    try:
+        source_gateway.use_cookies_from_browser(browser)
+    except CookieBrowserNotSupportedException:
+        logger.error(f'Extracting cookies from browser not supported. ({browser=})')
+        sys.exit(1)
+
+    logger.info(f'Applied cookies from browser ({browser=}).')
+
+
 @inject
 def create_novel(
         url: str,
+        browser: Optional[str],
         novel_service: NovelService = Provide[Application.services.novel_service],
 ) -> Novel:
     """
@@ -25,36 +42,39 @@ def create_novel(
     this includes chapter list and metadata.
     """
     source_gateway = get_source_gateway(url)
+    set_cookies(source_gateway, browser)
 
-    logger.info(f'Retrieving novel (url={url})...')
+    logger.info(f'Retrieving novel ({url=})...')
     novel_dto, chapter_dtos, metadata_dtos = source_gateway.novel_by_url(url)
 
     novel = novel_service.insert_novel(novel_dto)
     novel_service.insert_chapters(novel, chapter_dtos)
     novel_service.insert_metadata(novel, metadata_dtos)
 
-    logger.info(f'New novel (id={novel.id}, title={novel.title}, chapters={len(chapter_dtos)})')
+    logger.info(f'Added new novel (id={novel.id}, title=\'{novel.title}\', chapters={len(chapter_dtos)}\').')
     return novel
 
 
 @inject
 def update_novel(
         novel: Novel,
+        browser: Optional[str],
         novel_service: NovelService = Provide[Application.services.novel_service],
 ):
     url = novel_service.get_primary_url(novel)
-    logger.debug(f'Using primary url. (url={url})')
+    logger.debug(f'Using primary url ({url=})')
 
     source_gateway = get_source_gateway(url)
+    set_cookies(source_gateway, browser)
 
-    logger.info(f'Retrieving novel (url={url})...')
+    logger.info(f'Retrieving novel ({url=})...')
     novel_dto, chapter_dtos, metadata_dtos = source_gateway.novel_by_url(url)
 
     novel_service.update_novel(novel, novel_dto)
     novel_service.update_chapters(novel, chapter_dtos)
     novel_service.update_metadata(novel, metadata_dtos)
 
-    logger.info(f'Updated novel (id={novel.id}, title={novel.title}, chapters={len(chapter_dtos)})')
+    logger.info(f'Updated novel (id={novel.id}, title=\'{novel.title}\', chapters={len(chapter_dtos)})')
     return novel
 
 
@@ -68,20 +88,20 @@ def download_thumbnail(
 ):
     thumbnail_path = path_service.get_thumbnail_path(novel)
     if not force and thumbnail_path.exists() and thumbnail_path.is_file():
-        logger.info(f'Skipped thumbnail download (title={novel.title})')
+        logger.info(f'Skipped thumbnail download ({novel.title=})')
         return
 
-    logger.debug(f'Attempting thumbnail download (title={novel.title}, url={novel.thumbnail_url})')
+    logger.debug(f'Attempting thumbnail download ({novel.title=}, {novel.thumbnail_url=})')
     response = requests.get(novel.thumbnail_url)
     if not response.ok:
-        logger.info(f'Error during thumbnail download (title={novel.title}, status_code={response.status_code})')
+        logger.info(f'Error during thumbnail download ({novel.title=}, {response.status_code=})')
         return
 
     thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
     file_service.write_bytes(thumbnail_path, response.content)
     novel_service.set_thumbnail_asset(novel, path_service.relative_to_data_dir(thumbnail_path))
 
-    logger.info(f'Downloaded thumbnail image (title={novel.title}, thumbnail_path={novel.thumbnail_path})')
+    logger.info(f'Downloaded thumbnail image ({novel.title=}, {novel.thumbnail_path=})')
 
 
 @inject
@@ -93,10 +113,11 @@ def download_pending(
 ):
     chapters = novel_service.get_pending_chapters(novel, limit)
     if not chapters:
-        logger.info(f'Novel (title={novel.title}) has no pending chapters.')
+        logger.info(f'Skipped chapter download ({novel.title=}, reason=\'No pending chapters\').')
+        return
 
     url = novel_service.get_primary_url(novel)
-    logger.debug(f'Using primary novel url. (url={url})')
+    logger.debug(f'Using primary novel url ({url=}).')
 
     source_gateway = get_source_gateway(url)
 
@@ -105,10 +126,10 @@ def download_pending(
     for chapter in chapters:
         controller.add(dto_adapter.chapter_to_dto(chapter))
 
-    logger.info(f'Downloading pending chapters. (count={len(chapters)}, threads={len(controller.threads)})...')
+    logger.info(f'Downloading pending chapters (count={len(chapters)}, threads={len(controller.threads)})...')
     for chapter_dto in controller.iter():
         novel_service.update_content(chapter_dto)
-        logger.debug(f'Chapter content downloaded. (index={chapter_dto.index}, title={chapter_dto.title})')
+        logger.debug(f'Chapter content downloaded (index={chapter_dto.index}, title=\'{chapter_dto.title}\').')
 
     logger.info(f'Download complete.')
 
@@ -126,11 +147,12 @@ def get_novel(
         try:
             novel = novel_service.get_novel_by_id(int(id_or_url))
         except ValueError:
-            logger.info(f'Value provided is neither a url or an id. (value={({id_or_url})})')
+            logger.info(f'Value provided is neither a url or an id (value={({id_or_url})}).')
             sys.exit(1)
 
     if not novel:
-        logger.info(f'Novel not found. ({"url" if is_url else "id"}={id_or_url})')
+        quote = '\'' if is_url else ''
+        logger.info(f'Novel not found ({"url" if is_url else "id"}={quote}{id_or_url}{quote}).')
         raise ValueError()
 
     return novel

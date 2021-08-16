@@ -1,9 +1,13 @@
 from typing import Tuple, List
 
+import browser_cookie3
+from loguru import logger
 from novelsave_sources.sources.novel.source import Source
+from requests.cookies import RequestsCookieJar
 
 from ...core import dtos
 from ...core.services.source import BaseSourceGateway
+from ...exceptions import CookieBrowserNotSupportedException
 from ...utils.adapters import SourceAdapter
 
 
@@ -42,3 +46,23 @@ class SourceGateway(BaseSourceGateway):
         self.source_adapter.chapter_content_to_internal(source_chapter, chapter)
 
         return chapter
+
+    def use_cookies_from_browser(self, browser: str):
+        try:
+            cookies = getattr(browser_cookie3, browser)()
+        except AttributeError:
+            raise CookieBrowserNotSupportedException(browser)
+
+        logger.debug(f'Extracted cookies from browser ({browser=}, count={len(cookies)})')
+
+        cookiejar = self.where_cookies_in_domain(cookies)
+        self.source.set_cookies(cookiejar)
+        logger.debug(f'Filtered and set extracted cookies ({browser=}, source=\'{type(self).__name__}\', count={len(cookiejar)})')
+
+    def where_cookies_in_domain(self, cookies):
+        cj = RequestsCookieJar()
+        for c in cookies:
+            if c.domain in self.source.cookie_domains:
+                cj.set(c.name, c.value, domain=c.domain, path=c.path)
+
+        return cj

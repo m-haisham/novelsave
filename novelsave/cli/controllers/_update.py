@@ -1,10 +1,12 @@
 import sys
+from typing import Optional
 
 from .. import helpers
 
 
 def update(
         id_or_url: str,
+        browser: Optional[str] = None,
         limit: int = -1,
 ):
     """
@@ -14,6 +16,7 @@ def update(
     however if id is provided the process will be terminated
 
     :param id_or_url: id or url of the novel
+    :param browser: extract cookies from this browser
     :param limit: no. of chapters to update
     :return: None
     """
@@ -24,9 +27,9 @@ def update(
         if not is_url:
             sys.exit(1)
 
-        novel = helpers.create_novel(id_or_url)
+        novel = helpers.create_novel(id_or_url, browser)
     else:
-        helpers.update_novel(novel)
+        helpers.update_novel(novel, browser)
 
     helpers.download_thumbnail(novel)
 

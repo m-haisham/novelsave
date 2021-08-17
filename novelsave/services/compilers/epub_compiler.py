@@ -166,7 +166,7 @@ class EpubCompiler(BaseCompiler):
             item_strings = [self.metadata_display_value(item) for item in items]
 
             section = E.DIV(
-                E.H4(name),
+                E.H4(name.capitalize()),
                 E.DIV(
                     ', '.join(item_strings),
                     style="padding: 0 1rem",

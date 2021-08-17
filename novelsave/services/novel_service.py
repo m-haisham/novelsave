@@ -130,8 +130,8 @@ class NovelService(BaseNovelService):
                 existing_volume = indexed_volumes.pop(v.index)
 
                 # update names of volumes that already exist
-                logger.debug(f"Updating volume name (index={v.index}, name='{existing_volume.name}' -> '{v.name}')")
                 if existing_volume.name != v.name:
+                    logger.debug(f"Updating volume name (index={v.index}, name='{existing_volume.name}' -> '{v.name}')")
                     self.session.execute(update(Volume).where(Volume.id == existing_volume.id).values(name=v.name))
 
                 # index exists so map the chapters into existing volume

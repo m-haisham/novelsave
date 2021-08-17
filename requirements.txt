@@ -5,7 +5,7 @@ loguru==0.5.3
 sqlalchemy==1.4.22
 dependency-injector==4.35.2
 alembic~=1.6.5
-novelsave-sources>=0.1.0a1
+novelsave-sources>=0.1.0a2
 click==8.0.1
 lxml==4.6.3
 browser-cookie3~=0.12.1

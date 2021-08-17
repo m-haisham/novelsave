@@ -17,13 +17,13 @@ class SourceGateway(BaseSourceGateway):
         self.source_adapter = source_adapter
 
     def source_name(self) -> str:
-        return self.source.__class__.__name__
+        return getattr(self.source, 'name', self.source.__class__.__name__)
 
     def is_search_capable(self) -> bool:
-        return self.source.__search__
+        return self.source.search_viable
 
     def is_login_capable(self) -> bool:
-        return self.source.__login__
+        return self.source.login_viable
 
     def search(self, keyword: str):
         self.source.search(keyword)

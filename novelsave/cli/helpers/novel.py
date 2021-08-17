@@ -1,5 +1,6 @@
 import os
 import sys
+from functools import lru_cache
 from typing import Optional
 
 import requests
@@ -134,6 +135,7 @@ def download_pending(
     logger.info(f"Download complete.")
 
 
+@lru_cache(maxsize=1)
 @inject
 def get_novel(
         id_or_url: str,
@@ -154,6 +156,8 @@ def get_novel(
         quote = '\'' if is_url else ''
         logger.info(f"Novel not found ({'url' if is_url else 'id'}={quote}{id_or_url}{quote}).")
         raise ValueError()
+
+    logger.error('get_novel')
 
     return novel
 

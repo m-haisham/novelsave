@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Callable, List, Dict
+from typing import Optional, Callable, List, Dict, Tuple
 
 from loguru import logger
 from sqlalchemy import delete, select, update
@@ -169,27 +169,47 @@ class NovelService(BaseNovelService):
                     chapters_to_add.append(chapter)
 
         # add all new chapters
-        logger.debug(f"adding newly found chapters (count={len(chapters_to_add)}).")
+        logger.debug(f"Adding newly found chapters (count={len(chapters_to_add)}).")
         self.session.add_all(chapters_to_add)
 
         # delete chapters that dont exist anymore
-        logger.debug(f"deleting chapter rows that dont exist anymore (count={len(indexed_chapters)}).")
+        logger.debug(f"Deleting chapter rows that dont exist anymore (count={len(indexed_chapters)}).")
         for old in indexed_chapters.values():
             self.session.delete(old)
 
         # delete volumes that dont exist anymore
-        logger.debug(f"deleting volume rows that dont exist anymore (count={len(indexed_volumes)}).")
+        logger.debug(f"Deleting volume rows that dont exist anymore (count={len(indexed_volumes)}).")
         for old in indexed_volumes.values():
             self.session.delete(old)
 
         self.session.commit()
 
     def update_metadata(self, novel: Novel, metadata_dtos: List[MetaDataDTO]):
-        # delete existing
-        self.session.execute(delete(MetaData).where(MetaData.novel_id == novel.id))
+        current_metadata = self.get_metadata(novel)
+        indexed_metadata: Dict[Tuple, MetaData] = {(data.name, data.value): data for data in current_metadata}
 
-        # add new
-        self.insert_metadata(novel, metadata_dtos)
+        metadata_to_add = []
+        for dto in metadata_dtos:
+            this_metadata = self.dto_adapter.metadata_from_dto(novel, dto)
+
+            try:
+                current_metadata = indexed_metadata.pop((this_metadata.name, this_metadata.value))
+                if current_metadata.others != this_metadata.others:
+                    current_metadata.others = this_metadata
+                    logger.debug(f"Updating metadata (id={current_metadata.id}, "
+                                 f"others={current_metadata.others} -> {this_metadata.others})")
+
+            except KeyError:
+                metadata_to_add.append(this_metadata)
+
+        logger.debug(f"Adding newly found metadata (count={len(metadata_to_add)})")
+        self.session.add_all(metadata_to_add)
+
+        logger.debug(f"Deleting metadata rows that dont exist anymore (count={len(indexed_metadata)})")
+        for metadata in indexed_metadata.values():
+            self.session.delete(metadata)
+
+        self.session.commit()
 
     def update_content(self, chapter_dto: ChapterDTO):
         stmt = update(Chapter).where(Chapter.url == chapter_dto.url).values(content=chapter_dto.content)

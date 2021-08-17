@@ -157,8 +157,6 @@ def get_novel(
         logger.info(f"Novel not found ({'url' if is_url else 'id'}={quote}{id_or_url}{quote}).")
         raise ValueError()
 
-    logger.error('get_novel')
-
     return novel
 
 

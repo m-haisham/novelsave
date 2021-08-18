@@ -88,6 +88,8 @@ def download_thumbnail(
         path_service: BasePathService = Provide[Application.services.path_service],
 ):
     thumbnail_path = path_service.get_thumbnail_path(novel)
+    novel_service.set_thumbnail_asset(novel, path_service.relative_to_data_dir(thumbnail_path))
+
     if not force and thumbnail_path.exists() and thumbnail_path.is_file():
         logger.info(f"Skipped thumbnail download ({novel.title=})")
         return
@@ -100,7 +102,6 @@ def download_thumbnail(
 
     thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
     file_service.write_bytes(thumbnail_path, response.content)
-    novel_service.set_thumbnail_asset(novel, path_service.relative_to_data_dir(thumbnail_path))
 
     logger.info(f"Downloaded thumbnail image ({novel.title=}, {novel.thumbnail_path=})")
 
@@ -153,12 +154,12 @@ def get_novel(
         try:
             novel = novel_service.get_novel_by_id(int(id_or_url))
         except ValueError:
-            logger.info(f"Value provided is neither a url or an id (value={({id_or_url})}).")
+            logger.error(f"Value provided is neither a url or an id (value={({id_or_url})}).")
             sys.exit(1)
 
     if not novel:
-        quote = '\'' if is_url else ''
-        logger.info(f"Novel not found ({'url' if is_url else 'id'}={quote}{id_or_url}{quote}).")
+        quote = "'" if is_url else ''
+        logger.error(f"Novel not found ({'url' if is_url else 'id'}={quote}{id_or_url}{quote}).")
         raise ValueError()
 
     return novel

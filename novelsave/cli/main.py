@@ -19,7 +19,7 @@ from loguru import logger
 from . import controllers, helpers, groups
 from .. import settings
 from ..containers import Application
-from ..insfrastructure.migrations import commands as migration_commands
+from ..infrastructure.migrations import commands as migration_commands
 
 
 def inject_dependencies():

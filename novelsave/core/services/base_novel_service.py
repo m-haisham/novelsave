@@ -83,3 +83,19 @@ class BaseNovelService(ABC):
     @abstractmethod
     def remove_url(self, novel: Novel, url: str):
         """removes the specified url from the database"""
+
+    @abstractmethod
+    def delete_content(self, novel: Novel):
+        """deletes all the chapters contents"""
+
+    @abstractmethod
+    def delete_novel(self, novel: Novel):
+        """delete novel including chapters and assets"""
+
+    @abstractmethod
+    def delete_volumes(self, novel: Novel):
+        """delete volumes associated with novel as well as the chapters linked to them"""
+
+    @abstractmethod
+    def delete_metadata(self, novel: Novel):
+        """delete all the metadata associated with novel"""

@@ -18,8 +18,7 @@ class Novel(Base):
 
     last_updated = Column(TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())
 
-    urls = relationship('NovelUrl', back_populates='novel')
-
-    volumes = relationship('Volume', back_populates='novel')
-    novel_metadata = relationship('MetaData', back_populates='novel')
-    assets = relationship('Asset', back_populates='novel')
+    urls = relationship('NovelUrl', back_populates='novel', cascade='all, delete-orphan')
+    volumes = relationship('Volume', back_populates='novel', cascade='all, delete-orphan')
+    novel_metadata = relationship('MetaData', back_populates='novel', cascade='all, delete-orphan')
+    assets = relationship('Asset', back_populates='novel', cascade='all, delete-orphan')

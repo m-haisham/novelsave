@@ -17,4 +17,4 @@ class Volume(Base):
     novel_id = Column(Integer, ForeignKey('novels.id'), nullable=False)
     novel = relationship('Novel', back_populates='volumes')
 
-    chapters = relationship('Chapter', back_populates='volume')
+    chapters = relationship('Chapter', back_populates='volume', cascade='all, delete-orphan')

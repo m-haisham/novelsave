@@ -51,7 +51,7 @@ class NovelService(BaseNovelService):
         return self.session.execute(stmt).scalars().all()
 
     def get_volumes(self, novel: Novel) -> List[Volume]:
-        return self.session.execute(select(Volume).where(Volume.novel_id == novel.id)).scalars.all()
+        return novel.volumes
 
     def get_volumes_with_chapters(self, novel: Novel) -> Dict[Volume, List[Chapter]]:
         volumes = self.session.execute(select(Volume).where(Volume.novel_id == novel.id)).scalars().all()
@@ -236,3 +236,39 @@ class NovelService(BaseNovelService):
         stmt = delete(NovelUrl).where((NovelUrl.url == url) & (NovelUrl.novel_id == novel.id))
         self.session.execute(stmt)
         self.session.commit()
+
+    def delete_content(self, novel: Novel):
+        volumes = [v.id for v in self.get_volumes(novel)]
+        stmt = update(Chapter).where(Chapter.volume_id.in_(volumes)).values(content=None)
+
+        self.session.execute(stmt)
+        self.session.commit()
+
+    def delete_novel(self, novel: Novel):
+        # using session.commit since we want the sqlalchemy cascade to be run
+        self.session.delete(novel)
+        self.session.commit()
+
+    def delete_volumes(self, novel: Novel):
+        # using session.commit since we want the sqlalchemy cascade to be run
+        volumes = self.get_volumes(novel)
+        for volume in volumes:
+            self.session.delete(volume)
+
+        self.session.commit()
+
+    def delete_metadata(self, novel: Novel):
+        stmt = delete(MetaData).where(MetaData.novel_id == novel.id)
+        self.session.execute(stmt)
+        self.session.commit()
+
+
+
+
+
+
+
+
+
+
+

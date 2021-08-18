@@ -11,7 +11,7 @@ def _compile(id_or_url: str):
     controllers.compile(id_or_url)
 
 
-@cli.command(name='refresh')
+@cli.command(name='update_compile')
 @click.argument('id_or_url')
 @click.option('--limit', type=int, help='Maximum count of chapters to update. Set to 0 or less to skip.')
 @click.option('--browser', help='Extract cookies from the specified browser and use them in subsequent requests.')
@@ -26,11 +26,31 @@ def _refresh(id_or_url: str, limit: int, browser: str):
 @click.option('--limit', type=int, help='Maximum count of chapters to update. Set to 0 or less to skip.')
 @click.option('--browser', help='Extract cookies from the specified browser and use them in subsequent requests.')
 def _update(id_or_url: str, limit: int, browser: str):
-    """Download the corresponding website of the novel and update the database"""
+    """Scrape the website of the novel and update the database"""
     controllers.update(id_or_url, browser, limit)
 
 
-@cli.group(name='url')
+@cli.group(name='novel')
+def _novel():
+    """Group of commands to manage novels"""
+
+
+@_novel.command(name='clean')
+@click.argument('id_or_url')
+@click.option('--content-only', is_flag=True, help="Only remove chapter content")
+def _clean_novel(id_or_url: str, content_only: bool):
+    """Removes all except vital information related to novel"""
+    controllers.clean_novel(id_or_url, content_only)
+
+
+@_novel.command(name='delete')
+@click.argument('id_or_url')
+def _delete_novel(id_or_url: str):
+    """Remove novel entry from database"""
+    controllers.delete_novel(id_or_url)
+
+
+@_novel.group(name='url')
 def _url():
     """Handles novel url operations, add or delete"""
 

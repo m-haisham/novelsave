@@ -215,3 +215,24 @@ class NovelService(BaseNovelService):
         stmt = update(Chapter).where(Chapter.url == chapter_dto.url).values(content=chapter_dto.content)
         self.session.execute(stmt)
         self.session.commit()
+
+    def add_url(self, novel: Novel, url: str):
+        # TODO strip trailing '/'
+        if url in [novel_url.url for novel_url in self.get_urls(novel)]:
+            raise ValueError(f"Url already exists in novel (id={novel.id}, title='{novel.title}', {url=}).")
+
+        novel_url = NovelUrl(url=url, novel_id=novel.id)
+        self.session.add(novel_url)
+        self.session.commit()
+
+    def remove_url(self, novel: Novel, url: str):
+        urls = [novel_url.url for novel_url in self.get_urls(novel)]
+        if len(urls) <= 1:
+            raise ValueError(f"Novel has only one url (id={novel.id}, title='{novel.title}').\n"
+                             f"You must add another before this may be removed.")
+        if url not in urls:
+            raise ValueError(f"Url not in novel (id={novel.id}, title='{novel.title}', {url=}).")
+
+        stmt = delete(NovelUrl).where((NovelUrl.url == url) & (NovelUrl.novel_id == novel.id))
+        self.session.execute(stmt)
+        self.session.commit()

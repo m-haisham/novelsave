@@ -141,7 +141,11 @@ def get_novel(
         id_or_url: str,
         novel_service: NovelService = Provide[Application.services.novel_service],
 ) -> Novel:
-    """retrieve novel is it exists in the database otherwise return none"""
+    """retrieve novel is it exists in the database otherwise return none
+
+    :raises ValueError: if novel does not exist
+    """
+
     is_url = id_or_url.startswith("http")
     if is_url:
         novel = novel_service.get_novel_by_url(id_or_url)

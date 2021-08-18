@@ -75,3 +75,11 @@ class BaseNovelService(ABC):
     @abstractmethod
     def update_content(self, chapter_dto: ChapterDTO):
         """update an existing chapter's content"""
+
+    @abstractmethod
+    def add_url(self, novel: Novel, url: str):
+        """add the specified url to the database linked to novel"""
+
+    @abstractmethod
+    def remove_url(self, novel: Novel, url: str):
+        """removes the specified url from the database"""

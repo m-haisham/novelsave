@@ -1,3 +1,3 @@
-from ._update import _update
-from ._compile import _compile
-from ._refresh import _refresh
+from ._novel import _compile, _refresh, _update, _url, _add_url, _remove_url
+from ._manage import _manage
+

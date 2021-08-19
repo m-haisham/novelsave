@@ -13,10 +13,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 CONFIG_DIR = Path(user_config_dir(NAME, AUTHOR))
 CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-CONFIG_FILE = CONFIG_DIR / 'config.yml'
+CONFIG_FILE = CONFIG_DIR / 'config.json'
 DATA_DIR = CONFIG_DIR / 'data'
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+# database file and the corresponding link to it
+# the database is where all the novel data is stored
 DATABASE_FILE = str((CONFIG_DIR / 'data.sqlite').resolve())
 DATABASE_URL = 'sqlite:///' + DATABASE_FILE
 
@@ -46,32 +48,30 @@ LOGGER_CONFIG = {
     ],
 }
 
+_config = {
+    'name': NAME,
+    'author': AUTHOR,
+    'base_dir': BASE_DIR,
+    'config': {
+        'dir': CONFIG_DIR,
+        'file': CONFIG_FILE,
+    },
+    'data': {
+        'dir': DATA_DIR,
+        'division_rules': DIVISION_RULES,
+    },
+    'novel': {
+        'dir': NOVEL_DIR,
+    },
+    'infrastructure': {
+        'database': {
+            'url': DATABASE_URL,
+        }
+    },
+    'logger': LOGGER_CONFIG,
+}
+
 
 # same information just as a dict for convenience with injector
 def as_dict():
-    return {
-        'name': NAME,
-        'author': AUTHOR,
-        'base_dir': BASE_DIR,
-        'config': {
-            'dir': CONFIG_DIR,
-            'file': CONFIG_FILE,
-        },
-        'data': {
-            'dir': DATA_DIR,
-            'division_rules': DIVISION_RULES,
-        },
-        'novel': {
-            'dir': NOVEL_DIR,
-        },
-        'infrastructure': {
-            'database': {
-                'url': DATABASE_URL,
-            }
-        },
-        'logger': LOGGER_CONFIG,
-    }
-
-
-# defines the editable configurations
-__editable__ = {'database_url', 'chapter_extension', 'data_division'}
+    return _config.copy()

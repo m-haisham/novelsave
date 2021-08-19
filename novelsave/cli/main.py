@@ -11,6 +11,7 @@ _manage {config, clean, novel}
 periodical (--every-minutes SECONDS)
 _manage {startup} {add, remove}
 """
+import json
 import sys
 
 import click
@@ -20,11 +21,18 @@ from . import controllers, helpers, groups
 from .. import settings
 from ..containers import Application
 from ..infrastructure.migrations import commands as migration_commands
+from ..utils.helpers import config_helper
 
 
 def inject_dependencies():
     application = Application()
     application.config.from_dict(settings.as_dict())
+
+    try:
+        application.config.from_dict(config_helper.from_file())
+    except FileNotFoundError:
+        pass
+
     application.wire(packages=[controllers, helpers, groups])
 
 
@@ -33,6 +41,7 @@ def update_database_schema():
 
 
 @click.group()
+@logger.catch()
 def cli():
     logger.configure(**settings.LOGGER_CONFIG)
     update_database_schema()

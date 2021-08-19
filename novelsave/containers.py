@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from novelsave.services import FileService, NovelService, PathService
 from novelsave.services.compilers import EpubCompiler, CompilerProvider
+from novelsave.services.config import ConfigService
 from novelsave.services.source import SourceGatewayProvider
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
 
@@ -34,11 +35,16 @@ class Infrastructure(containers.DeclarativeContainer):
 
 
 class Services(containers.DeclarativeContainer):
-    data_config = providers.Configuration()
-    novel_config = providers.Configuration()
+    config = providers.Configuration()
 
     adapters = providers.DependenciesContainer()
     infrastructure = providers.DependenciesContainer()
+
+    config_service = providers.Singleton(
+        ConfigService,
+        config_file=config.config.file,
+        default_novel_dir=config.novel.dir,
+    )
 
     file_service = providers.Factory(
         FileService,
@@ -58,9 +64,9 @@ class Services(containers.DeclarativeContainer):
 
     path_service = providers.Factory(
         PathService,
-        data_dir=data_config.dir,
-        novels_dir=novel_config.dir,
-        division_rules=data_config.division_rules,
+        data_dir=config.data.dir,
+        novels_dir=config.novel.dir,
+        division_rules=config.data.division_rules,
         novel_service=novel_service,
         source_provider=source_gateway_provider,
     )
@@ -97,8 +103,7 @@ class Application(containers.DeclarativeContainer):
 
     services = providers.Container(
         Services,
-        data_config=config.data,
-        novel_config=config.novel,
+        config=config,
         adapters=adapters,
         infrastructure=infrastructure,
     )

@@ -37,7 +37,7 @@ class TestPathService(unittest.TestCase):
     @patch('novelsave.core.services.source.BaseSourceGateway')
     def test_get_novel_path_with_source(self, source_provider, novel_service, source_gateway):
         source_provider.source_from_url.return_value = source_gateway
-        source_gateway.source_name.return_value = 'source'
+        source_gateway.name.return_value = 'source'
 
         path_service = PathService(self.data_dir, self.save_dir, self.division_rules, novel_service, source_provider)
         path = path_service.get_novel_path(Novel(title='novel'))

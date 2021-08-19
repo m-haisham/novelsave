@@ -98,7 +98,7 @@ def download_thumbnail(
     logger.debug(f"Attempting thumbnail download ({novel.title=}, {novel.thumbnail_url=})")
     response = requests.get(novel.thumbnail_url)
     if not response.ok:
-        logger.info(f"Error during thumbnail download ({novel.title=}, {response.status_code=})")
+        logger.error(f"Error during thumbnail download ({novel.title=}, {response.status_code=})")
         return
 
     thumbnail_path.parent.mkdir(parents=True, exist_ok=True)

@@ -6,14 +6,17 @@ from novelsave.core import dtos
 
 class BaseSourceGateway(ABC):
 
+    @property
     @abstractmethod
-    def source_name(self) -> str:
-        """:return current source name"""
+    def name(self) -> str:
+        """name of the corresponding source"""
 
+    @property
     @abstractmethod
     def is_search_capable(self) -> bool:
         """identifies whether the source provides search capability"""
 
+    @property
     @abstractmethod
     def is_login_capable(self) -> bool:
         """identifies whether the source provides login capability"""

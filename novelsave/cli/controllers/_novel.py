@@ -7,6 +7,8 @@ from loguru import logger
 from novelsave.cli import helpers as cli_helpers
 from novelsave.containers import Application
 from novelsave.core.services import BaseNovelService, BasePathService
+from novelsave.core.services.source import BaseSourceGatewayProvider
+from novelsave.exceptions import MetaDataSourceNotFoundException
 
 
 @inject
@@ -76,3 +78,21 @@ def delete_novel(
 
     novel_service.delete_novel(novel)
     logger.info(f"Deleted novel (id={novel.id}, title='{novel.title}')")
+
+
+@inject
+def import_metadata(
+        id_or_url: str,
+        metadata_url: str,
+        novel_service: BaseNovelService = Provide[Application.services.novel_service],
+):
+    """import metadata from a metadata supplied into an existing novel"""
+    try:
+        novel = cli_helpers.get_novel(id_or_url)
+    except ValueError:
+        sys.exit(1)
+
+    meta_source_gateway = cli_helpers.get_meta_source_gateway(metadata_url)
+    metadata_dtos = meta_source_gateway.metadata_by_url(metadata_url)
+
+    novel_service.update_metadata(novel, metadata_dtos)

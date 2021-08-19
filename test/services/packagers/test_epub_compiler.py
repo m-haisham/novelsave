@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock
 
 from novelsave.core.entities.novel import MetaData
-from novelsave.services.compilers import EpubPackager
+from novelsave.services.packagers import EpubPackager
 
 
 class TestEpubCompiler(unittest.TestCase):

@@ -30,6 +30,14 @@ def _update(id_or_url: str, limit: int, browser: str):
     controllers.update(id_or_url, browser, limit)
 
 
+@cli.command(name='metadata')
+@click.argument('id_or_url')
+@click.argument('metadata_url')
+def _metadata(id_or_url: str, metadata_url):
+    """Import metadata from a novel metadata provider"""
+    controllers.import_metadata(id_or_url, metadata_url)
+
+
 @cli.group(name='novel')
 def _novel():
     """Group of commands to manage novels"""

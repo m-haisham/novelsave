@@ -1,11 +1,12 @@
 from functools import lru_cache
-from typing import Optional
 
 from novelsave_sources.exceptions import UnknownSourceException
-from novelsave_sources.utils import parse_source
+from novelsave_sources.utils import parse_source, parse_metasource
 
+from .meta_source_gateway import MetaSourceGateway
 from .source_gateway import SourceGateway
 from ...core.services.source import BaseSourceGatewayProvider
+from ...exceptions import NovelSourceNotFoundException, MetaDataSourceNotFoundException
 from ...utils.adapters import SourceAdapter
 
 
@@ -14,10 +15,15 @@ class SourceGatewayProvider(BaseSourceGatewayProvider):
         self.source_adapter = source_adapter
 
     @lru_cache(1)
-    def source_from_url(self, url: str) -> Optional[SourceGateway]:
-        """gives source service from url provided"""
+    def source_from_url(self, url: str) -> SourceGateway:
         try:
             return SourceGateway(parse_source(url), source_adapter=self.source_adapter)
         except UnknownSourceException:
-            # TODO prefer throwing exceptions instead of returning [None]
-            return None
+            raise NovelSourceNotFoundException(url)
+
+    @lru_cache(1)
+    def meta_source_from_url(self, url: str) -> MetaSourceGateway:
+        try:
+            return MetaSourceGateway(parse_metasource(url), source_adapter=self.source_adapter)
+        except UnknownSourceException:
+            raise MetaDataSourceNotFoundException(url)

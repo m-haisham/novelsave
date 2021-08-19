@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from novelsave.core.entities.novel import Novel
 from novelsave.core.services import BasePathService, BaseNovelService
 from novelsave.core.services.source import BaseSourceGatewayProvider
+from novelsave.exceptions import NovelSourceNotFoundException
 from novelsave.utils.helpers import string_helper
 
 
@@ -33,9 +34,12 @@ class PathService(BasePathService):
 
     def get_novel_path(self, novel: Novel) -> Path:
         url = self.novel_service.get_primary_url(novel)
-        source_gateway = self.source_provider.source_from_url(url)
+        try:
+            source_gateway = self.source_provider.source_from_url(url)
+            source_folder_name = source_gateway.name if source_gateway else ''
+        except NovelSourceNotFoundException:
+            source_folder_name = ''
 
-        source_folder_name = source_gateway.source_name() if source_gateway else ''
         novel_name_slug = string_helper.slugify(novel.title, "_")
 
         return self.novels_dir / source_folder_name / novel_name_slug

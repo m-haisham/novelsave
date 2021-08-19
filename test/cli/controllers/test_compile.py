@@ -6,7 +6,7 @@ from loguru import logger
 from novelsave.cli.controllers import package
 
 
-@patch('novelsave.services.packagers.CompilerProvider')
+@patch('novelsave.services.packagers.PackagerProvider')
 @patch('novelsave.cli.controllers._package.get_novel')
 class TestCompileController(unittest.TestCase):
 

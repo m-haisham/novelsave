@@ -16,6 +16,7 @@ from novelsave.exceptions import CookieBrowserNotSupportedException
 from novelsave.services import NovelService, FileService
 from novelsave.utils.adapters import DTOAdapter
 from novelsave.utils.concurrent import ConcurrentActionsController
+from novelsave.utils.helpers import string_helper
 
 
 def set_cookies(source_gateway: BaseSourceGateway, browser: Optional[str]):
@@ -147,7 +148,7 @@ def get_novel(
     :raises ValueError: if novel does not exist
     """
 
-    is_url = id_or_url.startswith("http")
+    is_url = string_helper.is_url(id_or_url)
     if is_url:
         novel = novel_service.get_novel_by_url(id_or_url.rstrip('/'))
     else:

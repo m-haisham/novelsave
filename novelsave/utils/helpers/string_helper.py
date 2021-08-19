@@ -26,4 +26,4 @@ def slugify(s, replace=''):
 
 
 def is_url(p_url: str):
-    return bool(int_pattern.fullmatch(p_url))
+    return bool(url_pattern.fullmatch(p_url))

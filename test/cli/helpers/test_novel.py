@@ -38,7 +38,7 @@ class TestNovelHelper(unittest.TestCase):
         get_source_gateway.return_value = source_gateway
         source_gateway.novel_by_url.return_value = 'novel', ['chapters'], ['metadata']
 
-        novel = novel_helper.create_novel('https://www.test.site', novel_service)
+        novel = novel_helper.create_novel('https://www.test.site', None, novel_service)
 
         novel_service.insert_novel.assert_called_with('novel')
         novel_service.insert_chapters.assert_called_with(novel_service.insert_novel.return_value, ['chapters'])

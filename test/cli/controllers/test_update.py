@@ -31,18 +31,18 @@ class TestUpdateController(unittest.TestCase):
         get_novel.assert_called_with('1')
         create_novel.assert_not_called()
 
-        update('https://my.site.org', False)
+        update('https://my.site.org', None, 0)
         get_novel.assert_called_with('https://my.site.org')
-        create_novel.assert_called_with('https://my.site.org')
+        create_novel.assert_called_with('https://my.site.org', None)
 
     def test_update_exists(self, get_novel, create_novel, update_novel, download_thumbnail, download_pending):
         get_novel.return_value = 'novel'
 
         url = 'https://novel.site'
-        update(url, 1)
+        update(url, None, 1)
 
         get_novel.assert_called_with(url)
-        update_novel.assert_called_with('novel')
+        update_novel.assert_called_with('novel', None)
         download_pending.assert_called_with('novel', 1)
 
     def test_update_exists_skip_chapters(self, get_novel, create_novel, update_novel, download_thumbnail,
@@ -50,9 +50,9 @@ class TestUpdateController(unittest.TestCase):
         get_novel.return_value = 'novel'
 
         url = 'https://novel.site'
-        update(url, limit=0)
+        update(url, None, limit=0)
 
         get_novel.assert_called_with(url)
-        update_novel.assert_called_with('novel')
+        update_novel.assert_called_with('novel', None)
         download_pending.assert_not_called()
 

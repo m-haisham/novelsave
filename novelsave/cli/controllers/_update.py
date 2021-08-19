@@ -1,7 +1,10 @@
 import sys
 from typing import Optional
 
+from loguru import logger
+
 from .. import helpers
+from ...utils.helpers import string_helper
 
 
 def update(
@@ -23,10 +26,11 @@ def update(
     try:
         novel = helpers.get_novel(id_or_url)
     except ValueError:
-        is_url = id_or_url.startswith('https')
+        is_url = string_helper.is_url(id_or_url)
         if not is_url:
             sys.exit(1)
 
+        logger.info(f"Attempting to create new novel entry using url.")
         novel = helpers.create_novel(id_or_url, browser)
     else:
         helpers.update_novel(novel, browser)

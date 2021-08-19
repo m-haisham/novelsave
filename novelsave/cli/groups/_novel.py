@@ -4,21 +4,21 @@ from .. import controllers
 from ..main import cli
 
 
-@cli.command(name='compile')
+@cli.command(name='package')
 @click.argument('id_or_url')
-def _compile(id_or_url: str):
-    """compile the specified novel to epub"""
-    controllers.compile(id_or_url)
+def _package(id_or_url: str):
+    """package the specified novel to epub"""
+    controllers.package(id_or_url)
 
 
-@cli.command(name='update_compile')
+@cli.command(name='process')
 @click.argument('id_or_url')
 @click.option('--limit', type=int, help='Maximum count of chapters to update. Set to 0 or less to skip.')
 @click.option('--browser', help='Extract cookies from the specified browser and use them in subsequent requests.')
-def _refresh(id_or_url: str, limit: int, browser: str):
-    """runs 'update' and 'compile' commands consecutively"""
+def _process(id_or_url: str, limit: int, browser: str):
+    """runs 'update' and 'package' commands consecutively"""
     controllers.update(id_or_url, browser, limit)
-    controllers.compile(id_or_url)
+    controllers.package(id_or_url)
 
 
 @cli.command(name='update')

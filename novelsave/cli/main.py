@@ -1,7 +1,7 @@
 """
 update {only, all} [url or id]
-compile {only, all} [url or id] {--formats} [--only-updated]
-default: update-and-compile {only} (url or id) {--formats}
+package {only, all} [url or id] {--formats} [--only-updated]
+default: update-and-package {only} (url or id) {--formats}
 history {only, all} [url or id]
 _manage {config, clean, novel}
     _manage novel (url or id) {add, remove} (url)

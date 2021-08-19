@@ -10,10 +10,10 @@ from lxml.html import builder as E
 
 from novelsave.core.entities.novel import Novel, Chapter, MetaData, NovelUrl
 from novelsave.core.services import BaseNovelService, BasePathService, BaseFileService
-from novelsave.core.services.compilers import BaseCompiler
+from novelsave.core.services.packagers import BasePackager
 
 
-class EpubCompiler(BaseCompiler):
+class EpubPackager(BasePackager):
 
     def __init__(
             self,
@@ -28,18 +28,18 @@ class EpubCompiler(BaseCompiler):
     def keywords(self) -> Tuple[str]:
         return 'epub',
 
-    def compile(self, novel: Novel):
-        logger.debug(f'Preparing to compile to epub (novel.id={novel.id}, novel.title={novel.title})')
+    def package(self, novel: Novel):
+        logger.debug(f'Preparing to package to epub (novel.id={novel.id}, novel.title={novel.title})')
 
         urls = self.novel_service.get_urls(novel)
-        logger.debug(f'Preparing to compile to epub (urls={len(urls)})')
+        logger.debug(f'Preparing to package to epub (urls={len(urls)})')
 
         volumes = self.novel_service.get_volumes_with_chapters(novel)
         chapter_count = len([c for cl in volumes.values() for c in cl])
-        logger.debug(f'Preparing to compile to epub (volumes={len(volumes)}, chapters={chapter_count})')
+        logger.debug(f'Preparing to package to epub (volumes={len(volumes)}, chapters={chapter_count})')
 
         metadata = self.novel_service.get_metadata(novel)
-        logger.debug(f'Preparing to compile to epub (metadata={len(metadata)})')
+        logger.debug(f'Preparing to package to epub (metadata={len(metadata)})')
 
         book = epub.EpubBook()
         book.set_identifier(str(novel.id))

@@ -3,11 +3,11 @@ from unittest.mock import patch
 
 from loguru import logger
 
-from novelsave.cli.controllers import compile
+from novelsave.cli.controllers import package
 
 
-@patch('novelsave.services.compilers.CompilerProvider')
-@patch('novelsave.cli.controllers._compile.get_novel')
+@patch('novelsave.services.packagers.CompilerProvider')
+@patch('novelsave.cli.controllers._package.get_novel')
 class TestCompileController(unittest.TestCase):
 
     @classmethod
@@ -18,9 +18,9 @@ class TestCompileController(unittest.TestCase):
         get_novel.side_effect = ValueError()
 
         with self.assertRaises(SystemExit):
-            compile('https://novel.site', compiler_provider)
+            package('https://novel.site', compiler_provider)
 
     def test_compile_with_novel(self, get_novel, compiler_provider):
         get_novel.return_value = 'novel'
 
-        compile('https://novel.site', compiler_provider)
+        package('https://novel.site', compiler_provider)

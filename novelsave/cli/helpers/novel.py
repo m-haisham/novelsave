@@ -149,7 +149,7 @@ def get_novel(
 
     is_url = id_or_url.startswith("http")
     if is_url:
-        novel = novel_service.get_novel_by_url(id_or_url)
+        novel = novel_service.get_novel_by_url(id_or_url.rstrip('/'))
     else:
         try:
             novel = novel_service.get_novel_by_id(int(id_or_url))

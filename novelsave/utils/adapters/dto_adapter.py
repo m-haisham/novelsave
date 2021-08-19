@@ -17,7 +17,7 @@ class DTOAdapter:
         )
 
         url = NovelUrl(
-            url=novel_dto.url,
+            url=novel_dto.url.rstrip('/'),
         )
 
         return novel, url
@@ -41,10 +41,11 @@ class DTOAdapter:
                     volumes[-1] = (Volume(index=-1, name='_default', novel_id=novel.id), [dto])
             elif len(dto.volume) < 2:
                 continue
-            elif dto.volume[0] in volumes.keys():
-                volumes[dto.volume[0]][1].append(dto)
             else:
-                volumes[dto.volume[0]] = (Volume(index=dto.volume[0], name=dto.volume[1], novel_id=novel.id), [dto])
+                try:
+                    volumes[dto.volume[0]][1].append(dto)
+                except KeyError:
+                    volumes[dto.volume[0]] = (Volume(index=dto.volume[0], name=dto.volume[1], novel_id=novel.id), [dto])
 
         return {volume: chapters for volume_index, (volume, chapters) in volumes.items()}
 

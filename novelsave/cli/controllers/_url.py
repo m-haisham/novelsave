@@ -42,7 +42,7 @@ def add_url(
         sys.exit(1)
 
     try:
-        novel_service.add_url(novel, new_url)
+        novel_service.add_url(novel, new_url.rstrip('/'))
     except ValueError as e:
         logger.error(e)
         sys.exit(1)

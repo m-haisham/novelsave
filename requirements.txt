@@ -7,5 +7,6 @@ dependency-injector==4.35.2
 alembic~=1.6.5
 novelsave-sources>=0.1.0a2
 click==8.0.1
+
 lxml==4.6.3
 browser-cookie3~=0.12.1

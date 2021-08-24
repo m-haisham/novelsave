@@ -29,7 +29,7 @@ class BaseNovelService(ABC):
         """retrieve all chapters of the novel"""
 
     @abstractmethod
-    def get_pending_chapters(self, novel: Novel) -> List[Chapter]:
+    def get_pending_chapters(self, novel: Novel, limit: int) -> List[Chapter]:
         """retrieve all pending chapters of the novel. a chapter is assumed to be pending if it has no content."""
 
     @abstractmethod

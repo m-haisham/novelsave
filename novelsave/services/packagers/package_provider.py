@@ -18,5 +18,5 @@ class PackagerProvider(BasePackagerProvider):
         return {
             compiler
             for compiler in self._packager
-            if any(k in keywords for k in compiler.keywords)
+            if any(k in keywords for k in compiler.keywords())
         }

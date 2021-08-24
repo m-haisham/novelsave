@@ -4,7 +4,7 @@ from pathlib import Path
 from appdirs import user_config_dir
 
 NAME = 'novelsave'
-AUTHOR = 'mhaisham'
+AUTHOR = 'Mensch272'
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

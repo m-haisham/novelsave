@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from novelsave.services import FileService, NovelService, PathService
+from novelsave.services import FileService, NovelService, PathService, AssetService
 from novelsave.services.packagers import EpubPackager, PackagerProvider
 from novelsave.services.config import ConfigService
 from novelsave.services.source import SourceGatewayProvider
@@ -55,6 +55,11 @@ class Services(containers.DeclarativeContainer):
         session=infrastructure.session,
         dto_adapter=adapters.dto_adapter,
         file_service=file_service,
+    )
+
+    asset_service = providers.Factory(
+        AssetService,
+        session=infrastructure.session,
     )
 
     source_gateway_provider = providers.Singleton(

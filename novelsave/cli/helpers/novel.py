@@ -10,7 +10,7 @@ from loguru import logger
 from novelsave.cli.helpers.source import get_source_gateway
 from novelsave.containers import Application
 from novelsave.core.entities.novel import Novel
-from novelsave.core.services import BasePathService, BaseNovelService
+from novelsave.core.services import BasePathService, BaseNovelService, BaseAssetService
 from novelsave.core.services.source import BaseSourceGateway
 from novelsave.exceptions import CookieBrowserNotSupportedException
 from novelsave.services import NovelService, FileService
@@ -111,7 +111,8 @@ def download_thumbnail(
 def download_pending(
         novel: Novel,
         limit: Optional[int],
-        novel_service: NovelService = Provide[Application.services.novel_service],
+        novel_service: BaseNovelService = Provide[Application.services.novel_service],
+        asset_service: BaseAssetService = Provide[Application.services.asset_service],
         dto_adapter: DTOAdapter = Provide[Application.adapters.dto_adapter],
 ):
     chapters = novel_service.get_pending_chapters(novel, limit)
@@ -125,13 +126,15 @@ def download_pending(
     source_gateway = get_source_gateway(url)
 
     # setup controller
-    controller = ConcurrentActionsController(min(os.cpu_count(), len(chapters)), source_gateway.update_chapter_content)
+    controller = ConcurrentActionsController(1 or min(os.cpu_count(), len(chapters)), source_gateway.update_chapter_content)
     for chapter in chapters:
         controller.add(dto_adapter.chapter_to_dto(chapter))
 
     logger.info(f"Downloading pending chapters (count={len(chapters)}, threads={len(controller.threads)})...")
     for chapter_dto in controller.iter():
+        chapter_dto.content = asset_service.collect_assets(novel, chapter_dto)
         novel_service.update_content(chapter_dto)
+
         logger.debug(f"Chapter content downloaded (index={chapter_dto.index}, title='{chapter_dto.title}').")
 
     logger.info(f"Download complete.")

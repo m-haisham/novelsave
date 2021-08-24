@@ -87,6 +87,7 @@ class Packagers(containers.DeclarativeContainer):
         novel_service=services.novel_service,
         file_service=services.file_service,
         path_service=services.path_service,
+        asset_service=services.asset_service,
     )
 
     packager_provider = providers.Factory(

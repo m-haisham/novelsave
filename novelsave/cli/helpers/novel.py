@@ -125,7 +125,7 @@ def download_chapters(
     source_gateway = get_source_gateway(url)
 
     # setup controller
-    controller = ConcurrentActionsController(1 or min(os.cpu_count(), len(chapters)),
+    controller = ConcurrentActionsController(min(os.cpu_count(), len(chapters)),
                                              source_gateway.update_chapter_content)
     for chapter in chapters:
         controller.add(dto_adapter.chapter_to_dto(chapter))

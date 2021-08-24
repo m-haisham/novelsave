@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Union
 
 from novelsave.core.entities.novel import Novel, Asset
 
@@ -27,7 +28,7 @@ class BasePathService(ABC):
         """:return absolute path to novel thumbnail file"""
 
     @abstractmethod
-    def resolve_data_path(self, r_path: Path) -> Path:
+    def resolve_data_path(self, r_path: Union[Path, str]) -> Path:
         """converts relative path to data to absolute path"""
 
     @abstractmethod

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 from urllib.parse import urlparse
 
@@ -58,7 +58,7 @@ class PathService(BasePathService):
 
         return self.data_dir / str(novel.id) / f'cover{suffix}'
 
-    def resolve_data_path(self, r_path: Path) -> Path:
+    def resolve_data_path(self, r_path: Union[Path, str]) -> Path:
         return self.data_dir / str(r_path).lstrip('.').lstrip('/\\')
 
     def relative_to_data_dir(self, path: Path) -> Path:

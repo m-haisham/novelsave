@@ -1,3 +1,5 @@
+from collections import defaultdict
+from functools import lru_cache
 from typing import Dict, List
 
 from bs4 import BeautifulSoup
@@ -21,9 +23,19 @@ class AssetService(BaseAssetService):
         self.session = session
         self.path_service = path_service
 
-    def update_asset_path(self, asset: Asset):
-        self.session.execute(update(Asset).where(Asset.id == asset.id).values(path=asset.path))
-        self.session.commit()
+    def downloaded_assets(self, novel: Novel) -> List[Asset]:
+        downloaded = []
+        for asset in novel.assets:
+            if asset.path is None:
+                continue
+
+            file = self.path_service.resolve_data_path(asset.path)
+            if not file.exists() or not file.is_file():
+                continue
+
+            downloaded.append(asset)
+
+        return downloaded
 
     def pending_assets(self, novel: Novel) -> List[Asset]:
         pending = []
@@ -37,6 +49,10 @@ class AssetService(BaseAssetService):
                 pending.append(asset)
 
         return pending
+
+    def update_asset_path(self, asset: Asset):
+        self.session.execute(update(Asset).where(Asset.id == asset.id).values(path=asset.path))
+        self.session.commit()
 
     def update_assets(self, novel: Novel, assets: List[Asset]) -> Dict[str, Asset]:
         stmt = select(Asset).where(Asset.novel_id == novel.id)
@@ -81,11 +97,17 @@ class AssetService(BaseAssetService):
             if not src:
                 continue
 
-            img['src'] = '{id%d}' % indexed_assets[src].id
+            img['src'] = f'{{id{indexed_assets[src].id}}}'
 
         logger.debug(f'Embedded asset markers (chapter={chapter.title}).')
 
         return str(soup)
 
-    def inject_assets(self, html: str, path_mapping: Dict[int, str]):
-        pass
+    def mapping_dict(self, path_mapping: Dict[int, str]):
+        return defaultdict(
+            str,
+            {f'id{key}': path for key, path in path_mapping.items()}
+        )
+
+    def inject_assets(self, html: str, mapping_dict: Dict[int, str]):
+        return html.format_map(mapping_dict)

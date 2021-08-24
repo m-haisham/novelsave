@@ -2,28 +2,31 @@ import json
 from functools import lru_cache
 from pathlib import Path
 from typing import Tuple, List, Dict
+import mimetypes
 
+import ebooklib
 import lxml.html
 from ebooklib import epub
 from loguru import logger
 from lxml.html import builder as E
 
-from novelsave.core.entities.novel import Novel, Chapter, MetaData, NovelUrl
-from novelsave.core.services import BaseNovelService, BasePathService, BaseFileService
+from novelsave.core.entities.novel import Novel, Chapter, MetaData, NovelUrl, Asset
+from novelsave.core.services import BaseNovelService, BasePathService, BaseFileService, BaseAssetService
 from novelsave.core.services.packagers import BasePackager
 
 
 class EpubPackager(BasePackager):
-
     def __init__(
             self,
             novel_service: BaseNovelService,
             file_service: BaseFileService,
             path_service: BasePathService,
+            asset_service: BaseAssetService,
     ):
         self.novel_service = novel_service
         self.file_service = file_service
         self.path_service = path_service
+        self.asset_service = asset_service
 
     def keywords(self) -> Tuple[str]:
         return 'epub',
@@ -52,7 +55,7 @@ class EpubPackager(BasePackager):
         self.set_cover(book, novel)
 
         if novel.synopsis:
-            book.add_metadata('DC', 'synopsis', novel.synopsis)
+            book.add_metadata('DC', 'description', novel.synopsis)
             logger.debug(f'Bound attributes to epub (synopsis={novel.synopsis[:min(30, len(novel.synopsis))]}…)')
         else:
             logger.debug(f'Bound attributes to epub (synopsis=None')
@@ -76,6 +79,8 @@ class EpubPackager(BasePackager):
                 book_chapters[volume_tuple].append(epub_chapter)
 
         logger.debug(f'Added pages to epub (pages.count={chapter_count}, type=chapter)')
+
+        self.add_assets(book, novel)
 
         # table of contents
         book.toc = [book_preface]
@@ -118,23 +123,55 @@ class EpubPackager(BasePackager):
                 cover = possible_cover
 
         if cover is None:
-            logger.debug(f'Copying cover image aborted (path="{novel.thumbnail_path}", reason=file does not exist)')
+            logger.debug(f"Copying cover image aborted (path='{novel.thumbnail_path}', reason='file does not exist')")
             return
 
         book.set_cover(cover.name, self.file_service.read_bytes(cover))
-        logger.debug(f'Copied cover image to epub (path="{novel.thumbnail_path}")')
+        logger.debug(f"Copied cover image to epub (path='{novel.thumbnail_path}')")
 
-    @staticmethod
-    def chapter_html(novel: Novel, chapter: Chapter) -> epub.EpubHtml:
-        content = f'<h1>{chapter.title}</h1>{chapter.content}'
-        file_name = f'{str(chapter.index).zfill(4)}.xhtml'
+    @lru_cache(1)
+    def path_mapping(self, novel: Novel) -> Dict[int, str]:
+        assets = self.asset_service.downloaded_assets(novel)
+
+        return {
+            asset.id: f'assets/{Path(asset.path).name}'
+            for asset in assets
+        }
+
+    @lru_cache(1)
+    def mapping_dict(self, novel: Novel):
+        return self.asset_service.mapping_dict(self.path_mapping(novel))
+
+    def chapter_html(self, novel: Novel, chapter: Chapter) -> epub.EpubHtml:
+        content = self.asset_service.inject_assets(chapter.content, self.mapping_dict(novel))
+        content_with_heading = f'<h1>{chapter.title}</h1>{content}'
+        file_name = f'chapters/{str(chapter.index).zfill(4)}.xhtml'
 
         return epub.EpubHtml(
             title=chapter.title,
-            content=content,
+            content=content_with_heading,
             file_name=file_name,
             lang=novel.lang,
         )
+
+    def add_assets(self, book: epub.EpubBook, novel: Novel):
+        path_mapping = self.path_mapping(novel)
+
+        assets = self.asset_service.downloaded_assets(novel)
+        for asset in assets:
+            file = self.path_service.resolve_data_path(asset.path)
+            content = self.file_service.read_bytes(file)
+            mimetype, encoding = mimetypes.guess_type(asset.path)
+
+            image = epub.EpubItem(
+                file_name=path_mapping[asset.id],
+                media_type=mimetype,
+                content=content,
+            )
+
+            book.add_item(image)
+
+        logger.debug(f'Added assets to epub (count={len(assets)})')
 
     @staticmethod
     def metadata_display_value(data: MetaData):

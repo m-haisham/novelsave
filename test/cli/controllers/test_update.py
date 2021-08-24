@@ -6,7 +6,7 @@ from loguru import logger
 from novelsave.cli.controllers import update
 
 
-@patch('novelsave.cli.controllers._update.helpers.download_pending')
+@patch('novelsave.cli.controllers._update.helpers.download_chapters')
 @patch('novelsave.cli.controllers._update.helpers.download_thumbnail')
 @patch('novelsave.cli.controllers._update.helpers.update_novel')
 @patch('novelsave.cli.controllers._update.helpers.create_novel', return_value=None)

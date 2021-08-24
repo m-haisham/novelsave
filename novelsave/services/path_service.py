@@ -3,7 +3,7 @@ from typing import Dict
 
 from urllib.parse import urlparse
 
-from novelsave.core.entities.novel import Novel
+from novelsave.core.entities.novel import Novel, Asset
 from novelsave.core.services import BasePathService, BaseNovelService
 from novelsave.core.services.source import BaseSourceGatewayProvider
 from novelsave.exceptions import NovelSourceNotFoundException
@@ -26,13 +26,11 @@ class PathService(BasePathService):
         self.novel_service = novel_service
         self.source_provider = source_provider
 
-    def divide(self, r_path: Path) -> Path:
-        path = Path(r_path)
+    def divide(self, path: Path) -> Path:
         parent = path.parent / self.division_rules.get(path.suffix, '')
-
         return parent.resolve() / path.name
 
-    def get_novel_path(self, novel: Novel) -> Path:
+    def novel_save_path(self, novel: Novel) -> Path:
         url = self.novel_service.get_primary_url(novel)
         try:
             source_gateway = self.source_provider.source_from_url(url)
@@ -44,10 +42,19 @@ class PathService(BasePathService):
 
         return self.novels_dir / source_folder_name / novel_name_slug
 
-    def get_thumbnail_path(self, novel: Novel) -> Path:
+    def novel_data_path(self, novel: Novel) -> Path:
+        return self.data_dir / str(novel.id)
+
+    def asset_path(self, novel: Novel, asset: Asset) -> Path:
+        parse_result = urlparse(novel.thumbnail_url)
+        suffix = Path(parse_result.path).suffix
+        file = Path(str(asset.id) + suffix)
+
+        return self.novel_data_path(novel) / self.divide(file)
+
+    def thumbnail_path(self, novel: Novel) -> Path:
         result = urlparse(novel.thumbnail_url)
-        suffix = Path(result.path).suffix
-        suffix = suffix if suffix else '.jpg'
+        suffix = Path(result.path).suffix or '.jpg'
 
         return self.data_dir / str(novel.id) / f'cover{suffix}'
 

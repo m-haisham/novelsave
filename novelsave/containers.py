@@ -57,11 +57,6 @@ class Services(containers.DeclarativeContainer):
         file_service=file_service,
     )
 
-    asset_service = providers.Factory(
-        AssetService,
-        session=infrastructure.session,
-    )
-
     source_gateway_provider = providers.Singleton(
         SourceGatewayProvider,
         source_adapter=adapters.source_adapter,
@@ -74,6 +69,12 @@ class Services(containers.DeclarativeContainer):
         division_rules=config.data.division_rules,
         novel_service=novel_service,
         source_provider=source_gateway_provider,
+    )
+
+    asset_service = providers.Factory(
+        AssetService,
+        session=infrastructure.session,
+        path_service=path_service,
     )
 
 

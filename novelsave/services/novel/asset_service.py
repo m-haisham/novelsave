@@ -2,19 +2,41 @@ from typing import Dict, List
 
 from bs4 import BeautifulSoup
 from loguru import logger
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from novelsave.core.dtos import ChapterDTO
 from novelsave.core.entities.constants import AssetTypes
 from novelsave.core.entities.novel import Asset, Novel
-from novelsave.core.services import BaseAssetService
+from novelsave.core.services import BaseAssetService, BasePathService
 
 
 class AssetService(BaseAssetService):
 
-    def __init__(self, session: Session):
+    def __init__(
+            self,
+            session: Session,
+            path_service: BasePathService,
+    ):
         self.session = session
+        self.path_service = path_service
+
+    def update_asset_path(self, asset: Asset):
+        self.session.execute(update(Asset).where(Asset.id == asset.id).values(path=asset.path))
+        self.session.commit()
+
+    def pending_assets(self, novel: Novel) -> List[Asset]:
+        pending = []
+        for asset in novel.assets:
+            if asset.path is None:
+                pending.append(asset)
+                continue
+
+            file = self.path_service.resolve_data_path(asset.path)
+            if not file.exists() or not file.is_file():
+                pending.append(asset)
+
+        return pending
 
     def update_assets(self, novel: Novel, assets: List[Asset]) -> Dict[str, Asset]:
         stmt = select(Asset).where(Asset.novel_id == novel.id)

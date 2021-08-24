@@ -10,10 +10,9 @@ from loguru import logger
 from novelsave.cli.helpers.source import get_source_gateway
 from novelsave.containers import Application
 from novelsave.core.entities.novel import Novel
-from novelsave.core.services import BasePathService, BaseNovelService, BaseAssetService
+from novelsave.core.services import BasePathService, BaseNovelService, BaseAssetService, BaseFileService
 from novelsave.core.services.source import BaseSourceGateway
 from novelsave.exceptions import CookieBrowserNotSupportedException
-from novelsave.services import NovelService, FileService
 from novelsave.utils.adapters import DTOAdapter
 from novelsave.utils.concurrent import ConcurrentActionsController
 from novelsave.utils.helpers import string_helper
@@ -37,7 +36,7 @@ def set_cookies(source_gateway: BaseSourceGateway, browser: Optional[str]):
 def create_novel(
         url: str,
         browser: Optional[str],
-        novel_service: NovelService = Provide[Application.services.novel_service],
+        novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ) -> Novel:
     """
     retrieve information about the novel from webpage and insert novel into database.
@@ -61,7 +60,7 @@ def create_novel(
 def update_novel(
         novel: Novel,
         browser: Optional[str],
-        novel_service: NovelService = Provide[Application.services.novel_service],
+        novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ):
     url = novel_service.get_primary_url(novel)
     logger.debug(f"Using primary url ({url=})")
@@ -85,14 +84,14 @@ def download_thumbnail(
         novel: Novel,
         force: bool = False,
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
-        file_service: FileService = Provide[Application.services.file_service],
+        file_service: BaseFileService = Provide[Application.services.file_service],
         path_service: BasePathService = Provide[Application.services.path_service],
 ):
-    thumbnail_path = path_service.get_thumbnail_path(novel)
+    thumbnail_path = path_service.thumbnail_path(novel)
     novel_service.set_thumbnail_asset(novel, path_service.relative_to_data_dir(thumbnail_path))
 
     if not force and thumbnail_path.exists() and thumbnail_path.is_file():
-        logger.info(f"Skipped thumbnail download ({novel.title=})")
+        logger.info(f"Skipped thumbnail download ({novel.title=}, reason='File already exists')")
         return
 
     logger.debug(f"Attempting thumbnail download ({novel.title=}, {novel.thumbnail_url=})")
@@ -108,7 +107,7 @@ def download_thumbnail(
 
 
 @inject
-def download_pending(
+def download_chapters(
         novel: Novel,
         limit: Optional[int],
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
@@ -126,7 +125,8 @@ def download_pending(
     source_gateway = get_source_gateway(url)
 
     # setup controller
-    controller = ConcurrentActionsController(1 or min(os.cpu_count(), len(chapters)), source_gateway.update_chapter_content)
+    controller = ConcurrentActionsController(1 or min(os.cpu_count(), len(chapters)),
+                                             source_gateway.update_chapter_content)
     for chapter in chapters:
         controller.add(dto_adapter.chapter_to_dto(chapter))
 
@@ -137,14 +137,46 @@ def download_pending(
 
         logger.debug(f"Chapter content downloaded (index={chapter_dto.index}, title='{chapter_dto.title}').")
 
-    logger.info(f"Download complete.")
+    logger.info(f"Chapters download complete.")
+
+
+@inject
+def download_assets(
+        novel: Novel,
+        asset_service: BaseAssetService = Provide[Application.services.asset_service],
+        file_service: BaseFileService = Provide[Application.services.file_service],
+        path_service: BasePathService = Provide[Application.services.path_service],
+):
+    pending = asset_service.pending_assets(novel)
+    if not pending:
+        logger.info(f"Skipped assets download ({novel.title=}, reason='No pending assets').")
+        return
+
+    logger.info(f"Downloading pending assets (count={len(pending)}).")
+    for asset in pending:
+        response = requests.get(asset.url)
+        if not response.ok:
+            logger.error(f"Error during asset download (id={asset.id}, url={asset.url}).")
+            continue
+
+        file = path_service.asset_path(novel, asset)
+        file.parent.mkdir(parents=True, exist_ok=True)
+
+        file_service.write_bytes(file, response.content)
+
+        asset.path = str(path_service.relative_to_data_dir(file))
+        asset_service.update_asset_path(asset)
+
+        logger.debug(f"Asset downloaded and saved (id={asset.id}, url={asset.url}, path={asset.path}).")
+
+    logger.info(f"Assets download complete.")
 
 
 @lru_cache(maxsize=1)
 @inject
 def get_novel(
         id_or_url: str,
-        novel_service: NovelService = Provide[Application.services.novel_service],
+        novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ) -> Novel:
     """retrieve novel is it exists in the database otherwise return none
 

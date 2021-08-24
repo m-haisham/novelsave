@@ -245,12 +245,12 @@ class NovelService(BaseNovelService):
         self.session.commit()
 
     def delete_novel(self, novel: Novel):
-        # using session.commit since we want the sqlalchemy cascade to be run
+        # using session.delete since we want the sqlalchemy cascade to be run
         self.session.delete(novel)
         self.session.commit()
 
     def delete_volumes(self, novel: Novel):
-        # using session.commit since we want the sqlalchemy cascade to be run
+        # using session.delete since we want the sqlalchemy cascade to be run
         volumes = self.get_volumes(novel)
         for volume in volumes:
             self.session.delete(volume)

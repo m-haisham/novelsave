@@ -69,6 +69,7 @@ def clean_novel(id_or_url: str, content_only: bool):
 def delete_novel(
         id_or_url: str,
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
+        path_service: BasePathService = Provide[Application.services.path_service],
 ):
     """delete all records of novel. this includes chapters, and assets"""
     try:
@@ -77,6 +78,7 @@ def delete_novel(
         sys.exit(1)
 
     novel_service.delete_novel(novel)
+    path_service.novel_save_path(novel)
     logger.info(f"Deleted novel (id={novel.id}, title='{novel.title}')")
 
 

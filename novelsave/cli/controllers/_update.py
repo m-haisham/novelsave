@@ -38,4 +38,8 @@ def update(
     helpers.download_thumbnail(novel)
 
     if limit is None or limit > 0:
-        helpers.download_pending(novel, limit)
+        helpers.download_chapters(novel, limit)
+    else:
+        logger.info(f"Skipped chapter download ({novel.title=}, reason='No download specified').")
+
+    helpers.download_assets(novel)

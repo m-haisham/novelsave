@@ -107,7 +107,7 @@ class EpubPackager(BasePackager):
 
     @lru_cache(maxsize=1)
     def destination(self, novel: Novel):
-        path = self.path_service.get_novel_path(novel)
+        path = self.path_service.novel_save_path(novel)
         return path / (path.name + '.epub')
 
     def set_cover(self, book: epub.EpubBook, novel: Novel):

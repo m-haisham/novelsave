@@ -30,7 +30,7 @@ class TestPathService(unittest.TestCase):
         source_provider.source_from_url.return_value = None
 
         path_service = PathService(self.data_dir, self.save_dir, self.division_rules, novel_service, source_provider)
-        path = path_service.get_novel_path(Novel(title='novel'))
+        path = path_service.novel_save_path(Novel(title='novel'))
 
         self.assertEqual(self.save_dir / 'novel', path)
 
@@ -40,7 +40,7 @@ class TestPathService(unittest.TestCase):
         source_gateway.name.return_value = 'source'
 
         path_service = PathService(self.data_dir, self.save_dir, self.division_rules, novel_service, source_provider)
-        path = path_service.get_novel_path(Novel(title='novel'))
+        path = path_service.novel_save_path(Novel(title='novel'))
 
         self.assertEqual(self.save_dir / 'source' / 'novel', path)
 
@@ -48,7 +48,7 @@ class TestPathService(unittest.TestCase):
         novel = Novel(id=1, thumbnail_url='https://my.site/local%20assets/image.jpg')
 
         path_service = PathService(self.data_dir, self.save_dir, self.division_rules, novel_service, source_provider)
-        path = path_service.get_thumbnail_path(novel)
+        path = path_service.thumbnail_path(novel)
 
         self.assertEqual(self.data_dir / '1' / 'cover.jpg', path)
 
@@ -56,7 +56,7 @@ class TestPathService(unittest.TestCase):
         novel = Novel(id=1, thumbnail_url='https://my.site/local%20assets/image')
 
         path_service = PathService(self.data_dir, self.save_dir, self.division_rules, novel_service, source_provider)
-        path = path_service.get_thumbnail_path(novel)
+        path = path_service.thumbnail_path(novel)
 
         self.assertEqual(self.data_dir / '1' / 'cover.jpg', path)
 

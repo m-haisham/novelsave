@@ -1,16 +1,16 @@
 from collections import defaultdict
-from functools import lru_cache
 from typing import Dict, List
 
 from bs4 import BeautifulSoup
 from loguru import logger
-from sqlalchemy import select, update
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from novelsave.core.dtos import ChapterDTO
 from novelsave.core.entities.constants import AssetTypes
 from novelsave.core.entities.novel import Asset, Novel
 from novelsave.core.services import BaseAssetService, BasePathService
+from novelsave.utils.helpers import url_helper
 
 
 class AssetService(BaseAssetService):
@@ -55,8 +55,7 @@ class AssetService(BaseAssetService):
         self.session.commit()
 
     def update_assets(self, novel: Novel, assets: List[Asset]) -> Dict[str, Asset]:
-        stmt = select(Asset).where(Asset.novel_id == novel.id)
-        indexed_assets = {a.url: a for a in self.session.execute(stmt).scalars().all()}
+        indexed_assets = {a.url: a for a in novel.assets}
         indexed_specific = {}
 
         assets_to_add = []
@@ -67,9 +66,14 @@ class AssetService(BaseAssetService):
                 indexed_specific[asset.url] = asset
                 assets_to_add.append(asset)
 
-        logger.debug(f'Adding newly found assets (count={len(assets_to_add)}).')
-        self.session.add_all(assets_to_add)
-        self.session.flush()
+        # we only interact with the database if we have something to add
+        # this is [expected] to be more performant
+        if assets_to_add:
+            logger.debug(f'Adding newly found assets (count={len(assets_to_add)}).')
+            self.session.add_all(assets_to_add)
+            self.session.flush()
+        else:
+            logger.debug(f"Skipping adding assets ({novel.id=}, reason='No assets to add')")
 
         return indexed_specific
 
@@ -87,9 +91,20 @@ class AssetService(BaseAssetService):
             if not src:
                 continue
 
-            assets.append(Asset(name=alt, url=src, type_id=AssetTypes.IMAGE, novel_id=novel.id))
+            url = url_helper.absolute_url(src, chapter.url)
+            asset = Asset(
+                name=alt,
+                url=url,
+                type_id=AssetTypes.IMAGE,
+                novel_id=novel.id,
+            )
 
-        logger.debug(f'Identified asset images (novel={novel.title}, count={len(assets)}).')
+            assets.append(asset)
+
+        logger.debug(f"Identified asset images (novel='{novel.title}', count={len(assets)}).")
+        if not assets:
+            logger.debug(f"Skipped further asset processing (novel='{novel.title}', reason='No assets identified')")
+            return chapter.content
 
         indexed_assets = self.update_assets(novel, assets)
         for img in soup.select('img'):
@@ -97,9 +112,10 @@ class AssetService(BaseAssetService):
             if not src:
                 continue
 
-            img['src'] = f'{{id{indexed_assets[src].id}}}'
+            url = url_helper.absolute_url(src, chapter.url)
+            img['src'] = f'{{id{indexed_assets[url].id}}}'
 
-        logger.debug(f'Embedded asset markers (chapter={chapter.title}).')
+        logger.debug(f"Embedded asset markers (chapter='{chapter.title}').")
 
         return str(soup)
 

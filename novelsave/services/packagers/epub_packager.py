@@ -134,7 +134,7 @@ class EpubPackager(BasePackager):
         assets = self.asset_service.downloaded_assets(novel)
 
         return {
-            asset.id: f'assets/{Path(asset.path).name}'
+            asset.id: f'../assets/{Path(asset.path).name}'
             for asset in assets
         }
 
@@ -164,7 +164,7 @@ class EpubPackager(BasePackager):
             mimetype, encoding = mimetypes.guess_type(asset.path)
 
             image = epub.EpubItem(
-                file_name=path_mapping[asset.id],
+                file_name=path_mapping[asset.id].lstrip('./'),
                 media_type=mimetype,
                 content=content,
             )

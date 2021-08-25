@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from bs4 import BeautifulSoup
 from loguru import logger
-from sqlalchemy import update
+from sqlalchemy import update, delete
 from sqlalchemy.orm import Session
 
 from novelsave.core.dtos import ChapterDTO
@@ -52,6 +52,10 @@ class AssetService(BaseAssetService):
 
     def update_asset_path(self, asset: Asset):
         self.session.execute(update(Asset).where(Asset.id == asset.id).values(path=asset.path))
+        self.session.commit()
+
+    def delete_assets_of_novel(self, novel: Novel):
+        self.session.execute(delete(Asset).where(Asset.novel_id == novel.id))
         self.session.commit()
 
     def update_assets(self, novel: Novel, assets: List[Asset]) -> Dict[str, Asset]:

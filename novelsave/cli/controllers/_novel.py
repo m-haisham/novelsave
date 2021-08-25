@@ -1,3 +1,4 @@
+import shutil
 import sys
 from pathlib import Path
 
@@ -6,7 +7,7 @@ from loguru import logger
 
 from novelsave.cli import helpers as cli_helpers
 from novelsave.containers import Application
-from novelsave.core.services import BaseNovelService, BasePathService
+from novelsave.core.services import BaseNovelService, BasePathService, BaseAssetService
 from novelsave.core.services.source import BaseSourceGatewayProvider
 from novelsave.exceptions import MetaDataSourceNotFoundException
 
@@ -31,6 +32,7 @@ def delete_associations(
         id_or_url: str,
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
         path_service: BasePathService = Provide[Application.services.path_service],
+        asset_service: BaseAssetService = Provide[Application.services.asset_service],
 ):
     """Removes all except vital information related to novel, this includes chapters, metadata, and assets."""
     try:
@@ -44,12 +46,12 @@ def delete_associations(
     novel_service.delete_metadata(novel)
     logger.info(f"Deleted metadata of novel (id={novel.id}, title='{novel.title}').")
 
-    if novel.thumbnail_path:
-        path_service.resolve_data_path(Path(novel.thumbnail_path)).unlink(missing_ok=True)
-        logger.info(f"Deleted thumbnail of novel (id={novel.id}, title='{novel.title}').")
-    else:
-        logger.info(f"Skipped deleting thumbnail of novel "
-                    f"(id={novel.id}, title='{novel.title}', reason='Does not exist').")
+    asset_service.delete_assets_of_novel(novel)
+    logger.info(f"Deleted asset entries of novel (id={novel.id}, title='{novel.title}').")
+
+    novel_dir = path_service.novel_data_path(novel)
+    shutil.rmtree(novel_dir)
+    logger.info(f"Deleted data of novel (includes=(thumbnail, assets))")
 
 
 def clean_novel(id_or_url: str, content_only: bool):
@@ -77,8 +79,11 @@ def delete_novel(
     except ValueError:
         sys.exit(1)
 
+    novel_dir = path_service.novel_data_path(novel)
+    shutil.rmtree(novel_dir)
+    logger.info(f"Deleted data of novel (includes=(thumbnail, assets))")
+
     novel_service.delete_novel(novel)
-    path_service.novel_save_path(novel)
     logger.info(f"Deleted novel (id={novel.id}, title='{novel.title}')")
 
 

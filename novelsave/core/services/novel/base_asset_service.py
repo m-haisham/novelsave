@@ -20,6 +20,10 @@ class BaseAssetService(ABC):
         """update the file path of the asset"""
 
     @abstractmethod
+    def delete_assets_of_novel(self, novel: Novel):
+        """delete all assets that are associated with from database"""
+
+    @abstractmethod
     def collect_assets(self, novel: Novel, chapter: ChapterDTO) -> str:
         """collect and modify the provided the html for asset injection"""
 

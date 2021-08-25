@@ -3,6 +3,7 @@ from typing import Optional
 
 from loguru import logger
 
+from novelsave.utils.helpers import url_helper
 from .. import helpers
 from ...utils.helpers import string_helper
 
@@ -28,7 +29,7 @@ def update(
     try:
         novel = helpers.get_novel(id_or_url)
     except ValueError:
-        is_url = string_helper.is_url(id_or_url)
+        is_url = url_helper.is_url(id_or_url)
         if not is_url:
             sys.exit(1)
 

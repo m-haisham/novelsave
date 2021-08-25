@@ -1,6 +1,5 @@
 import shutil
 import sys
-from pathlib import Path
 
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
@@ -8,8 +7,25 @@ from loguru import logger
 from novelsave.cli import helpers as cli_helpers
 from novelsave.containers import Application
 from novelsave.core.services import BaseNovelService, BasePathService, BaseAssetService
-from novelsave.core.services.source import BaseSourceGatewayProvider
-from novelsave.exceptions import MetaDataSourceNotFoundException
+
+
+def show_info(id_or_url: str):
+    """print current information of novel"""
+    try:
+        novel = cli_helpers.get_novel(id_or_url)
+    except ValueError:
+        sys.exit(1)
+
+    logger.info('[novel]')
+    logger.info(f'id = {novel.id}')
+    logger.info(f'title = {novel.title}')
+    logger.info(f'author = {novel.author}')
+    logger.info(f'lang = {novel.lang}')
+    logger.info(f'thumbnail = {novel.thumbnail_url}')
+    logger.info(f'synopsis = [')
+    for line in novel.synopsis.splitlines():
+        logger.info(f'  "{line.strip()}",')
+    logger.info(f']')
 
 
 @inject

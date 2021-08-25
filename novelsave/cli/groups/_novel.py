@@ -45,6 +45,13 @@ def _novel():
     """Group of commands to manage novels"""
 
 
+@_novel.command(name='show')
+@click.argument('id_or_url')
+def _show(id_or_url: str):
+    """Show current information of the novel"""
+    controllers.show_info(id_or_url)
+
+
 @_novel.command(name='clean')
 @click.argument('id_or_url')
 @click.option('--content-only', is_flag=True, help="Only remove chapter content")

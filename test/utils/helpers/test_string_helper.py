@@ -1,5 +1,6 @@
 import unittest
 
+import novelsave.utils.helpers.url_helper
 from novelsave.utils.helpers import string_helper
 
 
@@ -14,7 +15,7 @@ class TestStringHelper(unittest.TestCase):
         ]
 
         for url in tests:
-            self.assertTrue(string_helper.is_url(url), msg=f"{url=} is not a url")
+            self.assertTrue(novelsave.utils.helpers.url_helper.is_url(url), msg=f"{url=} is not a url")
 
     def test_is_url_false(self):
         tests = [
@@ -26,4 +27,4 @@ class TestStringHelper(unittest.TestCase):
         ]
 
         for url in tests:
-            self.assertFalse(string_helper.is_url(url), msg=f"{url=} is a url")
+            self.assertFalse(novelsave.utils.helpers.url_helper.is_url(url), msg=f"{url=} is a url")

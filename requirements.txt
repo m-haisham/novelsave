@@ -2,11 +2,11 @@ appdirs==1.4.4
 requests>=2.26.0
 ebooklib==0.17.1
 loguru==0.5.3
-sqlalchemy==1.4.22
+sqlalchemy==1.4.23
 dependency-injector==4.35.2
 alembic~=1.6.5
 novelsave-sources>=0.1.0a2
 click==8.0.1
-
+BeautifulSoup4~=4.9.3
 lxml==4.6.3
 browser-cookie3~=0.12.1

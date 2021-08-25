@@ -27,4 +27,4 @@ def package(
 
     for packager in packager_provider.packagers():
         path = packager.package(novel)
-        logger.info(f'Compiled (keywords: {packager.keywords()}, loc="{path}")')
+        logger.info(f'Compiled (keyword: {packager.keywords()[0]}, loc="{path}")')

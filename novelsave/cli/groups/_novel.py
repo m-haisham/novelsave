@@ -15,9 +15,10 @@ def _package(id_or_url: str):
 @click.argument('id_or_url')
 @click.option('--limit', type=int, help='Maximum count of chapters to update. Set to 0 or less to skip.')
 @click.option('--browser', help='Extract cookies from the specified browser and use them in subsequent requests.')
-def _process(id_or_url: str, limit: int, browser: str):
+@click.option('--threads', type=int, help="Amount of threads to use when downloading chapters.")
+def _process(id_or_url: str, limit: int, browser: str, threads: int):
     """runs 'update' and 'package' commands consecutively"""
-    controllers.update(id_or_url, browser, limit)
+    controllers.update(id_or_url, browser, limit, threads)
     controllers.package(id_or_url)
 
 
@@ -25,9 +26,10 @@ def _process(id_or_url: str, limit: int, browser: str):
 @click.argument('id_or_url')
 @click.option('--limit', type=int, help='Maximum count of chapters to update. Set to 0 or less to skip.')
 @click.option('--browser', help='Extract cookies from the specified browser and use them in subsequent requests.')
-def _update(id_or_url: str, limit: int, browser: str):
+@click.option('--threads', type=int, help="Amount of threads to use when downloading chapters.")
+def _update(id_or_url: str, limit: int, browser: str, threads: int):
     """Scrape the website of the novel and update the database"""
-    controllers.update(id_or_url, browser, limit)
+    controllers.update(id_or_url, browser, limit, threads)
 
 
 @cli.command(name='metadata')

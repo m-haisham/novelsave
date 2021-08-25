@@ -9,8 +9,9 @@ from ...utils.helpers import string_helper
 
 def update(
         id_or_url: str,
-        browser: Optional[str] = None,
-        limit: int = -1,
+        browser: Optional[str],
+        limit: int,
+        threads: int,
 ):
     """
     update the novel metadata and downloads any new chapters if not specified otherwise
@@ -21,6 +22,7 @@ def update(
     :param id_or_url: id or url of the novel
     :param browser: extract cookies from this browser
     :param limit: no. of chapters to update
+    :param threads: no. of threads to use when downloading chapters
     :return: None
     """
     try:
@@ -38,7 +40,7 @@ def update(
     helpers.download_thumbnail(novel)
 
     if limit is None or limit > 0:
-        helpers.download_chapters(novel, limit)
+        helpers.download_chapters(novel, limit, threads)
     else:
         logger.info(f"Skipped chapter download ({novel.title=}, reason='No download specified').")
 

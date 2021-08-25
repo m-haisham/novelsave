@@ -110,6 +110,7 @@ def download_thumbnail(
 def download_chapters(
         novel: Novel,
         limit: Optional[int],
+        threads: Optional[int],
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
         asset_service: BaseAssetService = Provide[Application.services.asset_service],
         dto_adapter: DTOAdapter = Provide[Application.adapters.dto_adapter],
@@ -125,8 +126,10 @@ def download_chapters(
     source_gateway = get_source_gateway(url)
 
     # setup controller
-    controller = ConcurrentActionsController(min(os.cpu_count(), len(chapters)),
-                                             source_gateway.update_chapter_content)
+    controller = ConcurrentActionsController(
+        threads or min(os.cpu_count(), len(chapters)),
+        task=source_gateway.update_chapter_content
+    )
     for chapter in chapters:
         controller.add(dto_adapter.chapter_to_dto(chapter))
 

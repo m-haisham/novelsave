@@ -1,26 +1,13 @@
-"""
-update {only, all} [url or id]
-package {only, all} [url or id] {--formats} [--only-updated]
-default: update-and-package {only} (url or id) {--formats}
-history {only, all} [url or id]
-_manage {config, clean, novel}
-    _manage novel (url or id) {add, remove} (url)
-                         ... {purge}
-
-[maybe]
-periodical (--every-minutes SECONDS)
-_manage {startup} {add, remove}
-"""
-import json
-import sys
+import functools
 
 import click
 from loguru import logger
+from tqdm import tqdm
 
 from . import controllers, helpers, groups
-from ..settings import as_dict as settings_as_dict, DATABASE_URL, LOGGER_CONFIG
 from ..containers import Application
 from ..infrastructure.migrations import commands as migration_commands
+from ..settings import as_dict as settings_as_dict, DATABASE_URL, LOGGER_CONFIG
 from ..utils.helpers import config_helper
 
 
@@ -42,11 +29,14 @@ def update_database_schema():
 
 @click.group()
 @click.option('--debug', is_flag=True, help="Print debugging information to console")
+@click.option('--plain', is_flag=True, help="Remove progress bars from console output")
 @logger.catch()
-def cli(debug: bool):
+def cli(debug: bool, plain: bool):
     logger_config = LOGGER_CONFIG.copy()
     if debug:
         logger_config['handlers'][0]['level'] = 'DEBUG'
+    if plain:
+        tqdm.__init__ = functools.partialmethod(tqdm.__init__, disable=True)
 
     logger.configure(**logger_config)
 

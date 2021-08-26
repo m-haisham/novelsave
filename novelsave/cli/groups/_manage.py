@@ -1,6 +1,3 @@
-import click
-
-from .. import controllers
 from ..main import cli
 
 

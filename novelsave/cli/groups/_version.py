@@ -1,5 +1,3 @@
-from loguru import logger
-
 from ..main import cli
 from ... import __version__
 

@@ -8,18 +8,18 @@ from dependency_injector.wiring import inject, Provide
 from loguru import logger
 from tqdm import tqdm
 
-from novelsave.core.dtos import ChapterDTO
-from novelsave.settings import TQDM_CONFIG
-from novelsave.utils.helpers import url_helper
 from novelsave.cli.helpers.source import get_source_gateway
 from novelsave.containers import Application
+from novelsave.core.dtos import ChapterDTO
 from novelsave.core.entities.novel import Novel
 from novelsave.core.services import BasePathService, BaseNovelService, BaseAssetService, BaseFileService
 from novelsave.core.services.source import BaseSourceGateway
+from novelsave.exceptions import ContentUpdateFailedException
 from novelsave.exceptions import CookieBrowserNotSupportedException
+from novelsave.settings import TQDM_CONFIG
 from novelsave.utils.adapters import DTOAdapter
 from novelsave.utils.concurrent import ConcurrentActionsController
-from novelsave.exceptions import ContentUpdateFailedException
+from novelsave.utils.helpers import url_helper
 
 
 def set_cookies(source_gateway: BaseSourceGateway, browser: Optional[str]):

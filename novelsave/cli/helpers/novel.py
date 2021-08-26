@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 from functools import lru_cache
 from typing import Optional
@@ -65,6 +66,7 @@ def update_novel(
         novel: Novel,
         browser: Optional[str],
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
+        path_service: BasePathService = Provide[Application.services.path_service],
 ):
     url = novel_service.get_primary_url(novel)
     logger.debug(f"Using primary url ({url=})")
@@ -80,6 +82,12 @@ def update_novel(
     novel_service.update_metadata(novel, metadata_dtos)
 
     logger.info(f"Updated novel (id={novel.id}, title='{novel.title}', chapters={len(chapter_dtos)})")
+
+    data_dir = path_service.novel_data_path(novel)
+    if data_dir.exists():
+        shutil.rmtree(data_dir)
+        logger.debug(f"Cleaned existing data in novel data dir (path='{path_service.resolve_data_path(data_dir)}')")
+
     return novel
 
 

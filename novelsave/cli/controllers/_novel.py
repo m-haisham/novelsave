@@ -66,7 +66,8 @@ def delete_associations(
     logger.info(f"Deleted asset entries of novel (id={novel.id}, title='{novel.title}').")
 
     novel_dir = path_service.novel_data_path(novel)
-    shutil.rmtree(novel_dir)
+    if novel_dir.exists():
+        shutil.rmtree(novel_dir)
     logger.info(f"Deleted data of novel (includes=(thumbnail, assets))")
 
 

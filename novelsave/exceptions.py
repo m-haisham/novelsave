@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from novelsave.core.dtos import ChapterDTO
+
 
 class NovelSaveException(Exception):
     """base novelsave exception"""
@@ -9,6 +11,12 @@ class NovelSaveException(Exception):
 class CookieBrowserNotSupportedException(NovelSaveException):
     """the specified browser does not support cookie extraction"""
     browser: str
+
+
+@dataclass
+class ContentUpdateFailedException(NovelSaveException):
+    chapter: ChapterDTO
+    exception: Exception
 
 
 @dataclass

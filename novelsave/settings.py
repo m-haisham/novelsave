@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 from appdirs import user_config_dir
+from tqdm import tqdm
 
 NAME = 'novelsave'
 AUTHOR = 'Mensch272'
@@ -36,7 +37,7 @@ DIVISION_RULES = {
 LOGGER_CONFIG = {
     "handlers": [
         {
-            'sink': sys.stdout,
+            'sink': lambda msg: tqdm.write(msg, end=""),
             'format': '<level>{level:<8}</level> | <level>{message}</level>',
             'level': 'TRACE',
             'colorize': True,
@@ -46,6 +47,11 @@ LOGGER_CONFIG = {
             'level': 'TRACE',
         }
     ],
+}
+
+TQDM_CONFIG = {
+    'ncols': 80,
+    'bar_format': f'{"PROGRESS":<8}' + ' | {percentage:3.0f}% |{bar}| {r_bar}'
 }
 
 _config = {

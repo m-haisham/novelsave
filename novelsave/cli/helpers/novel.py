@@ -6,7 +6,10 @@ from typing import Optional
 import requests
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
+from tqdm import tqdm
 
+from novelsave.core.dtos import ChapterDTO
+from novelsave.settings import TQDM_CONFIG
 from novelsave.utils.helpers import url_helper
 from novelsave.cli.helpers.source import get_source_gateway
 from novelsave.containers import Application
@@ -16,6 +19,7 @@ from novelsave.core.services.source import BaseSourceGateway
 from novelsave.exceptions import CookieBrowserNotSupportedException
 from novelsave.utils.adapters import DTOAdapter
 from novelsave.utils.concurrent import ConcurrentActionsController
+from novelsave.exceptions import ContentUpdateFailedException
 
 
 def set_cookies(source_gateway: BaseSourceGateway, browser: Optional[str]):
@@ -125,22 +129,36 @@ def download_chapters(
 
     source_gateway = get_source_gateway(url)
 
+    def download(dto: ChapterDTO):
+        try:
+            return source_gateway.update_chapter_content(dto)
+        except Exception as e:
+            return ContentUpdateFailedException(dto, e)
+
     # setup controller
-    controller = ConcurrentActionsController(
-        threads or min(os.cpu_count(), len(chapters)),
-        task=source_gateway.update_chapter_content
-    )
+    controller = ConcurrentActionsController(threads or min(os.cpu_count(), len(chapters)), task=download)
     for chapter in chapters:
         controller.add(dto_adapter.chapter_to_dto(chapter))
 
     logger.info(f"Downloading pending chapters (count={len(chapters)}, threads={len(controller.threads)})...")
-    for chapter_dto in controller.iter():
-        chapter_dto.content = asset_service.collect_assets(novel, chapter_dto)
-        novel_service.update_content(chapter_dto)
+    succeses = 0
+    with tqdm(total=len(chapters), **TQDM_CONFIG) as pbar:
+        for result in controller.iter():
+            if type(result) == ContentUpdateFailedException:
+                logger.error(f"An error occurred during content download "
+                             f"(title='{result.chapter.title}', error={type(result.exception)}).")
+                logger.debug("An error occurred during content download {}", vars(result))
+            else:
+                chapter_dto = result
+                chapter_dto.content = asset_service.collect_assets(novel, chapter_dto)
+                novel_service.update_content(chapter_dto)
 
-        logger.debug(f"Chapter content downloaded (index={chapter_dto.index}, title='{chapter_dto.title}').")
+                logger.debug(f"Chapter content downloaded (index={chapter_dto.index}, title='{chapter_dto.title}').")
+                succeses += 1
 
-    logger.info(f"Chapters download complete.")
+            pbar.update(1)
+
+    logger.info(f"Chapters download complete (successes={succeses}, errors={len(chapters) - succeses}).")
 
 
 @inject
@@ -156,7 +174,7 @@ def download_assets(
         return
 
     logger.info(f"Downloading pending assets (count={len(pending)}).")
-    for asset in pending:
+    for asset in tqdm(pending, **TQDM_CONFIG):
         response = requests.get(asset.url)
         if not response.ok:
             logger.error(f"Error during asset download (id={asset.id}, url={asset.url}).")

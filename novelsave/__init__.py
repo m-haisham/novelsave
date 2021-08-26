@@ -1,2 +1,2 @@
-__version__ = '0.7.0a3'
+__version__ = '0.7.0'
 __source__ = 'https://github.com/mHaisham/novelsave'

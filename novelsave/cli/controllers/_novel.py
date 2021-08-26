@@ -22,10 +22,9 @@ def show_info(id_or_url: str):
     logger.info(f'author = {novel.author}')
     logger.info(f'lang = {novel.lang}')
     logger.info(f'thumbnail = {novel.thumbnail_url}')
-    logger.info(f'synopsis = [')
+    logger.info(f'synopsis = ')
     for line in novel.synopsis.splitlines():
-        logger.info(f'  "{line.strip()}",')
-    logger.info(f']')
+        logger.info(f'{"":<4}{line.strip()}')
 
 
 @inject
@@ -68,7 +67,7 @@ def delete_associations(
     novel_dir = path_service.novel_data_path(novel)
     if novel_dir.exists():
         shutil.rmtree(novel_dir)
-    logger.info(f"Deleted data of novel (includes=(thumbnail, assets))")
+    logger.info(f"Deleted data of novel (path='{path_service.resolve_data_path(novel_dir)}')")
 
 
 def clean_novel(id_or_url: str, content_only: bool):
@@ -97,8 +96,9 @@ def delete_novel(
         sys.exit(1)
 
     novel_dir = path_service.novel_data_path(novel)
-    shutil.rmtree(novel_dir)
-    logger.info(f"Deleted data of novel (includes=(thumbnail, assets))")
+    if novel_dir.exists():
+        shutil.rmtree(novel_dir)
+    logger.info(f"Deleted data of novel (path='{path_service.resolve_data_path(novel_dir)}')")
 
     novel_service.delete_novel(novel)
     logger.info(f"Deleted novel (id={novel.id}, title='{novel.title}')")

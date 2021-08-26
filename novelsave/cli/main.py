@@ -29,7 +29,7 @@ def update_database_schema():
 
 @click.group()
 @click.option('--debug', is_flag=True, help="Print debugging information to console")
-@click.option('--plain', is_flag=True, help="Remove progress bars from console output")
+@click.option('--plain', is_flag=True, help="Disable reactive and interactive elements")
 @logger.catch()
 def cli(debug: bool, plain: bool):
     logger_config = LOGGER_CONFIG.copy()

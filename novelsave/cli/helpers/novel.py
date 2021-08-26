@@ -19,7 +19,7 @@ from novelsave.exceptions import CookieBrowserNotSupportedException
 from novelsave.settings import TQDM_CONFIG
 from novelsave.utils.adapters import DTOAdapter
 from novelsave.utils.concurrent import ConcurrentActionsController
-from novelsave.utils.helpers import url_helper
+from novelsave.utils.helpers import url_helper, string_helper
 
 
 def set_cookies(source_gateway: BaseSourceGateway, browser: Optional[str]):
@@ -95,19 +95,20 @@ def download_thumbnail(
     novel_service.set_thumbnail_asset(novel, path_service.relative_to_data_dir(thumbnail_path))
 
     if not force and thumbnail_path.exists() and thumbnail_path.is_file():
-        logger.info(f"Skipped thumbnail download ({novel.title=}, reason='File already exists')")
+        logger.info(f"Skipped thumbnail download (title='{novel.title}', reason='File already exists')")
         return
 
-    logger.debug(f"Attempting thumbnail download ({novel.title=}, {novel.thumbnail_url=})")
+    logger.debug(f"Attempting thumbnail download (title='{novel.title}', thumbnail='{novel.thumbnail_path}').")
     response = requests.get(novel.thumbnail_url)
     if not response.ok:
-        logger.error(f"Error during thumbnail download ({novel.title=}, {response.status_code=})")
+        logger.error(f"Error during thumbnail download (title='{novel.title=}', {response.status_code=}).")
         return
 
     thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
     file_service.write_bytes(thumbnail_path, response.content)
 
-    logger.info(f"Downloaded thumbnail image ({novel.title=}, {novel.thumbnail_path=})")
+    size = string_helper.format_bytes(len(response.content))
+    logger.info(f"Downloaded thumbnail image (title='{novel.title}', thumbnail='{novel.thumbnail_path}', {size=}).")
 
 
 @inject
@@ -121,7 +122,7 @@ def download_chapters(
 ):
     chapters = novel_service.get_pending_chapters(novel, limit)
     if not chapters:
-        logger.info(f"Skipped chapter download ({novel.title=}, reason='No pending chapters').")
+        logger.info(f"Skipped chapter download (title='{novel.title}', reason='No pending chapters').")
         return
 
     url = novel_service.get_primary_url(novel)
@@ -141,7 +142,7 @@ def download_chapters(
         controller.add(dto_adapter.chapter_to_dto(chapter))
 
     logger.info(f"Downloading pending chapters (count={len(chapters)}, threads={len(controller.threads)})...")
-    succeses = 0
+    successes = 0
     with tqdm(total=len(chapters), **TQDM_CONFIG) as pbar:
         for result in controller.iter():
             if type(result) == ContentUpdateFailedException:
@@ -154,11 +155,11 @@ def download_chapters(
                 novel_service.update_content(chapter_dto)
 
                 logger.debug(f"Chapter content downloaded (index={chapter_dto.index}, title='{chapter_dto.title}').")
-                succeses += 1
+                successes += 1
 
             pbar.update(1)
 
-    logger.info(f"Chapters download complete (successes={succeses}, errors={len(chapters) - succeses}).")
+    logger.info(f"Chapters download complete (successes={successes}, errors={len(chapters) - successes}).")
 
 
 @inject
@@ -170,7 +171,7 @@ def download_assets(
 ):
     pending = asset_service.pending_assets(novel)
     if not pending:
-        logger.info(f"Skipped assets download ({novel.title=}, reason='No pending assets').")
+        logger.info(f"Skipped assets download (title='{novel.title}', reason='No pending assets').")
         return
 
     logger.info(f"Downloading pending assets (count={len(pending)}).")

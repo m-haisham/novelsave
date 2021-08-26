@@ -47,4 +47,4 @@ def add_url(
         logger.error(e)
         sys.exit(1)
     else:
-        logger.info(f"Url added to novel (id={novel.id}, title='{novel.title}', {url=}).")
+        logger.info(f"Url added to novel (id={novel.id}, title='{novel.title}', {new_url=}).")

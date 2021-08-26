@@ -52,7 +52,7 @@ LOGGER_CONFIG = {
 
 TQDM_CONFIG = {
     'ncols': 80,
-    'bar_format': f'{"PROGRESS":<8}' + ' | {percentage:3.0f}% |{bar}| {r_bar}'
+    'bar_format': f'{"PROGRESS":<8}' + ' | {percentage:3.0f}% |{bar}{r_bar}'
 }
 
 _config = {

@@ -18,7 +18,7 @@ import click
 from loguru import logger
 
 from . import controllers, helpers, groups
-from .. import settings
+from ..settings import as_dict as settings_as_dict, DATABASE_URL, LOGGER_CONFIG
 from ..containers import Application
 from ..infrastructure.migrations import commands as migration_commands
 from ..utils.helpers import config_helper
@@ -26,7 +26,7 @@ from ..utils.helpers import config_helper
 
 def inject_dependencies():
     application = Application()
-    application.config.from_dict(settings.as_dict())
+    application.config.from_dict(settings_as_dict())
 
     try:
         application.config.from_dict(config_helper.from_file())
@@ -37,12 +37,18 @@ def inject_dependencies():
 
 
 def update_database_schema():
-    migration_commands.migrate(settings.DATABASE_URL)
+    migration_commands.migrate(DATABASE_URL)
 
 
 @click.group()
+@click.option('--debug', is_flag=True, help="Print debugging information to console")
 @logger.catch()
-def cli():
-    logger.configure(**settings.LOGGER_CONFIG)
+def cli(debug: bool):
+    logger_config = LOGGER_CONFIG.copy()
+    if debug:
+        logger_config['handlers'][0]['level'] = 'DEBUG'
+
+    logger.configure(**logger_config)
+
     update_database_schema()
     inject_dependencies()

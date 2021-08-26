@@ -37,15 +37,16 @@ DIVISION_RULES = {
 LOGGER_CONFIG = {
     "handlers": [
         {
-            'sink': lambda msg: tqdm.write(msg, end=""),
+            'sink': lambda msg: tqdm.write(msg, end=''),
             'format': '<level>{level:<8}</level> | <level>{message}</level>',
-            'level': 'TRACE',
+            'level': 'INFO',
             'colorize': True,
         },
         {
-            'sink': CONFIG_DIR / 'logs' / 'dev' / '{time:YYYY-MM-DD}.log',
+            'sink': CONFIG_DIR / 'logs' / '{time:YYYY-MM-DD}.log',
             'level': 'TRACE',
-        }
+            'compression': 'zip',
+        },
     ],
 }
 

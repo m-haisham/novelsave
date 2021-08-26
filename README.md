@@ -9,7 +9,7 @@
 ![Pull Requests](https://img.shields.io/github/issues-pr/mensch272/novelsave)
 [![License](https://img.shields.io/github/license/mensch272/novelsave)](LICENSE)
 
-This is a tool to download and convert webnovels from popular sites to epub.
+This is a tool to download and convert novels from popular sites to e-books.
 
 > **v0.7.+ is not compatible with previous versions**
 

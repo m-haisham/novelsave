@@ -1,4 +1,4 @@
-from typing import List, Set, Iterable
+from typing import List, Set, Iterable, Tuple
 
 from novelsave.core.services.packagers import BasePackager, BasePackagerProvider
 
@@ -11,7 +11,7 @@ class PackagerProvider(BasePackagerProvider):
     def keywords(self):
         return [keyword for p in self._packagers for keyword in p.keywords()]
 
-    def packagers(self) -> Set[BasePackager]:
+    def packagers(self) -> Tuple[BasePackager]:
         return self._packagers
 
     def filter_packagers(self, keywords: List[str]) -> Set[BasePackager]:

@@ -42,6 +42,7 @@ def create_novel(
         url: str,
         browser: Optional[str],
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
+        path_service: BasePathService = Provide[Application.services.path_service],
 ) -> Novel:
     """
     retrieve information about the novel from webpage and insert novel into database.
@@ -58,6 +59,12 @@ def create_novel(
     novel_service.insert_metadata(novel, metadata_dtos)
 
     logger.info(f"Added new novel (id={novel.id}, title='{novel.title}', chapters={len(chapter_dtos)}').")
+    
+    data_dir = path_service.novel_data_path(novel)
+    if data_dir.exists():
+        shutil.rmtree(data_dir)
+        logger.debug(f"Cleaned existing data in novel data dir (path='{path_service.relative_to_data_dir(data_dir)}')")
+
     return novel
 
 
@@ -66,7 +73,6 @@ def update_novel(
         novel: Novel,
         browser: Optional[str],
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
-        path_service: BasePathService = Provide[Application.services.path_service],
 ):
     url = novel_service.get_primary_url(novel)
     logger.debug(f"Using primary url ({url=})")
@@ -82,12 +88,6 @@ def update_novel(
     novel_service.update_metadata(novel, metadata_dtos)
 
     logger.info(f"Updated novel (id={novel.id}, title='{novel.title}', chapters={len(chapter_dtos)})")
-
-    data_dir = path_service.novel_data_path(novel)
-    if data_dir.exists():
-        shutil.rmtree(data_dir)
-        logger.debug(f"Cleaned existing data in novel data dir (path='{path_service.relative_to_data_dir(data_dir)}')")
-
     return novel
 
 

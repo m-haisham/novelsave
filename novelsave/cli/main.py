@@ -28,8 +28,8 @@ def update_database_schema():
 
 
 @click.group()
-@click.option('--debug', is_flag=True, help="Print debugging information to console")
-@click.option('--plain', is_flag=True, help="Disable reactive and interactive elements")
+@click.option('-d', '--debug', is_flag=True, help="Print debugging information to console")
+@click.option('-p', '--plain', is_flag=True, help="Disable reactive and interactive elements")
 def cli(debug: bool, plain: bool):
     logger_config = LOGGER_CONFIG.copy()
     if debug:

@@ -45,10 +45,10 @@ def _novel():
     """Group of commands to manage novels"""
 
 
-@_novel.command(name='show')
+@_novel.command(name='info')
 @click.argument('id_or_url')
-def _show(id_or_url: str):
-    """Show current information of the novel"""
+def _info(id_or_url: str):
+    """Show saved information of the novel"""
     controllers.show_info(id_or_url)
 
 

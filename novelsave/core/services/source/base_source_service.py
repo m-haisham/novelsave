@@ -4,7 +4,7 @@ from typing import Optional
 from . import BaseSourceGateway, BaseMetaSourceGateway
 
 
-class BaseSourceGatewayProvider(ABC):
+class BaseSourceService(ABC):
 
     @abstractmethod
     def source_from_url(self, url: str) -> BaseSourceGateway:

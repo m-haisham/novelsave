@@ -86,7 +86,7 @@ def update_novel(
     data_dir = path_service.novel_data_path(novel)
     if data_dir.exists():
         shutil.rmtree(data_dir)
-        logger.debug(f"Cleaned existing data in novel data dir (path='{path_service.resolve_data_path(data_dir)}')")
+        logger.debug(f"Cleaned existing data in novel data dir (path='{path_service.relative_to_data_dir(data_dir)}')")
 
     return novel
 

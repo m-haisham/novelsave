@@ -5,12 +5,12 @@ from novelsave_sources.utils import parse_source, parse_metasource
 
 from .meta_source_gateway import MetaSourceGateway
 from .source_gateway import SourceGateway
-from ...core.services.source import BaseSourceGatewayProvider
+from ...core.services.source import BaseSourceService
 from ...exceptions import NovelSourceNotFoundException, MetaDataSourceNotFoundException
 from ...utils.adapters import SourceAdapter
 
 
-class SourceGatewayProvider(BaseSourceGatewayProvider):
+class SourceService(BaseSourceService):
     def __init__(self, source_adapter: SourceAdapter):
         self.source_adapter = source_adapter
 

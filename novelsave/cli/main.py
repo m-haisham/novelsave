@@ -7,13 +7,13 @@ from tqdm import tqdm
 from . import controllers, helpers, groups
 from ..containers import Application
 from ..infrastructure.migrations import commands as migration_commands
-from ..settings import as_dict as settings_as_dict, DATABASE_URL, LOGGER_CONFIG
+from ..settings import config, DATABASE_URL, LOGGER_CONFIG
 from ..utils.helpers import config_helper
 
 
 def inject_dependencies():
     application = Application()
-    application.config.from_dict(settings_as_dict())
+    application.config.from_dict(config)
 
     try:
         application.config.from_dict(config_helper.from_file())
@@ -30,7 +30,6 @@ def update_database_schema():
 @click.group()
 @click.option('--debug', is_flag=True, help="Print debugging information to console")
 @click.option('--plain', is_flag=True, help="Disable reactive and interactive elements")
-@logger.catch()
 def cli(debug: bool, plain: bool):
     logger_config = LOGGER_CONFIG.copy()
     if debug:
@@ -42,3 +41,8 @@ def cli(debug: bool, plain: bool):
 
     update_database_schema()
     inject_dependencies()
+
+
+@logger.catch()
+def main():
+    cli()

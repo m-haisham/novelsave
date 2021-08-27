@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from novelsave.services import FileService, NovelService, PathService, AssetService
 from novelsave.services.packagers import EpubPackager, PackagerProvider
 from novelsave.services.config import ConfigService
-from novelsave.services.source import SourceGatewayProvider
+from novelsave.services.source import SourceService
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
 
 
@@ -57,8 +57,8 @@ class Services(containers.DeclarativeContainer):
         file_service=file_service,
     )
 
-    source_gateway_provider = providers.Singleton(
-        SourceGatewayProvider,
+    source_service = providers.Singleton(
+        SourceService,
         source_adapter=adapters.source_adapter,
     )
 
@@ -68,7 +68,7 @@ class Services(containers.DeclarativeContainer):
         novels_dir=config.novel.dir,
         division_rules=config.data.division_rules,
         novel_service=novel_service,
-        source_provider=source_gateway_provider,
+        source_service=source_service,
     )
 
     asset_service = providers.Factory(

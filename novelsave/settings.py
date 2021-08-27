@@ -1,29 +1,36 @@
-import sys
+import datetime
 from pathlib import Path
 
 from appdirs import user_config_dir
 from tqdm import tqdm
 
+
 NAME = 'novelsave'
 AUTHOR = 'Mensch272'
 
+# base project directory
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # operating system specific configuration file
 # config directory is used to place logs, config, cache
 CONFIG_DIR = Path(user_config_dir(NAME, AUTHOR))
 CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-
 CONFIG_FILE = CONFIG_DIR / 'config.json'
+
+
 DATA_DIR = CONFIG_DIR / 'data'
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# database file and the corresponding link to it
-# the database is where all the novel data is stored
-DATABASE_FILE = str((CONFIG_DIR / 'data.sqlite').resolve())
-DATABASE_URL = 'sqlite:///' + DATABASE_FILE
 
+DATABASE_FILE = (CONFIG_DIR / 'data.sqlite').resolve()
+DATABASE_URL = 'sqlite:///' + str(DATABASE_FILE)
+
+
+# default novel directory, where packaged files such
+# as epub and pdf are stored.
 NOVEL_DIR = Path.home() / 'novels'
+
 
 # the following map defines how files are stored
 # by further subdivision into sub-folders
@@ -34,28 +41,32 @@ DIVISION_RULES = {
     },
 }
 
+
 LOGGER_CONFIG = {
     "handlers": [
         {
             'sink': lambda msg: tqdm.write(msg, end=''),
-            'format': '<level>{level:<8}</level> | <level>{message}</level>',
+            'format': '<level>{message}</level>',
             'level': 'INFO',
             'colorize': True,
         },
         {
             'sink': CONFIG_DIR / 'logs' / '{time:YYYY-MM-DD}.log',
             'level': 'TRACE',
-            'compression': 'zip',
+            'retention': '10 days',
+            'rotation': datetime.time(0, 0, 0),
         },
     ],
 }
 
+
 TQDM_CONFIG = {
     'ncols': 80,
-    'bar_format': f'{"PROGRESS":<8}' + ' | {percentage:3.0f}% |{bar}{r_bar}'
+    'bar_format': '{percentage:3.0f}% |{bar}{r_bar}'
 }
 
-_config = {
+
+config = {
     'name': NAME,
     'author': AUTHOR,
     'base_dir': BASE_DIR,
@@ -76,9 +87,5 @@ _config = {
         }
     },
     'logger': LOGGER_CONFIG,
+    'tqdm': TQDM_CONFIG,
 }
-
-
-# same information just as a dict for convenience with injector
-def as_dict():
-    return _config.copy()

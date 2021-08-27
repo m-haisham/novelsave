@@ -13,7 +13,7 @@ class TestSourceHelper(unittest.TestCase):
     def setUpClass(cls) -> None:
         logger.remove()
 
-    @patch('novelsave.services.source.SourceGatewayProvider')
+    @patch('novelsave.services.source.SourceService')
     def test_get_source_gateway_none(self, source_gateway_provider):
         source_gateway_provider.source_from_url.side_effect = NovelSourceNotFoundException('')
 
@@ -21,7 +21,7 @@ class TestSourceHelper(unittest.TestCase):
             get_source_gateway('https://not.a.provider.site', source_gateway_provider)
 
     @patch('novelsave.services.source.SourceGateway')
-    @patch('novelsave.services.source.SourceGatewayProvider')
+    @patch('novelsave.services.source.SourceService')
     def test_get_source_gateway(self, source_gateway_provider, source_gateway):
         source_gateway_provider.source_from_url.return_value = source_gateway
 

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 url_start_pattern = re.compile(r'^https?://')
 
 url_pattern = re.compile(
-    r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)')
+    r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)')
 
 
 def absolute_url(url: str, location: str):

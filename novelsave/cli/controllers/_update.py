@@ -10,8 +10,8 @@ from .. import helpers
 def update(
         id_or_url: str,
         browser: Optional[str],
-        limit: int,
-        threads: int,
+        limit: Optional[int],
+        threads: Optional[int],
 ):
     """
     update the novel metadata and downloads any new chapters if not specified otherwise

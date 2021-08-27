@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 from novelsave.core.entities.novel import Novel, Asset
 from novelsave.core.services import BasePathService, BaseNovelService
-from novelsave.core.services.source import BaseSourceGatewayProvider
+from novelsave.core.services.source import BaseSourceService
 from novelsave.exceptions import NovelSourceNotFoundException
 from novelsave.utils.helpers import string_helper
 
@@ -18,13 +18,13 @@ class PathService(BasePathService):
             novels_dir: Path,
             division_rules: Dict[str, str],
             novel_service: BaseNovelService,
-            source_provider: BaseSourceGatewayProvider,
+            source_service: BaseSourceService,
     ):
         self.data_dir = data_dir
         self.novels_dir = novels_dir
         self.division_rules = division_rules
         self.novel_service = novel_service
-        self.source_provider = source_provider
+        self.source_service = source_service
 
     def divide(self, path: Path) -> Path:
         parent = path.parent / self.division_rules.get(path.suffix, '')
@@ -33,14 +33,14 @@ class PathService(BasePathService):
     def novel_save_path(self, novel: Novel) -> Path:
         url = self.novel_service.get_primary_url(novel)
         try:
-            source_gateway = self.source_provider.source_from_url(url)
-            source_folder_name = source_gateway.name if source_gateway else ''
+            source_gateway = self.source_service.source_from_url(url)
+            source_folder_name = source_gateway.name
         except NovelSourceNotFoundException:
             source_folder_name = ''
 
         novel_name_slug = string_helper.slugify(novel.title, "_")
 
-        return self.novels_dir / source_folder_name / novel_name_slug
+        return (self.novels_dir / source_folder_name / novel_name_slug).resolve()
 
     def novel_data_path(self, novel: Novel) -> Path:
         return self.data_dir / str(novel.id)
@@ -53,8 +53,7 @@ class PathService(BasePathService):
         return self.novel_data_path(novel) / self.divide(file)
 
     def thumbnail_path(self, novel: Novel) -> Path:
-        result = urlparse(novel.thumbnail_url)
-        suffix = Path(result.path).suffix or '.jpg'
+        suffix = Path(novel.thumbnail_url).suffix
 
         return self.data_dir / str(novel.id) / f'cover{suffix}'
 

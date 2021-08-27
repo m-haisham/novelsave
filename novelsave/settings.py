@@ -49,6 +49,8 @@ LOGGER_CONFIG = {
             'format': '<level>{message}</level>',
             'level': 'INFO',
             'colorize': True,
+            'backtrace': False,
+            'diagnose': False,
         },
         {
             'sink': CONFIG_DIR / 'logs' / '{time:YYYY-MM-DD}.log',

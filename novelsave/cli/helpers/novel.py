@@ -59,7 +59,7 @@ def create_novel(
     novel_service.insert_metadata(novel, metadata_dtos)
 
     logger.info(f"Added new novel (id={novel.id}, title='{novel.title}', chapters={len(chapter_dtos)}').")
-    
+
     data_dir = path_service.novel_data_path(novel)
     if data_dir.exists():
         shutil.rmtree(data_dir)

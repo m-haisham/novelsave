@@ -1,4 +1,2 @@
-from .epub import NovelEpub
-from .novelsave import NovelSave
-
-from .meta import __version__
+__version__ = '0.7.0'
+__source__ = 'https://github.com/mHaisham/novelsave'

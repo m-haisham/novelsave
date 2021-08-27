@@ -243,3 +243,6 @@ dmypy.json
 
 # python files outside package
 ./*.py
+
+# SQLAlchemy
+*.sqlite

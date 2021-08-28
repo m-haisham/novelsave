@@ -28,6 +28,15 @@ def show_info(id_or_url: str):
 
 
 @inject
+def list_novels(
+        novel_service: BaseNovelService = Provide[Application.services.novel_service],
+):
+    novels = novel_service.novels()
+    for novel in novels:
+        logger.info(f"Novel (id={novel.id}, title='{novel.title}', last_updated='{novel.last_updated}').")
+
+
+@inject
 def delete_downloaded_content(
         id_or_url: str,
         novel_service: BaseNovelService = Provide[Application.services.novel_service],

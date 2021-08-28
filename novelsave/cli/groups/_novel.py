@@ -40,6 +40,12 @@ def _metadata(id_or_url: str, metadata_url):
     controllers.import_metadata(id_or_url, metadata_url)
 
 
+@cli.command(name='list')
+def _list():
+    """List all novels saved in database"""
+    controllers.list_novels()
+
+
 @cli.command(name='info')
 @click.argument('id_or_url')
 def _info(id_or_url: str):

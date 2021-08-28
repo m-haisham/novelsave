@@ -24,6 +24,9 @@ class NovelService(BaseNovelService):
         self.dto_adapter = dto_adapter
         self.file_service = file_service
 
+    def novels(self) -> List[Novel]:
+        return self.session.execute(select(Novel)).scalars().all()
+
     def get_novel_by_id(self, id_: int) -> Novel:
         """retrieve a novel from persistence using its id"""
         return self.session.get(Novel, id_)

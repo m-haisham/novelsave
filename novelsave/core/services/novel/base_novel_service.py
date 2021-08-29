@@ -9,7 +9,7 @@ from novelsave.core.entities.novel import Novel, Chapter, Volume, MetaData, Nove
 class BaseNovelService(ABC):
 
     @abstractmethod
-    def novels(self) -> List[Novel]:
+    def get_all_novels(self) -> List[Novel]:
         """retrieve all the novels in the database"""
 
     @abstractmethod

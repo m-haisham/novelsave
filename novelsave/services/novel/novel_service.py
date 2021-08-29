@@ -24,7 +24,7 @@ class NovelService(BaseNovelService):
         self.dto_adapter = dto_adapter
         self.file_service = file_service
 
-    def novels(self) -> List[Novel]:
+    def get_all_novels(self) -> List[Novel]:
         return self.session.execute(select(Novel)).scalars().all()
 
     def get_novel_by_id(self, id_: int) -> Novel:

@@ -7,6 +7,8 @@ from loguru import logger
 from novelsave.cli import helpers as cli_helpers
 from novelsave.containers import Application
 from novelsave.core.services import BaseNovelService, BasePathService, BaseAssetService
+from novelsave.core.services.source import BaseSourceService
+from novelsave.exceptions import SourceNotFoundException
 
 
 def show_info(id_or_url: str):
@@ -30,10 +32,18 @@ def show_info(id_or_url: str):
 @inject
 def list_novels(
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
+        source_service: BaseSourceService = Provide[Application.services.source_service],
 ):
-    novels = novel_service.novels()
+    novels = novel_service.get_all_novels()
     for novel in novels:
-        logger.info(f"Novel (id={novel.id}, title='{novel.title}', last_updated='{novel.last_updated}').")
+        url = novel_service.get_primary_url(novel)
+
+        try:
+            source = source_service.source_from_url(url).name
+        except SourceNotFoundException:
+            source = None
+
+        logger.info(f"Novel (id={novel.id}, title='{novel.title}', {source=}, last_updated='{novel.last_updated}').")
 
 
 @inject

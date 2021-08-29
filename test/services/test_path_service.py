@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from novelsave.core.entities.novel import Novel
-from novelsave.exceptions import NovelSourceNotFoundException
+from novelsave.exceptions import SourceNotFoundException
 from novelsave.services import PathService
 
 
@@ -28,7 +28,7 @@ class TestPathService(unittest.TestCase):
         self.assertEqual(Path(r_path), s_path)
 
     def test_get_novel_path_no_source(self, source_service, novel_service):
-        source_service.source_from_url.side_effect = NovelSourceNotFoundException('')
+        source_service.source_from_url.side_effect = SourceNotFoundException('')
 
         path_service = PathService(self.data_dir, self.save_dir, self.division_rules, novel_service, source_service)
         path = path_service.novel_save_path(Novel(title='novel'))

@@ -1,12 +1,11 @@
 from pathlib import Path
 from typing import Dict, Union
-
 from urllib.parse import urlparse
 
 from novelsave.core.entities.novel import Novel, Asset
 from novelsave.core.services import BasePathService, BaseNovelService
 from novelsave.core.services.source import BaseSourceService
-from novelsave.exceptions import NovelSourceNotFoundException
+from novelsave.exceptions import SourceNotFoundException
 from novelsave.utils.helpers import string_helper
 
 
@@ -35,7 +34,7 @@ class PathService(BasePathService):
         try:
             source_gateway = self.source_service.source_from_url(url)
             source_folder_name = source_gateway.name
-        except NovelSourceNotFoundException:
+        except SourceNotFoundException:
             source_folder_name = ''
 
         novel_name_slug = string_helper.slugify(novel.title, "_")

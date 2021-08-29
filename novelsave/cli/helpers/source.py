@@ -5,7 +5,7 @@ from loguru import logger
 
 from novelsave.containers import Application
 from novelsave.core.services.source import BaseMetaSourceGateway, BaseSourceGateway, BaseSourceService
-from novelsave.exceptions import NovelSourceNotFoundException
+from novelsave.exceptions import SourceNotFoundException
 
 
 @inject
@@ -15,7 +15,7 @@ def get_source_gateway(
 ) -> BaseSourceGateway:
     try:
         source_gateway = source_service.source_from_url(url)
-    except NovelSourceNotFoundException:
+    except SourceNotFoundException:
         logger.error(f"Could not find source corresponding to url ({url=}).")
         sys.exit(1)
 
@@ -30,7 +30,7 @@ def get_meta_source_gateway(
 ) -> BaseMetaSourceGateway:
     try:
         meta_source_gateway = source_service.meta_source_from_url(url)
-    except NovelSourceNotFoundException:
+    except SourceNotFoundException:
         logger.error(f"Could not find metadata source corresponding to url ({url=}).")
         sys.exit(1)
 

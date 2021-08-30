@@ -1,4 +1,5 @@
 import functools
+import sys
 
 import click
 from loguru import logger
@@ -6,6 +7,7 @@ from tqdm import tqdm
 
 from . import controllers, helpers, groups, events
 from ..containers import Application
+from ..exceptions import NSError
 from ..infrastructure.migrations import commands as migration_commands
 from ..settings import config, DATABASE_URL, LOGGER_CONFIG
 from ..utils.helpers import config_helper
@@ -45,4 +47,8 @@ def cli(debug: bool, plain: bool):
 
 @logger.catch()
 def main():
-    cli()
+    try:
+        cli()
+    except NSError as e:
+        logger.exception(e)
+        sys.exit(1)

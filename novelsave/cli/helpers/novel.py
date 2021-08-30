@@ -15,7 +15,7 @@ from novelsave.core.dtos import ChapterDTO
 from novelsave.core.entities.novel import Novel
 from novelsave.core.services import BasePathService, BaseNovelService, BaseAssetService, BaseFileService
 from novelsave.core.services.source import BaseSourceGateway
-from novelsave.exceptions import ContentUpdateFailedException
+from novelsave.exceptions import ContentUpdateFailedException, NSError
 from novelsave.exceptions import CookieBrowserNotSupportedException
 from novelsave.settings import TQDM_CONFIG
 from novelsave.utils.adapters import DTOAdapter
@@ -37,6 +37,18 @@ def set_cookies(source_gateway: BaseSourceGateway, browser: Optional[str]):
     logger.info(f"Applied cookies from browser ({browser=}).")
 
 
+def retrieve_novel_info(source_gateway: BaseSourceGateway, url: str, browser: str):
+    set_cookies(source_gateway, browser)
+
+    logger.info(f"Retrieving novel information ({url=})...")
+    try:
+        output = source_gateway.novel_by_url(url)
+    except requests.ConnectionError as e:
+        raise NSError(f"Connection terminated unexpectedly; Make sure you are connected to the internet.")
+
+    return output
+
+
 @inject
 def create_novel(
         url: str,
@@ -49,10 +61,7 @@ def create_novel(
     this includes chapter list and metadata.
     """
     source_gateway = get_source_gateway(url)
-    set_cookies(source_gateway, browser)
-
-    logger.info(f"Retrieving novel ({url=})...")
-    novel_dto, chapter_dtos, metadata_dtos = source_gateway.novel_by_url(url)
+    novel_dto, chapter_dtos, metadata_dtos = retrieve_novel_info(source_gateway, url, browser)
 
     novel = novel_service.insert_novel(novel_dto)
     novel_service.insert_chapters(novel, chapter_dtos)
@@ -78,10 +87,7 @@ def update_novel(
     logger.debug(f"Using primary url ({url=})")
 
     source_gateway = get_source_gateway(url)
-    set_cookies(source_gateway, browser)
-
-    logger.info(f"Retrieving novel ({url=})...")
-    novel_dto, chapter_dtos, metadata_dtos = source_gateway.novel_by_url(url)
+    novel_dto, chapter_dtos, metadata_dtos = retrieve_novel_info(source_gateway, url, browser)
 
     novel_service.update_novel(novel, novel_dto)
     novel_service.update_chapters(novel, chapter_dtos)
@@ -107,7 +113,11 @@ def download_thumbnail(
         return
 
     logger.debug(f"Attempting thumbnail download (title='{novel.title}', thumbnail='{novel.thumbnail_path}').")
-    response = requests.get(novel.thumbnail_url)
+    try:
+        response = requests.get(novel.thumbnail_url)
+    except requests.ConnectionError as e:
+        raise NSError(f"Connection terminated unexpectedly; Make sure you are connected to the internet.")
+
     if not response.ok:
         logger.error(f"Error during thumbnail download (title='{novel.title=}', {response.status_code=}).")
         return
@@ -228,7 +238,7 @@ def get_novel(
         logger.error(f"Novel not found ({'url' if is_url else 'id'}={quote}{id_or_url}{quote}).")
         raise ValueError()
 
-    logger.info(f"Acquired novel (id={novel.id}, title={novel.title}).")
+    logger.info(f"Acquired novel from database (id={novel.id}, title='{novel.title}').")
     return novel
 
 

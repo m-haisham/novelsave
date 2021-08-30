@@ -20,21 +20,21 @@ def update_check_event(
     available_updates = []
     errors = []
 
-    try:
+    try:   # novelsave-sources
         latest_sources_version = source_service.get_latest_version()
         if latest_sources_version > source_service.current_version:
             available_updates.append(('novelsave-sources', latest_sources_version))
     except ConnectionError as e:
         errors.append(e)
-        logger.debug(f"Connection error during checking for updates (package='novelsave-sources').")
+        logger.debug(f"Connection terminated unexpectedly while checking for update (package='novelsave-sources').")
 
-    try:
+    try:  # novelsave
         latest_version = meta_service.get_latest_version()
         if latest_version > meta_service.current_version:
             available_updates.append(('novelsave', latest_version))
     except ConnectionError as e:
         errors.append(e)
-        logger.debug(f"Connection error during checking for updates (package='novelsave').")
+        logger.debug(f"Connection terminated unexpectedly while checking for update (package='novelsave').")
 
     if not available_updates:
         logger.debug(f'No upgrades to packages detected (errors={len(errors)}).')

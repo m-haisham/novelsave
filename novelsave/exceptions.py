@@ -3,24 +3,28 @@ from dataclasses import dataclass
 from novelsave.core.dtos import ChapterDTO
 
 
-class NovelSaveException(Exception):
-    """base novelsave exception"""
+class NSException(Exception):
+    """base novelsave exception; can be caught and application may proceed once handled"""
+
+
+class NSError(Exception):
+    """base novelsave error; application must not continue once error is thrown"""
 
 
 @dataclass
-class CookieBrowserNotSupportedException(NovelSaveException):
+class CookieBrowserNotSupportedException(NSException):
     """the specified browser does not support cookie extraction"""
     browser: str
 
 
 @dataclass
-class ContentUpdateFailedException(NovelSaveException):
+class ContentUpdateFailedException(NSException):
     chapter: ChapterDTO
     exception: Exception
 
 
 @dataclass
-class SourceNotFoundException(NovelSaveException):
+class SourceNotFoundException(NSException):
     """source for the url was not found"""
     url: str
 

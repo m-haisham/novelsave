@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from novelsave.services import FileService, NovelService, PathService, AssetService
+from novelsave.services import FileService, NovelService, PathService, AssetService, MetaService
 from novelsave.services.packagers import EpubPackager, PackagerProvider
 from novelsave.services.config import ConfigService
 from novelsave.services.source import SourceService
@@ -44,6 +44,10 @@ class Services(containers.DeclarativeContainer):
         ConfigService,
         config_file=config.config.file,
         default_novel_dir=config.novel.dir,
+    )
+
+    meta_service = providers.Factory(
+        MetaService,
     )
 
     file_service = providers.Factory(

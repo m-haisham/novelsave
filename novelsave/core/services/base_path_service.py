@@ -32,5 +32,9 @@ class BasePathService(ABC):
         """converts relative path to data to absolute path"""
 
     @abstractmethod
+    def relative_to_novel_dir(self, path: Path) -> Path:
+        """provide the relative path segment from novels directory"""
+
+    @abstractmethod
     def relative_to_data_dir(self, path: Path) -> Path:
         """provide the relative path segment from data directory"""

@@ -59,5 +59,8 @@ class PathService(BasePathService):
     def resolve_data_path(self, r_path: Union[Path, str]) -> Path:
         return self.data_dir / str(r_path).lstrip('.').lstrip('/\\')
 
+    def relative_to_novel_dir(self, path: Path) -> Path:
+        return path.relative_to(self.novels_dir)
+
     def relative_to_data_dir(self, path: Path) -> Path:
         return path.relative_to(self.data_dir)

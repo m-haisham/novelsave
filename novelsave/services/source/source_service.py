@@ -1,5 +1,7 @@
 from functools import lru_cache
 
+import novelsave_sources
+import requests
 from novelsave_sources.exceptions import UnknownSourceException
 from novelsave_sources.utils import parse_source, parse_metasource
 
@@ -11,8 +13,21 @@ from ...utils.adapters import SourceAdapter
 
 
 class SourceService(BaseSourceService):
+
     def __init__(self, source_adapter: SourceAdapter):
         self.source_adapter = source_adapter
+
+    @property
+    def current_version(self) -> str:
+        return novelsave_sources.__version__
+
+    def get_latest_version(self) -> str:
+        response = requests.get('https://pypi.org/pypi/novelsave-sources/json')
+        if not response.ok:
+            raise ConnectionError(f"Response received was not valid: GET {response.url} {response.status_code}")
+
+        data = response.json()
+        return list(data['releases'].keys())[0]
 
     @lru_cache(1)
     def source_from_url(self, url: str) -> SourceGateway:

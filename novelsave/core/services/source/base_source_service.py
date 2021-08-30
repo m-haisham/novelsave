@@ -1,10 +1,18 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from . import BaseSourceGateway, BaseMetaSourceGateway
 
 
 class BaseSourceService(ABC):
+
+    @property
+    @abstractmethod
+    def current_version(self) -> str:
+        """installed current_version of sources"""
+
+    @abstractmethod
+    def get_latest_version(self) -> str:
+        """Latest stable version available for download"""
 
     @abstractmethod
     def source_from_url(self, url: str) -> BaseSourceGateway:

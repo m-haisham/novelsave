@@ -4,7 +4,7 @@ import click
 from loguru import logger
 from tqdm import tqdm
 
-from . import controllers, helpers, groups
+from . import controllers, helpers, groups, events
 from ..containers import Application
 from ..infrastructure.migrations import commands as migration_commands
 from ..settings import config, DATABASE_URL, LOGGER_CONFIG
@@ -20,7 +20,7 @@ def inject_dependencies():
     except FileNotFoundError:
         pass
 
-    application.wire(packages=[controllers, helpers, groups])
+    application.wire(modules=[events], packages=[controllers, helpers, groups])
 
 
 def update_database_schema():

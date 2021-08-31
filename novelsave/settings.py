@@ -1,4 +1,3 @@
-import datetime
 from pathlib import Path
 
 from appdirs import user_config_dir
@@ -54,10 +53,10 @@ LOGGER_CONFIG = {
             'diagnose': False,
         },
         {
-            'sink': CONFIG_DIR / 'logs' / '{time:YYYY-MM-DD}.log',
+            'sink': CONFIG_DIR / 'logs' / '{time}.log',
             'level': 'TRACE',
-            'retention': '10 days',
-            'rotation': datetime.time(0, 0, 0),
+            'retention': '2 days',
+            'compression': 'zip',
         },
     ],
 }

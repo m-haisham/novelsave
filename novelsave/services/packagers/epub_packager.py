@@ -177,7 +177,7 @@ class EpubPackager(BasePackager):
         synopsis_section = E.DIV(
             E.H4('Synopsis'),
             E.DIV(
-                *[E.P(para) for para in novel.synopsis.split('\n')],
+                *[E.P(para) for para in novel.synopsis.splitlines()],
                 style="padding: 0 1rem",
             )
         )

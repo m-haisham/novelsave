@@ -27,7 +27,8 @@ class SourceService(BaseSourceService):
             raise ConnectionError(f"Response received was not valid: GET {response.url} {response.status_code}")
 
         data = response.json()
-        return list(data['releases'].keys())[0]
+        versions = sorted((v for v in data['releases'].keys() if 'a' not in v), reverse=True)
+        return versions[0]
 
     @lru_cache(1)
     def source_from_url(self, url: str) -> SourceGateway:

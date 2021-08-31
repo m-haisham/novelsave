@@ -22,8 +22,7 @@ def remove_url(
     try:
         novel_service.remove_url(novel, url)
     except ValueError as e:
-        for line in str(e).splitlines():
-            logger.error(line)
+        logger.error(e)
         sys.exit(1)
     else:
         logger.info(f"Removed url from novel (id={novel.id}, title='{novel.title}', {url=}).")

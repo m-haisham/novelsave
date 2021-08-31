@@ -1,6 +1,6 @@
 import atexit
 
-from requests.exceptions import ConnectionError
+import requests
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
 
@@ -24,7 +24,7 @@ def update_check_event(
         latest_sources_version = source_service.get_latest_version()
         if latest_sources_version > source_service.current_version:
             available_updates.append(('novelsave-sources', latest_sources_version))
-    except ConnectionError as e:
+    except requests.ConnectionError as e:
         errors.append(e)
         logger.debug(f"Connection terminated unexpectedly while checking for update (package='novelsave-sources').")
 
@@ -32,7 +32,7 @@ def update_check_event(
         latest_version = meta_service.get_latest_version()
         if latest_version > meta_service.current_version:
             available_updates.append(('novelsave', latest_version))
-    except ConnectionError as e:
+    except requests.ConnectionError as e:
         errors.append(e)
         logger.debug(f"Connection terminated unexpectedly while checking for update (package='novelsave').")
 
@@ -42,4 +42,5 @@ def update_check_event(
 
     logger.warning(
         f"Following packages have new versions available: {', '.join(f'{n}=={v}' for n, v in available_updates)}.\n"
+        f"Run the following command to upgrade:\n"
         f"   python -m pip install --upgrade {' '.join(n for n, v in available_updates)}")

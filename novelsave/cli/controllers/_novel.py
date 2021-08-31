@@ -14,7 +14,7 @@ from novelsave.exceptions import SourceNotFoundException
 def show_info(id_or_url: str):
     """print current information of novel"""
     try:
-        novel = cli_helpers.get_novel(id_or_url)
+        novel = cli_helpers.get_novel(id_or_url, silent=True)
     except ValueError:
         sys.exit(1)
 

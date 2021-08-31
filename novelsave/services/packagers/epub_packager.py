@@ -94,7 +94,7 @@ class EpubPackager(BasePackager):
         path.parent.mkdir(parents=True, exist_ok=True)
 
         epub.write_epub(path, book, {})
-        logger.debug(f"Saved epub file (path='{path}')")
+        logger.debug(f"Saved epub file (path='{self.path_service.relative_to_novel_dir(path)}')")
 
         return path
 

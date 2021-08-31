@@ -16,4 +16,5 @@ class MetaService(BaseMetaService):
             raise ConnectionError(f"Response received was not valid: GET {response.url} {response.status_code}")
 
         data = response.json()
-        return list(data['releases'].keys())[0]
+        versions = sorted((v for v in data['releases'].keys() if 'a' not in v), reverse=True)
+        return versions[0]

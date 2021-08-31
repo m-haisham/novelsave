@@ -216,6 +216,7 @@ def download_assets(
 @inject
 def get_novel(
         id_or_url: str,
+        silent: bool = False,
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ) -> Novel:
     """retrieve novel is it exists in the database otherwise return none
@@ -238,7 +239,9 @@ def get_novel(
         logger.error(f"Novel not found ({'url' if is_url else 'id'}={quote}{id_or_url}{quote}).")
         raise ValueError()
 
-    logger.info(f"Acquired novel from database (id={novel.id}, title='{novel.title}').")
+    if not silent:
+        logger.info(f"Acquired novel from database (id={novel.id}, title='{novel.title}').")
+
     return novel
 
 

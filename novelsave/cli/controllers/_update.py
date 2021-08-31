@@ -42,6 +42,6 @@ def update(
     if limit is None or limit > 0:
         helpers.download_chapters(novel, limit, threads)
     else:
-        logger.info(f"Skipped chapter download ({novel.title=}, reason='No download specified').")
+        logger.info(f"Skipped chapter download (title='{novel.title}', reason='No download specified').")
 
     helpers.download_assets(novel)

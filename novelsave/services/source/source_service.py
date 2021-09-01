@@ -2,8 +2,7 @@ from functools import lru_cache
 
 import novelsave_sources
 import requests
-from novelsave_sources.exceptions import UnknownSourceException
-from novelsave_sources.utils import parse_source, parse_metasource
+from novelsave_sources import parse_source, parse_metasource, UnknownSourceException
 
 from .meta_source_gateway import MetaSourceGateway
 from .source_gateway import SourceGateway

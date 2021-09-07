@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+from concurrent import futures
 from functools import lru_cache
 from typing import Optional
 
@@ -19,7 +20,6 @@ from novelsave.exceptions import ContentUpdateFailedException, NSError
 from novelsave.exceptions import CookieBrowserNotSupportedException
 from novelsave.settings import TQDM_CONFIG
 from novelsave.utils.adapters import DTOAdapter
-from novelsave.utils.concurrent import ConcurrentActionsController
 from novelsave.utils.helpers import url_helper, string_helper
 
 
@@ -147,38 +147,39 @@ def download_chapters(
     logger.debug(f"Using primary novel url ({url=}).")
 
     source_gateway = get_source_gateway(url)
+    thread_count = 1 or min(threads, os.cpu_count())
 
     def download(dto: ChapterDTO):
         try:
             return source_gateway.update_chapter_content(dto)
         except Exception as e:
-            return ContentUpdateFailedException(dto, e)
+            raise ContentUpdateFailedException(dto, e)
 
-    # setup controller
-    controller = ConcurrentActionsController(threads or min(os.cpu_count(), len(chapters)), task=download)
-    for chapter in chapters:
-        controller.add(dto_adapter.chapter_to_dto(chapter))
-
-    logger.info(f"Downloading pending chapters (count={len(chapters)}, threads={len(controller.threads)})...")
+    logger.info(f"Downloading pending chapters (count={len(chapters)}, threads={thread_count})...")
     successes = 0
     with tqdm(total=len(chapters), **TQDM_CONFIG) as pbar:
-        for result in controller.iter():
-            if type(result) == ContentUpdateFailedException:
-                logger.error(f"An error occurred during content download "
-                             f"(title='{result.chapter.title}', error={type(result.exception)}).")
-                logger.debug("An error occurred during content download {}", vars(result))
-            else:
-                chapter_dto = result
+        executor = futures.ThreadPoolExecutor(max_workers=thread_count)
+        download_futures = [executor.submit(download, dto_adapter.chapter_to_dto(c)) for c in chapters]
+
+        for future in futures.as_completed(download_futures):
+            if future.done():
+                chapter_dto = future.result()
                 chapter_dto.content = asset_service.collect_assets(novel, chapter_dto)
                 novel_service.update_content(chapter_dto)
 
                 logger.debug(f"Chapter content downloaded (index={chapter_dto.index}, title='{chapter_dto.title}').")
                 successes += 1
+            else:
+                exc = future.exception()
+                logger.error(f"An error occurred during content download "
+                             f"(title='{exc.chapter.title}', error={type(exc.exception)}).")
+                logger.debug("An error occurred during content download {}", vars(exc))
 
             pbar.update(1)
 
-    logger.info(f"Chapters download complete (successes={successes}, errors={len(chapters) - successes}).")
+        executor.shutdown()
 
+    logger.info(f"Chapters download complete (successes={successes}, errors={len(chapters) - successes}).")
 
 @inject
 def download_assets(

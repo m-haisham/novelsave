@@ -17,6 +17,10 @@ def update_check_event(
 ):
     logger.debug("Checking for new package versions...")
 
+    if type(source_service) == Provide:
+        logger.debug("Service injection failed. Exiting process silently.")
+        return
+
     available_updates = []
     errors = []
 

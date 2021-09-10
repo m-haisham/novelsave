@@ -30,7 +30,7 @@ class BaseSourceGateway(ABC):
         """login to the source website, making available services or novels which might otherwise be absent"""
 
     @abstractmethod
-    def novel_by_url(self, url: str) -> Tuple[dtos.NovelDTO, List[dtos.ChapterDTO], List[dtos.MetaDataDTO]]:
+    def novel_by_url(self, url: str) -> dtos.NovelDTO:
         """scrape and parse a novel by its url"""
 
     @abstractmethod

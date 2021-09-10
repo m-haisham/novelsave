@@ -1,7 +1,8 @@
 import json
+from pathlib import Path
 from typing import Tuple, List, Dict
 
-from novelsave.core.dtos import NovelDTO, ChapterDTO, MetaDataDTO
+from novelsave.core.dtos import NovelDTO, ChapterDTO, MetaDataDTO, VolumeDTO
 from novelsave.core.entities.novel import Novel, NovelUrl, Chapter, Volume, MetaData
 
 
@@ -18,8 +19,8 @@ class DTOAdapter:
 
         url = NovelUrl(
             # ensure trailing forward slash, it is preferred that a uri that isn't
-            # a file end in a slash to signify an endpoint
-            url=novel_dto.url.rstrip('/') + '/',
+            # a file end in a slash to signify a path
+            url=novel_dto.url.rstrip('/') + ('/' if Path(novel_dto.url).suffix else ''),
         )
 
         return novel, url
@@ -33,23 +34,16 @@ class DTOAdapter:
 
         return novel
 
-    def volumes_from_chapter_dtos(self, novel: Novel, chapter_dtos: List[ChapterDTO]) -> Dict[Volume, List[ChapterDTO]]:
-        volumes = {}
-        for dto in chapter_dtos:
-            if dto.volume is None:
-                try:
-                    volumes[-1][1].append(dto)
-                except KeyError:
-                    volumes[-1] = (Volume(index=-1, name='_default', novel_id=novel.id), [dto])
-            elif len(dto.volume) < 2:
-                continue
-            else:
-                try:
-                    volumes[dto.volume[0]][1].append(dto)
-                except KeyError:
-                    volumes[dto.volume[0]] = (Volume(index=dto.volume[0], name=dto.volume[1], novel_id=novel.id), [dto])
-
-        return {volume: chapters for volume_index, (volume, chapters) in volumes.items()}
+    def volumes_from_dto(self, novel: Novel, volume_dtos: List[VolumeDTO]) -> Dict[Volume, List[ChapterDTO]]:
+        return {
+            Volume(
+                id=dto.id,
+                index=dto.index,
+                name=dto.name,
+                novel_id=novel.id,
+            ): dto.chapters
+            for dto in volume_dtos
+        }
 
     def chapter_from_dto(self, volume: Volume, chapter_dto: ChapterDTO) -> Chapter:
         return Chapter(

@@ -9,4 +9,3 @@ class ChapterDTO:
     title: str
     url: str
     content: Union[str, List[str]] = None
-    volume: Tuple[int, str] = None

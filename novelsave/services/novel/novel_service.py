@@ -5,7 +5,7 @@ from loguru import logger
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
-from novelsave.core.dtos import NovelDTO, ChapterDTO, MetaDataDTO
+from novelsave.core.dtos import NovelDTO, ChapterDTO, MetaDataDTO, VolumeDTO
 from novelsave.core.entities.novel import Novel, NovelUrl, Chapter, Volume, MetaData
 from novelsave.core.services import BaseNovelService
 from novelsave.services import FileService
@@ -83,10 +83,10 @@ class NovelService(BaseNovelService):
     def insert_chapters(
             self,
             novel: Novel,
-            chapter_dtos: List[ChapterDTO],
+            volume_dtos: List[VolumeDTO],
             previous: Dict[str, Chapter] = None
     ):
-        volume_mapped_chapters = self.dto_adapter.volumes_from_chapter_dtos(novel, chapter_dtos)
+        volume_mapped_chapters = self.dto_adapter.volumes_from_dto(novel, volume_dtos)
 
         # add volumes
         self.session.add_all(volume_mapped_chapters.keys())
@@ -121,10 +121,10 @@ class NovelService(BaseNovelService):
         novel.thumbnail_path = str(r_path)
         self.session.commit()
 
-    def update_chapters(self, novel: Novel, chapter_dtos: List[ChapterDTO]):
+    def update_chapters(self, novel: Novel, volume_dtos: List[VolumeDTO]):
         volumes = self.session.execute(select(Volume).where(Volume.novel_id == novel.id)).scalars().all()
         chapters = self.get_chapters(novel)
-        volume_mapped_chapters = self.dto_adapter.volumes_from_chapter_dtos(novel, chapter_dtos)
+        volume_mapped_chapters = self.dto_adapter.volumes_from_dto(novel, volume_dtos)
 
         indexed_volumes = {v.index: v for v in volumes}
         volumes_to_add = []
@@ -220,7 +220,6 @@ class NovelService(BaseNovelService):
         self.session.commit()
 
     def add_url(self, novel: Novel, url: str):
-        # TODO strip trailing '/'
         if url in [novel_url.url for novel_url in self.get_urls(novel)]:
             raise ValueError(f"Url already exists in novel (id={novel.id}, title='{novel.title}', {url=}).")
 

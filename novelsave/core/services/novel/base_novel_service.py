@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, List, Dict
 
-from novelsave.core.dtos import NovelDTO, ChapterDTO, MetaDataDTO
+from novelsave.core.dtos import NovelDTO, ChapterDTO, MetaDataDTO, VolumeDTO
 from novelsave.core.entities.novel import Novel, Chapter, Volume, MetaData, NovelUrl
 
 
@@ -53,7 +53,7 @@ class BaseNovelService(ABC):
         """insert a new novel into the database"""
 
     @abstractmethod
-    def insert_chapters(self, novel: Novel, chapter_dtos: List[ChapterDTO]):
+    def insert_chapters(self, novel: Novel, volume_dtos: List[VolumeDTO]):
         """insert new chapters into the database as well as their volumes"""
 
     @abstractmethod
@@ -69,7 +69,7 @@ class BaseNovelService(ABC):
         """update existing novel with newer values"""
 
     @abstractmethod
-    def update_chapters(self, novel: Novel, chapter_dtos: List[ChapterDTO]):
+    def update_chapters(self, novel: Novel, volume_dtos: List[VolumeDTO]):
         """update and replace existing novel chapters and their corresponding volumes"""
 
     @abstractmethod

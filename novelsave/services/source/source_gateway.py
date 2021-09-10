@@ -34,14 +34,10 @@ class SourceGateway(BaseSourceGateway):
     def login(self, username: str, password: str):
         self.source.login(username, password)
 
-    def novel_by_url(self, url: str) -> Tuple[dtos.NovelDTO, List[dtos.ChapterDTO], List[dtos.MetaDataDTO]]:
-        novel, chapters, metadata = self.source.novel(url)
+    def novel_by_url(self, url: str) -> dtos.NovelDTO:
+        novel = self.source.novel(url)
 
-        internal_novel = self.source_adapter.novel_to_internal(novel)
-        internal_chapters = [self.source_adapter.chapter_to_internal(c) for c in chapters]
-        internal_metadata = [self.source_adapter.metadata_to_internal(m) for m in metadata]
-
-        return internal_novel, internal_chapters, internal_metadata
+        return self.source_adapter.novel_to_internal(novel)
 
     def update_chapter_content(self, chapter: dtos.ChapterDTO) -> dtos.ChapterDTO:
         source_chapter = self.source_adapter.chapter_to_external(chapter)

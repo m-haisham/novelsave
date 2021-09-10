@@ -43,7 +43,7 @@ def retrieve_novel_info(source_gateway: BaseSourceGateway, url: str, browser: st
     logger.info(f"Retrieving novel information ({url=})...")
     try:
         output = source_gateway.novel_by_url(url)
-    except requests.ConnectionError as e:
+    except requests.ConnectionError:
         raise NSError(f"Connection terminated unexpectedly; Make sure you are connected to the internet.")
 
     return output
@@ -61,13 +61,14 @@ def create_novel(
     this includes chapter list and metadata.
     """
     source_gateway = get_source_gateway(url)
-    novel_dto, chapter_dtos, metadata_dtos = retrieve_novel_info(source_gateway, url, browser)
+    novel_dto = retrieve_novel_info(source_gateway, url, browser)
 
     novel = novel_service.insert_novel(novel_dto)
-    novel_service.insert_chapters(novel, chapter_dtos)
-    novel_service.insert_metadata(novel, metadata_dtos)
+    novel_service.insert_chapters(novel, novel_dto.volumes)
+    novel_service.insert_metadata(novel, novel_dto.metadata)
 
-    logger.info(f"Added new novel (id={novel.id}, title='{novel.title}', chapters={len(chapter_dtos)}').")
+    chapters = [c for v in novel_dto.volumes for c in v.chapters]
+    logger.info(f"Added new novel (id={novel.id}, title='{novel.title}', chapters={len(chapters)}').")
 
     data_dir = path_service.novel_data_path(novel)
     if data_dir.exists():
@@ -87,13 +88,14 @@ def update_novel(
     logger.debug(f"Using primary url ({url=})")
 
     source_gateway = get_source_gateway(url)
-    novel_dto, chapter_dtos, metadata_dtos = retrieve_novel_info(source_gateway, url, browser)
+    novel_dto = retrieve_novel_info(source_gateway, url, browser)
 
     novel_service.update_novel(novel, novel_dto)
-    novel_service.update_chapters(novel, chapter_dtos)
-    novel_service.update_metadata(novel, metadata_dtos)
+    novel_service.update_chapters(novel, novel_dto.volumes)
+    novel_service.update_metadata(novel, novel_dto.metadata)
 
-    logger.info(f"Updated novel (id={novel.id}, title='{novel.title}', chapters={len(chapter_dtos)})")
+    chapters = [c for v in novel_dto.volumes for c in v.chapters]
+    logger.info(f"Updated novel (id={novel.id}, title='{novel.title}', chapters={len(chapters)})")
     return novel
 
 
@@ -147,7 +149,7 @@ def download_chapters(
     logger.debug(f"Using primary novel url ({url=}).")
 
     source_gateway = get_source_gateway(url)
-    thread_count = 1 or min(threads, os.cpu_count())
+    thread_count = min(threads, os.cpu_count())
 
     def download(dto: ChapterDTO):
         try:
@@ -238,7 +240,7 @@ def get_novel(
     if not novel:
         quote = "'" if is_url else ''
         logger.error(f"Novel not found ({'url' if is_url else 'id'}={quote}{id_or_url}{quote}).")
-        raise ValueError()
+        raise ValueError("Novel was not found.")
 
     if not silent:
         logger.info(f"Acquired novel from database (id={novel.id}, title='{novel.title}').")

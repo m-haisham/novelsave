@@ -11,10 +11,16 @@ class SourceAdapter(object):
         arguments = {
             key: value
             for key, value in vars(novel).items()
-            if key in {'title', 'url', 'author', 'synopsis', 'thumbnail_url', 'lang'}
+            if key in {'title', 'url', 'author', 'thumbnail_url', 'lang'}
         }
 
-        return dtos.NovelDTO(id=None, **arguments)
+        return dtos.NovelDTO(
+            id=None,
+            synopsis='\n'.join(novel.synopsis),
+            volumes=[self.volume_to_internal(c) for c in novel.volumes],
+            metadata=[self.metadata_to_internal(m) for m in novel.metadata],
+            **arguments
+        )
 
     def novel_to_external(self, novel: dtos.NovelDTO) -> sm.Novel:
         """convert novel from source to internal"""
@@ -27,6 +33,16 @@ class SourceAdapter(object):
 
         return sm.Novel(**arguments)
 
+    def volume_to_internal(self, volume: sm.Volume) -> dtos.VolumeDTO:
+        """convert volume from source to internal"""
+
+        return dtos.VolumeDTO(
+            id=None,
+            index=volume.index,
+            name=volume.name,
+            chapters=[self.chapter_to_internal(c) for c in volume.chapters]
+        )
+
     def chapter_to_internal(self, chapter: sm.Chapter) -> dtos.ChapterDTO:
         """convert chapter from source to internal"""
 
@@ -35,7 +51,6 @@ class SourceAdapter(object):
             title=chapter.title,
             url=chapter.url,
             content=chapter.paragraphs,
-            volume=chapter.volume,
         )
 
     def chapter_to_external(self, chapter: dtos.ChapterDTO) -> sm.Chapter:
@@ -46,7 +61,6 @@ class SourceAdapter(object):
             title=chapter.title,
             url=chapter.url,
             paragraphs=chapter.content,
-            volume=chapter.volume,
         )
 
     def metadata_to_internal(self, metadata: sm.Metadata) -> dtos.MetaDataDTO:

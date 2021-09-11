@@ -7,25 +7,23 @@ url_pattern = re.compile(
     r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)')
 
 
-def absolute_url(url: str, location: str):
+def absolute_url(url: str, location: str) -> str:
     """Resolve the url into an absolute url
 
     :param url: The url to be resolved, it can start with '/', '//', '', or 'https?://'.
     :param location: Location from which the url was retrieved.
     :returns: Absolute url derived using the parameters.
     """
-    path = url.lstrip('/')
-    if url_start_pattern.match(url):
+    if url.startswith('http://') or url.startswith('https:'):
         return url
-    elif url.startswith('/'):
-        return f'{location.rstrip("/")}/{path}'
 
-    parse_result = urlparse(location)
+    r = urlparse(location)
     if url.startswith('//'):
-        return f'{parse_result.scheme}:{url}'
-    else:
-        base_url = f'{parse_result.scheme}://{parse_result.netloc}'
-        return f'{base_url}/{path}'
+        return f'{r.scheme}:{url}'
+    elif url.startswith('/'):
+        return f'{r.scheme}://{r.netloc}{url}'
+
+    return location.rstrip('/') + url
 
 
 def is_url(p_url: str):

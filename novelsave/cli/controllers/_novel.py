@@ -11,7 +11,11 @@ from novelsave.core.services.source import BaseSourceService
 from novelsave.exceptions import SourceNotFoundException
 
 
-def show_info(id_or_url: str):
+@inject
+def show_info(
+        id_or_url: str,
+        novel_service: BaseNovelService = Provide[Application.services.novel_service],
+):
     """print current information of novel"""
     try:
         novel = cli_helpers.get_novel(id_or_url, silent=True)
@@ -27,6 +31,16 @@ def show_info(id_or_url: str):
     logger.info(f'synopsis = ')
     for line in novel.synopsis.splitlines():
         logger.info(f'{"":<4}{line.strip()}')
+
+    logger.info(f'urls = ')
+    for n_url in novel_service.get_urls(novel):
+        logger.info(f'{"":<4}{n_url.url}')
+
+    logger.info('')
+    logger.info('[chapters]')
+    chapters = novel_service.get_chapters(novel)
+    logger.info(f'total = {len(chapters)}')
+    logger.info(f'downloaded = {len([c for c in chapters if c.content])}')
 
 
 @inject

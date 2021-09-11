@@ -17,7 +17,7 @@ def slugify(s: str, replace=''):
     return re.sub(r'[\\/:*"\'<>|.%$^&£?]', replace, s)
 
 
-def format_bytes(size: int):
+def format_bytes(size: int) -> str:
     """
     scale and label the size of bytes.
 

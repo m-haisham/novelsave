@@ -23,7 +23,6 @@ def update(
     :param browser: extract cookies from this browser
     :param limit: no. of chapters to update
     :param threads: no. of threads to use when downloading chapters
-    :return: None
     """
     try:
         novel = helpers.get_novel(id_or_url)

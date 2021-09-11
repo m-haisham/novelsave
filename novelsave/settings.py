@@ -57,6 +57,7 @@ LOGGER_CONFIG = {
             'level': 'TRACE',
             'retention': '2 days',
             'compression': 'zip',
+            'encoding': 'utf-8',
         },
     ],
 }

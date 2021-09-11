@@ -15,12 +15,9 @@ def package(
         packager_provider: BasePackagerProvider = Provide[Application.packagers.packager_provider],
         path_service: BasePathService = Provide[Application.services.path_service],
 ):
-    """
-    package the selected novel into the formats of choosing
+    """Package the selected novel into the formats of choosing
 
     Note: currently supports epub format only
-
-    :return: None
     """
     try:
         novel = get_novel(id_or_url)

@@ -183,6 +183,7 @@ def download_chapters(
 
     logger.info(f"Chapters download complete (successes={successes}, errors={len(chapters) - successes}).")
 
+
 @inject
 def download_assets(
         novel: Novel,

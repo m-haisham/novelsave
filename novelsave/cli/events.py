@@ -1,5 +1,3 @@
-import atexit
-
 import requests
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
@@ -9,7 +7,6 @@ from novelsave.core.services import BaseMetaService
 from novelsave.core.services.source import BaseSourceService
 
 
-@atexit.register
 @inject
 def update_check_event(
         source_service: BaseSourceService = Provide[Application.services.source_service],

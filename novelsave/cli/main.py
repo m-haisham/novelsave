@@ -1,3 +1,4 @@
+import atexit
 import functools
 import sys
 
@@ -11,6 +12,7 @@ from ..exceptions import NSError
 from ..infrastructure.migrations import commands as migration_commands
 from ..settings import config, DATABASE_URL, LOGGER_CONFIG
 from ..utils.helpers import config_helper
+from .events import update_check_event
 
 
 def inject_dependencies():
@@ -43,6 +45,7 @@ def cli(debug: bool, plain: bool):
 
     update_database_schema()
     inject_dependencies()
+    atexit.register(update_check_event)
 
 
 @logger.catch()

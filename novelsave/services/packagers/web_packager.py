@@ -1,3 +1,4 @@
+import base64
 import shutil
 from functools import lru_cache
 from pathlib import Path
@@ -9,7 +10,7 @@ from mako.lookup import TemplateLookup
 from novelsave.core.entities.novel import Novel, MetaData, Volume, Chapter
 from novelsave.core.services import BaseNovelService, BaseFileService, BasePathService, BaseAssetService
 from novelsave.core.services.packagers import BasePackager
-from novelsave.utils.helpers import metadata_helper
+from novelsave.utils.helpers import metadata_helper, string_helper
 
 
 class WebPackager(BasePackager):
@@ -40,60 +41,11 @@ class WebPackager(BasePackager):
         logger.debug(f"Preparing to package to web (id={novel.id}, title='{novel.title}', volumes={len(volumes)}, "
                      f"chapters={chapter_count}, metadata={len(metadata)}).")
 
-        toc = self.prepare_toc(volumes)
+        html_file = self.destination(novel)
+        html_file.parent.mkdir(parents=True, exist_ok=True)
 
-        base_folder = self.destination(novel)
-        base_folder.mkdir(parents=True, exist_ok=True)
-        self.compile_index(base_folder, novel, urls, toc, chapter_count, metadata)
+        toc = self.prepare_toc(novel, volumes)
 
-        chapters_folder = base_folder / 'chapters'
-        chapters_folder.mkdir(parents=True, exist_ok=True)
-        for path in chapters_folder.iterdir():
-            self.remove_path(path)
-
-        for volume_wrapper in toc:
-            for chapter_wrapper in volume_wrapper['chapter_wrappers']:
-                self.compile_chapter(chapters_folder, novel, chapter_wrapper)
-
-        logger.debug("Compiled and saved files to web folder (folder='chapters').")
-
-        assets_folder = base_folder / 'assets'
-        (assets_folder / 'images').mkdir(parents=True, exist_ok=True)
-        for path in assets_folder.iterdir():
-            self.remove_path(path)
-
-        self.copy_assets(novel, assets_folder)
-
-        # static files
-
-        (assets_folder / 'css').mkdir(parents=True, exist_ok=True)
-        shutil.copy2(self.static_dir / 'web/bootstrap.min.css', assets_folder / 'css')
-
-        (assets_folder / 'js').mkdir(parents=True, exist_ok=True)
-        shutil.copy2(self.static_dir / 'web/bootstrap.min.js', assets_folder / 'js')
-        logger.debug(f"Copied static to web folder (group='bootstrap').")
-
-        return base_folder
-
-    @lru_cache(maxsize=1)
-    def destination(self, novel: Novel):
-        path = self.path_service.novel_save_path(novel)
-        return path / f'[Web] {path.name}'
-
-    @lru_cache(maxsize=1)
-    def path_mapping(self, novel: Novel) -> Dict[int, str]:
-        assets = self.asset_service.downloaded_assets(novel)
-
-        return {
-            asset.id: f'../assets/images/{Path(asset.path).name}'
-            for asset in assets
-        }
-
-    @lru_cache(maxsize=1)
-    def mapping_dict(self, novel: Novel):
-        return self.asset_service.mapping_dict(self.path_mapping(novel))
-
-    def compile_index(self, base_folder: Path, novel, urls, toc, chapter_count, metadata):
         meta_by_name: Dict[str, List[str]] = {}
         for item in metadata:
             meta_by_name.setdefault(item.name, []).append(metadata_helper.display_value(item))
@@ -102,61 +54,53 @@ class WebPackager(BasePackager):
             novel=novel,
             metadata=meta_by_name,
             volume_wrappers=toc,
-            has_sections=len(toc) > 1,
             chapter_count=chapter_count,
             sources=[uobject.url for uobject in urls],
+            static=self.prepare_static(),
         ).encode('utf-8')
+        logger.debug(f"Rendered html file (size='{string_helper.format_bytes(len(rendered_data))}').")
 
-        self.file_service.write_bytes(base_folder / 'index.html', rendered_data)
-        logger.debug("Compiled and saved files to web folder (file='index.html').")
+        self.file_service.write_bytes(html_file, rendered_data)
 
-    def compile_chapter(self, chapter_folder: Path, novel, chapter_wrapper):
-        content = self.asset_service.inject_assets(chapter_wrapper['chapter'].content, self.mapping_dict(novel))
+        logger.debug(f"Compiled and saved html file (file='{self.path_service.relative_to_novel_dir(html_file)}').")
+        return html_file
 
-        rendered_data = self.lookup.get_template('chapter.html.mako').render(
-            novel=novel,
-            content=content,
-            chapter_wrapper=chapter_wrapper,
-        ).encode('utf-8')
+    @lru_cache(maxsize=1)
+    def destination(self, novel: Novel):
+        path = self.path_service.novel_save_path(novel)
+        return path / f'{path.name}.html'
 
-        self.file_service.write_bytes(chapter_folder / chapter_wrapper['filename'], rendered_data)
-
-    def copy_assets(self, novel: Novel, assets_folder: Path):
-        path_mapping = self.path_mapping(novel)
-
+    @lru_cache(maxsize=1)
+    def path_mapping(self, novel: Novel) -> Dict[int, str]:
         assets = self.asset_service.downloaded_assets(novel)
+
+        mapping = {}
         for asset in assets:
-            file = self.path_service.resolve_data_path(asset.path)
+            file_data = self.file_service.read_bytes(self.path_service.resolve_data_path(asset.path))
+            base64_data = base64.b64decode(file_data)
 
-            # its only images for now so
-            shutil.copy2(file, assets_folder / 'images' / path_mapping[asset.id].lstrip('./'))
+            mapping[asset.id] = base64_data.decode('utf-8')
 
-        logger.debug(f'Copied assets to web folder (count={len(assets)}).')
+        return mapping
 
-    @staticmethod
-    def prepare_toc(volumes: Dict[Volume, List[Chapter]]):
+    @lru_cache(maxsize=1)
+    def mapping_dict(self, novel: Novel):
+        return self.asset_service.mapping_dict(self.path_mapping(novel))
+
+    def prepare_toc(self, novel: Novel, volumes: Dict[Volume, List[Chapter]]):
         volume_wrappers = []
         for volume, chapters in sorted(volumes.items(), key=lambda v: v.index):
 
-            chapter_wrappers = []
-            for chapter in sorted(chapters, key=lambda c: c.index):
-                chapter_wrapper = {
+            chapter_wrappers = [
+                {
                     'order': chapter.index,
                     'chapter': chapter,
                     'filename': f'{str(chapter.index).zfill(4)}.html',
-                    'next': None,
-                    'previous': None,
+                    'content': self.asset_service.inject_assets(chapter.content, self.mapping_dict(novel)),
+                    'id': f'chapter-{chapter.index}'
                 }
-
-                if len(chapter_wrappers) > 0:
-                    chapter_wrapper['previous'] = chapter_wrappers[-1]
-                elif len(volume_wrappers) > 0:
-                    chapter_wrapper['previous'] = volume_wrappers[-1]['chapter_wrappers'][-1]
-
-                if chapter_wrapper['previous'] is not None:
-                    chapter_wrapper['previous']['next'] = chapter_wrapper
-
-                chapter_wrappers.append(chapter_wrapper)
+                for chapter in sorted(chapters, key=lambda c: c.index)
+            ]
 
             volume_wrappers.append({
                 'order': volume.index,
@@ -165,11 +109,15 @@ class WebPackager(BasePackager):
                 'id': f'volume-{volume.index}',
             })
 
+        logger.debug(f"Constructed table of contents for web (volumes={len(volumes)}).")
+
         return volume_wrappers
 
-    @staticmethod
-    def remove_path(path: Path):
-        if path.is_file():
-            path.unlink()
-        elif path.is_dir():
-            shutil.rmtree(path)
+    def prepare_static(self):
+        static = {
+            'bootstrap.min.css': self.file_service.read_str(self.static_dir / 'web/bootstrap.min.css'),
+            'bootstrap.min.js': self.file_service.read_str(self.static_dir / 'web/bootstrap.min.js'),
+        }
+
+        logger.debug(f"Retrieved static data (count={len(static)}).")
+        return static

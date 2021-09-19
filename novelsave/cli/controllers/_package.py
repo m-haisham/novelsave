@@ -28,4 +28,4 @@ def package(
 
     for packager in packager_provider.filter_packagers(keywords):
         path = packager.package(novel)
-        logger.info(f"Packaged (type='{packager.keywords()[0]}', path='{path_service.relative_to_novel_dir(path)}')")
+        logger.info(f"Packaging completed (type='{packager.keywords()[0]}', path='{path_service.relative_to_novel_dir(path)}')")

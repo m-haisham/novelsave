@@ -1,3 +1,3 @@
 from .epub_packager import EpubPackager
-from .web_packager import WebPackager
+from .html_packager import HtmlPackager
 from .package_provider import PackagerProvider

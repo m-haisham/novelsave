@@ -1,4 +1,5 @@
 import base64
+import mimetypes
 import shutil
 from functools import lru_cache
 from pathlib import Path
@@ -13,7 +14,7 @@ from novelsave.core.services.packagers import BasePackager
 from novelsave.utils.helpers import metadata_helper, string_helper
 
 
-class WebPackager(BasePackager):
+class HtmlPackager(BasePackager):
     def __init__(
             self,
             static_dir: Path,
@@ -31,7 +32,7 @@ class WebPackager(BasePackager):
         self.lookup = TemplateLookup(directories=[self.static_dir / 'web/templates'])
 
     def keywords(self) -> List[str]:
-        return ['web', 'html']
+        return ['html', 'web']
 
     def package(self, novel: Novel) -> Path:
         urls = self.novel_service.get_urls(novel)
@@ -78,8 +79,9 @@ class WebPackager(BasePackager):
         for asset in assets:
             file_data = self.file_service.read_bytes(self.path_service.resolve_data_path(asset.path))
             base64_data = base64.b64decode(file_data)
+            mimetype, encoding = mimetypes.guess_type(asset.path)
 
-            mapping[asset.id] = base64_data.decode('utf-8')
+            mapping[asset.id] = f"data:{mimetype};base64,{base64_data.decode('utf-8')}"
 
         return mapping
 

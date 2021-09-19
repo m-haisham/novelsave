@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable
 
 import click
 
@@ -8,10 +8,11 @@ from ..main import cli
 
 @cli.command(name='package')
 @click.argument('id_or_url')
-@click.option('-t', '--target', multiple=True)
-def _package(id_or_url: str, target: List[str]):
+@click.option('--target', multiple=True, default=('epub', ),
+              help="Target formats to package the novel ('epub', 'html').")
+def _package(id_or_url: str, target: Iterable[str]):
     """Package the specified novel to epub"""
-    controllers.package(id_or_url, target or ('epub', ))
+    controllers.package(id_or_url, target)
 
 
 @cli.command(name='process')
@@ -19,10 +20,12 @@ def _package(id_or_url: str, target: List[str]):
 @click.option('--limit', type=int, help='Maximum count of chapters to update. Set to 0 or less to skip.')
 @click.option('--browser', help='Extract cookies from the specified browser and use them in subsequent requests.')
 @click.option('--threads', type=int, help="Amount of threads to use when downloading chapters.")
-def _process(id_or_url: str, limit: int, browser: str, threads: int):
+@click.option('--target', multiple=True, default=('epub', ),
+              help="Target formats to package the novel ('epub', 'html').")
+def _process(id_or_url: str, limit: int, browser: str, threads: int, target: Iterable[str]):
     """Runs 'update' and 'package' commands consecutively"""
     controllers.update(id_or_url, browser, limit, threads)
-    controllers.package(id_or_url)
+    controllers.package(id_or_url, target)
 
 
 @cli.command(name='update')

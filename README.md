@@ -58,17 +58,17 @@ novelsave update --help
 
 The command requires the url of the id of the novel as an argument. When novel is identified compiles the downloaded content into the specified formats.
 
-Specify a compilation target using the `-t` `--target` option. If option is not provided
+Specify a compilation target using the `--target` option. If option is not provided
 compiles to only epub.
 
 ```bash
-novelsave package <id_or_url> -t epub -t web
+novelsave package <id_or_url> --target epub --target web
 ```
 
 Supported compilation targets:
 
 - Epub
-- Web
+- Html
 
 For more information, run
 

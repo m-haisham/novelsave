@@ -2,7 +2,7 @@ import json
 import mimetypes
 from functools import lru_cache
 from pathlib import Path
-from typing import Tuple, List, Dict
+from typing import List, Dict
 
 import lxml.html
 from ebooklib import epub
@@ -12,6 +12,7 @@ from lxml.html import builder as E
 from novelsave.core.entities.novel import Novel, Chapter, MetaData, NovelUrl
 from novelsave.core.services import BaseNovelService, BasePathService, BaseFileService, BaseAssetService
 from novelsave.core.services.packagers import BasePackager
+from novelsave.utils.helpers import metadata_helper
 
 
 class EpubPackager(BasePackager):
@@ -27,8 +28,8 @@ class EpubPackager(BasePackager):
         self.path_service = path_service
         self.asset_service = asset_service
 
-    def keywords(self) -> Tuple[str]:
-        return 'epub',
+    def keywords(self) -> List[str]:
+        return ['epub']
 
     def package(self, novel: Novel):
         urls = self.novel_service.get_urls(novel)
@@ -117,7 +118,7 @@ class EpubPackager(BasePackager):
         book.set_cover(cover.name, self.file_service.read_bytes(cover))
         logger.debug(f"Copied cover image to epub (path='{novel.thumbnail_path}')")
 
-    @lru_cache(1)
+    @lru_cache(maxsize=1)
     def path_mapping(self, novel: Novel) -> Dict[int, str]:
         assets = self.asset_service.downloaded_assets(novel)
 
@@ -126,7 +127,7 @@ class EpubPackager(BasePackager):
             for asset in assets
         }
 
-    @lru_cache(1)
+    @lru_cache(maxsize=1)
     def mapping_dict(self, novel: Novel):
         return self.asset_service.mapping_dict(self.path_mapping(novel))
 
@@ -161,18 +162,6 @@ class EpubPackager(BasePackager):
 
         logger.debug(f'Added assets to epub (count={len(assets)})')
 
-    @staticmethod
-    def metadata_display_value(data: MetaData):
-        try:
-            others = json.loads(data.others)
-        except json.JSONDecodeError:
-            others = {}
-
-        others = [f'{key}={value}' for key, value in others.items()]
-        postfix = f'(' + ', '.join(others) + ')' if others else ''
-
-        return f'{data.value}{postfix}'
-
     def preface_html(self, novel: Novel, urls: List[NovelUrl], metadata: List[MetaData]) -> epub.EpubHtml:
         synopsis_section = E.DIV(
             E.H4('Synopsis'),
@@ -188,7 +177,7 @@ class EpubPackager(BasePackager):
 
         metadata_sections = []
         for name, items in meta_by_name.items():
-            item_strings = [self.metadata_display_value(item) for item in items]
+            item_strings = [metadata_helper.display_value(item) for item in items]
 
             section = E.DIV(
                 E.H4(name.capitalize()),

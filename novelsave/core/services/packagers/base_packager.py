@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, List
 
 from novelsave.core.entities.novel import Novel
 
@@ -8,7 +8,7 @@ from novelsave.core.entities.novel import Novel
 class BasePackager(ABC):
 
     @abstractmethod
-    def keywords(self) -> Tuple[str]:
+    def keywords(self) -> List[str]:
         """keywords that identify this packager. for example, output format"""
 
     @abstractmethod

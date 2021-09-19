@@ -1,4 +1,5 @@
 import sys
+from typing import Iterable
 
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
@@ -12,6 +13,7 @@ from novelsave.core.services.packagers import BasePackagerProvider
 @inject
 def package(
         id_or_url: str,
+        keywords: Iterable[str],
         packager_provider: BasePackagerProvider = Provide[Application.packagers.packager_provider],
         path_service: BasePathService = Provide[Application.services.path_service],
 ):
@@ -24,6 +26,6 @@ def package(
     except ValueError:
         sys.exit(1)
 
-    for packager in packager_provider.packagers():
+    for packager in packager_provider.filter_packagers(keywords):
         path = packager.package(novel)
         logger.info(f"Packaged (type='{packager.keywords()[0]}', path='{path_service.relative_to_novel_dir(path)}')")

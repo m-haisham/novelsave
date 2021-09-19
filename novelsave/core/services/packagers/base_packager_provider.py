@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Set
+from typing import List, Set, Iterable
 
 from novelsave.core.services.packagers import BasePackager
 
@@ -11,10 +11,10 @@ class BasePackagerProvider(ABC):
         """all keywords of the supported packagers"""
 
     @abstractmethod
-    def packagers(self) -> Set[BasePackager]:
+    def packagers(self) -> Iterable[BasePackager]:
         """return all the packagers"""
 
     @abstractmethod
-    def filter_packagers(self, keywords: List[str]) -> Set[BasePackager]:
+    def filter_packagers(self, keywords: Iterable[str]) -> Set[BasePackager]:
         """return all packagers with the one of the specified keywords"""
 

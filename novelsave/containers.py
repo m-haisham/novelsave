@@ -4,7 +4,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 from novelsave.services import FileService, NovelService, PathService, AssetService, MetaService
-from novelsave.services.packagers import EpubPackager, PackagerProvider
+from novelsave.services.packagers import EpubPackager, PackagerProvider, WebPackager
 from novelsave.services.config import ConfigService
 from novelsave.services.source import SourceService
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
@@ -83,7 +83,7 @@ class Services(containers.DeclarativeContainer):
 
 
 class Packagers(containers.DeclarativeContainer):
-    novel_config = providers.Configuration()
+    config = providers.Configuration()
     services = providers.DependenciesContainer()
 
     epub_packager = providers.Factory(
@@ -94,9 +94,19 @@ class Packagers(containers.DeclarativeContainer):
         asset_service=services.asset_service,
     )
 
+    web_packager = providers.Factory(
+        WebPackager,
+        static_dir=config.static.dir,
+        novel_service=services.novel_service,
+        file_service=services.file_service,
+        path_service=services.path_service,
+        asset_service=services.asset_service,
+    )
+
     packager_provider = providers.Factory(
         PackagerProvider,
         epub=epub_packager,
+        web=web_packager,
     )
 
 
@@ -121,5 +131,6 @@ class Application(containers.DeclarativeContainer):
 
     packagers = providers.Container(
         Packagers,
+        config=config,
         services=services,
     )

@@ -1,3 +1,5 @@
+from typing import List
+
 import click
 
 from .. import controllers
@@ -6,9 +8,10 @@ from ..main import cli
 
 @cli.command(name='package')
 @click.argument('id_or_url')
-def _package(id_or_url: str):
+@click.option('-t', '--target', multiple=True)
+def _package(id_or_url: str, target: List[str]):
     """Package the specified novel to epub"""
-    controllers.package(id_or_url)
+    controllers.package(id_or_url, target or ('epub', ))
 
 
 @cli.command(name='process')

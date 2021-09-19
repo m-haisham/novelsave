@@ -9,6 +9,8 @@ AUTHOR = 'Mensch272'
 # base project directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+STATIC_DIR = BASE_DIR / 'static'
+
 # operating system specific configuration file
 # config directory is used to place logs, config, cache
 CONFIG_DIR = Path(user_config_dir(NAME, AUTHOR))
@@ -71,6 +73,9 @@ config = {
     'name': NAME,
     'author': AUTHOR,
     'base_dir': BASE_DIR,
+    'static': {
+        'dir': STATIC_DIR,
+    },
     'config': {
         'dir': CONFIG_DIR,
         'file': CONFIG_FILE,

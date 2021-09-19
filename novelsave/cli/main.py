@@ -49,7 +49,7 @@ def cli(debug: bool, plain: bool):
     atexit.register(update_check_event)
 
 
-# @logger.catch()
+@logger.catch()
 def main():
     try:
         cli()

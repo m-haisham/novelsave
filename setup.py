@@ -5,9 +5,9 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     install_requires=requirements,
-    packages=['novelsave', 'static', 'test'],
+    packages=find_packages(),
     include_package_data=True,
     package_data={
-        'static': ['*.mako', '*.css', '*.js'],
+        'novelsave': ['static/*.*'],
     },
 )

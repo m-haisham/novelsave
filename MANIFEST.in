@@ -1,5 +1,5 @@
 include LICENSE
 include *.ini *.py *.cfg *.txt
 
-recursive-include static *.mako *.css *.js
 recursive-include novelsave *.mako *.md
+recursive-include novelsave/static *.mako *.css *.js

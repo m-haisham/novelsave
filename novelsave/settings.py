@@ -1,3 +1,4 @@
+import mimetypes
 from pathlib import Path
 
 from appdirs import user_config_dir
@@ -9,7 +10,7 @@ AUTHOR = 'Mensch272'
 # base project directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-STATIC_DIR = BASE_DIR / 'static'
+STATIC_DIR = BASE_DIR / 'novelsave/static'
 
 # operating system specific configuration file
 # config directory is used to place logs, config, cache
@@ -29,12 +30,7 @@ NOVEL_DIR = Path.home() / 'novels'
 
 # the following map defines how files are stored
 # by further subdivision into sub-folders
-DIVISION_RULES = {
-    **{
-        key: 'assets'
-        for key in {'.jpeg', '.jpg', '.png', '.webp', '.gif'}
-    },
-}
+DIVISION_RULES = {k: v.split('/', maxsplit=1)[0] for k, v in mimetypes.types_map.items()}
 
 
 def console_formatter(record):

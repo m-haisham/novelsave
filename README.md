@@ -70,6 +70,7 @@ Supported compilation targets:
 - Epub
 - Html
 - Mobi
+- Pdf
 
 For more information, run
 

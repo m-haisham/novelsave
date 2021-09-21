@@ -4,7 +4,7 @@
 ![Python Version](https://img.shields.io/badge/Python-v3.8-blue)
 ![Repo Size](https://img.shields.io/github/repo-size/mensch272/novelsave)
 [![Contributors](https://img.shields.io/github/contributors/mensch272/novelsave)](https://github.com/mensch272/novelsave/graphs/contributors)
-![Last Commit](https://img.shields.io/github/last-commit/mensch272/novelsave/master)
+![Last Commit](https://img.shields.io/github/last-commit/mensch272/novelsave/main)
 ![Issues](https://img.shields.io/github/issues/mensch272/novelsave)
 ![Pull Requests](https://img.shields.io/github/issues-pr/mensch272/novelsave)
 [![License](https://img.shields.io/github/license/mensch272/novelsave)](LICENSE)

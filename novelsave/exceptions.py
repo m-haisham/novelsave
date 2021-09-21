@@ -28,3 +28,14 @@ class SourceNotFoundException(NSException):
     """source for the url was not found"""
     url: str
 
+
+class ToolException(NSException):
+    """Generic exception that is raised from command-line tools"""
+
+
+class PackagingException(NSException):
+    """Generic exception that is thrown during packaging"""
+
+
+class RequirementException(NSException):
+    """Raised when a particular requirement is not met"""

@@ -5,8 +5,8 @@ from novelsave.core.services.packagers import BasePackager, BasePackagerProvider
 
 class PackagerProvider(BasePackagerProvider):
 
-    def __init__(self, epub: BasePackager, html: BasePackager):
-        self._packagers = (epub, html)
+    def __init__(self, *args):
+        self._packagers = args
 
     def keywords(self):
         return [keyword for p in self._packagers for keyword in p.keywords()]

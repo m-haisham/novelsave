@@ -8,6 +8,7 @@ from novelsave.cli.helpers import get_novel
 from novelsave.containers import Application
 from novelsave.core.services import BasePathService
 from novelsave.core.services.packagers import BasePackagerProvider
+from novelsave.exceptions import RequirementException, ToolException
 
 
 @inject
@@ -27,5 +28,10 @@ def package(
         sys.exit(1)
 
     for packager in packager_provider.filter_packagers(keywords):
-        path = packager.package(novel)
-        logger.info(f"Packaging completed (type='{packager.keywords()[0]}', path='{path_service.relative_to_novel_dir(path)}')")
+        try:
+            path = packager.package(novel)
+        except (ToolException, RequirementException, FileNotFoundError) as e:
+            logger.error(f"Packaging failed (type='{packager.keywords()[0]}').")
+            logger.exception(e)
+        else:
+            logger.info(f"Packaging completed (type='{packager.keywords()[0]}', path='{path_service.relative_to_novel_dir(path)}').")

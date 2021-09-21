@@ -3,8 +3,8 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from novelsave.services import FileService, NovelService, PathService, AssetService, MetaService
-from novelsave.services.packagers import EpubPackager, PackagerProvider, HtmlPackager
+from novelsave.services import FileService, NovelService, PathService, AssetService, MetaService, CalibreService
+from novelsave.services.packagers import EpubPackager, HtmlPackager, MobiPackager, PackagerProvider
 from novelsave.services.config import ConfigService
 from novelsave.services.source import SourceService
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
@@ -81,6 +81,8 @@ class Services(containers.DeclarativeContainer):
         path_service=path_service,
     )
 
+    calibre_service = providers.Factory(CalibreService)
+
 
 class Packagers(containers.DeclarativeContainer):
     config = providers.Configuration()
@@ -103,10 +105,15 @@ class Packagers(containers.DeclarativeContainer):
         asset_service=services.asset_service,
     )
 
+    mobi_packager = providers.Factory(
+        MobiPackager,
+        calibre_service=services.calibre_service,
+        path_service=services.path_service,
+    )
+
     packager_provider = providers.Factory(
         PackagerProvider,
-        epub=epub_packager,
-        html=html_packager,
+        epub_packager, html_packager, mobi_packager,
     )
 
 

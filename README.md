@@ -69,6 +69,7 @@ Supported compilation targets:
 
 - Epub
 - Html
+- Mobi
 
 For more information, run
 

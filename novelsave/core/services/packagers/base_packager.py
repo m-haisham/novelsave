@@ -1,11 +1,16 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Tuple, List
+from typing import List
 
 from novelsave.core.entities.novel import Novel
 
 
 class BasePackager(ABC):
+
+    @property
+    @abstractmethod
+    def priority(self):
+        """Determines the order in which the packager must be called. Lowest first"""
 
     @abstractmethod
     def keywords(self) -> List[str]:

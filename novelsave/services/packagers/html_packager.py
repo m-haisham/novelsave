@@ -31,6 +31,10 @@ class HtmlPackager(BasePackager):
 
         self.lookup = TemplateLookup(directories=[self.static_dir / 'web/templates'])
 
+    @property
+    def priority(self):
+        return 1
+
     def keywords(self) -> List[str]:
         return ['html', 'web']
 

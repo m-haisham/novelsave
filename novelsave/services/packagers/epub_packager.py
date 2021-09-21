@@ -28,6 +28,10 @@ class EpubPackager(BasePackager):
         self.path_service = path_service
         self.asset_service = asset_service
 
+    @property
+    def priority(self):
+        return 1
+
     def keywords(self) -> List[str]:
         return ['epub']
 

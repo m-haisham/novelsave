@@ -15,6 +15,6 @@ class BasePackagerProvider(ABC):
         """return all the packagers"""
 
     @abstractmethod
-    def filter_packagers(self, keywords: Iterable[str]) -> Set[BasePackager]:
+    def filter_packagers(self, keywords: Iterable[str]) -> Iterable[BasePackager]:
         """return all packagers with the one of the specified keywords"""
 

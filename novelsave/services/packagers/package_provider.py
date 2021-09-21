@@ -14,11 +14,12 @@ class PackagerProvider(BasePackagerProvider):
     def packagers(self) -> Iterable[BasePackager]:
         return self._packagers
 
-    def filter_packagers(self, keywords: Iterable[str]) -> Set[BasePackager]:
+    def filter_packagers(self, keywords: Iterable[str]) -> Iterable[BasePackager]:
         keywords = [k.lower() for k in keywords]
-
-        return {
+        packagers = {
             compiler
             for compiler in self._packagers
             if any(k in keywords for k in compiler.keywords())
         }
+
+        return sorted(packagers, key=lambda p: p.priority)

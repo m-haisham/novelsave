@@ -47,7 +47,10 @@ def cli(debug: bool, plain: bool):
 
     update_database_schema()
     inject_dependencies()
-    atexit.register(update_check_event)
+
+    # only check for updates if this is not a help call
+    if '--help' not in sys.argv[1:]:
+        atexit.register(update_check_event)
 
 
 @logger.catch()

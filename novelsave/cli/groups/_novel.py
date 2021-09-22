@@ -10,9 +10,10 @@ from ..main import cli
 @click.argument('id_or_url')
 @click.option('--target', multiple=True, default=('epub', ),
               help="Target formats to package the novel ('epub', 'html', 'mobi', 'pdf', 'azw3').")
-def _package(id_or_url: str, target: Iterable[str]):
+@click.option('--target-all', is_flag=True, help="Target all supported formats (overrides --target).")
+def _package(id_or_url: str, target: Iterable[str], target_all: bool):
     """Package the specified novel to epub"""
-    controllers.package(id_or_url, target)
+    controllers.package(id_or_url, target, target_all)
 
 
 @cli.command(name='process')
@@ -22,6 +23,7 @@ def _package(id_or_url: str, target: Iterable[str]):
 @click.option('--threads', type=int, help="Amount of threads to use when downloading chapters.")
 @click.option('--target', multiple=True, default=('epub', ),
               help="Target formats to package the novel ('epub', 'html', 'mobi', 'pdf', 'azw3').")
+@click.option('--target-all', is_flag=True, help="Target all supported formats (overrides --target).")
 def _process(id_or_url: str, limit: int, browser: str, threads: int, target: Iterable[str]):
     """Runs 'update' and 'package' commands consecutively"""
     controllers.update(id_or_url, browser, limit, threads)

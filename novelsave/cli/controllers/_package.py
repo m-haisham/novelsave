@@ -14,19 +14,20 @@ from novelsave.exceptions import RequirementException, ToolException
 @inject
 def package(
         id_or_url: str,
-        keywords: Iterable[str],
+        targets: Iterable[str],
+        target_all: bool,
         packager_provider: BasePackagerProvider = Provide[Application.packagers.packager_provider],
         path_service: BasePathService = Provide[Application.services.path_service],
 ):
-    """Package the selected novel into the formats of choosing
-
-    Note: currently supports epub format only
-    """
-    try:
-        packagers = packager_provider.filter_packagers(keywords)
-    except ValueError as e:
-        logger.error(e)
-        sys.exit(1)
+    """Package the selected novel into the formats of choosing"""
+    if target_all:
+        packagers = packager_provider.packagers()
+    else:
+        try:
+            packagers = packager_provider.filter_packagers(targets)
+        except ValueError as e:
+            logger.error(e)
+            sys.exit(1)
 
     try:
         novel = get_novel(id_or_url)

@@ -61,6 +61,8 @@ The command requires the url of the id of the novel as an argument. When novel i
 Specify a compilation target using the `--target` option. If option is not provided
 compiles to only epub.
 
+Or you may use `--target-all` to package to all supported formats.
+
 ```bash
 novelsave package <id_or_url> --target epub --target web
 ```

@@ -9,7 +9,7 @@ from ..main import cli
 @cli.command(name='package')
 @click.argument('id_or_url')
 @click.option('--target', multiple=True, default=('epub', ),
-              help="Target formats to package the novel ('epub', 'html').")
+              help="Target formats to package the novel ('epub', 'html', 'mobi', 'pdf', 'azw3').")
 def _package(id_or_url: str, target: Iterable[str]):
     """Package the specified novel to epub"""
     controllers.package(id_or_url, target)
@@ -21,7 +21,7 @@ def _package(id_or_url: str, target: Iterable[str]):
 @click.option('--browser', help='Extract cookies from the specified browser and use them in subsequent requests.')
 @click.option('--threads', type=int, help="Amount of threads to use when downloading chapters.")
 @click.option('--target', multiple=True, default=('epub', ),
-              help="Target formats to package the novel ('epub', 'html').")
+              help="Target formats to package the novel ('epub', 'html', 'mobi', 'pdf', 'azw3').")
 def _process(id_or_url: str, limit: int, browser: str, threads: int, target: Iterable[str]):
     """Runs 'update' and 'package' commands consecutively"""
     controllers.update(id_or_url, browser, limit, threads)

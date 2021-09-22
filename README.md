@@ -67,10 +67,7 @@ novelsave package <id_or_url> --target epub --target web
 
 Supported compilation targets:
 
-- Epub
-- Html
-- Mobi
-- Pdf
+`epub` `html`|`web` `mobi` `pdf` `azw3`
 
 For more information, run
 

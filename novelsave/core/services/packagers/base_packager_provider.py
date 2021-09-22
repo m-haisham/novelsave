@@ -16,5 +16,8 @@ class BasePackagerProvider(ABC):
 
     @abstractmethod
     def filter_packagers(self, keywords: Iterable[str]) -> Iterable[BasePackager]:
-        """return all packagers with the one of the specified keywords"""
+        """return all packagers with the one of the specified keywords
+
+        :raises ValueError: if a keyword does not match any packagers
+        """
 

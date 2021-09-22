@@ -23,11 +23,17 @@ def package(
     Note: currently supports epub format only
     """
     try:
+        packagers = packager_provider.filter_packagers(keywords)
+    except ValueError as e:
+        logger.error(e)
+        sys.exit(1)
+
+    try:
         novel = get_novel(id_or_url)
     except ValueError:
         sys.exit(1)
 
-    for packager in packager_provider.filter_packagers(keywords):
+    for packager in packagers:
         try:
             path = packager.package(novel)
         except (ToolException, RequirementException, FileNotFoundError) as e:

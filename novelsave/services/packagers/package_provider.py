@@ -16,10 +16,15 @@ class PackagerProvider(BasePackagerProvider):
 
     def filter_packagers(self, keywords: Iterable[str]) -> Iterable[BasePackager]:
         keywords = [k.lower() for k in keywords]
-        packagers = {
-            compiler
-            for compiler in self._packagers
-            if any(k in keywords for k in compiler.keywords())
-        }
+        packagers = self.packagers()
 
-        return sorted(packagers, key=lambda p: p.priority)
+        filtered = set()
+        for keyword in keywords:
+            for p in packagers:
+                if keyword in p.keywords():
+                    filtered.add(p)
+                    break
+            else:  # if inner loop was not broken
+                raise ValueError(f"No packager was found that matches '{keyword}'.")
+
+        return sorted(filtered, key=lambda p: p.priority)

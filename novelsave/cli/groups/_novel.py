@@ -1,6 +1,8 @@
+import sys
 from typing import Iterable
 
 import click
+from loguru import logger
 
 from .. import controllers
 from ..main import cli
@@ -26,6 +28,10 @@ def _package(id_or_url: str, target: Iterable[str], target_all: bool):
 @click.option('--target-all', is_flag=True, help="Target all supported formats (overrides --target).")
 def _process(id_or_url: str, limit: int, browser: str, threads: int, target: Iterable[str], target_all: bool):
     """Runs 'update' and 'package' commands consecutively"""
+    if threads is not None and threads <= 0:
+        logger.error("'--threads' must be a positive integer.")
+        sys.exit(2)
+
     controllers.update(id_or_url, browser, limit, threads)
     controllers.package(id_or_url, target, target_all)
 
@@ -37,6 +43,10 @@ def _process(id_or_url: str, limit: int, browser: str, threads: int, target: Ite
 @click.option('--threads', type=int, help="Amount of threads to use when downloading chapters.")
 def _update(id_or_url: str, limit: int, browser: str, threads: int):
     """Scrape the website of the novel and update the database"""
+    if threads is not None and threads <= 0:
+        logger.error("'--threads' must be a positive integer.")
+        sys.exit(2)
+
     controllers.update(id_or_url, browser, limit, threads)
 
 

@@ -149,7 +149,7 @@ def download_chapters(
     logger.debug(f"Using primary novel url ({url=}).")
 
     source_gateway = get_source_gateway(url)
-    thread_count = min(threads, os.cpu_count())
+    thread_count = min(threads, os.cpu_count()) if threads is not None else os.cpu_count()
 
     def download(dto: ChapterDTO):
         try:
@@ -164,18 +164,17 @@ def download_chapters(
         download_futures = [executor.submit(download, dto_adapter.chapter_to_dto(c)) for c in chapters]
 
         for future in futures.as_completed(download_futures):
-            if future.done():
+            try:
                 chapter_dto = future.result()
                 chapter_dto.content = asset_service.collect_assets(novel, chapter_dto)
                 novel_service.update_content(chapter_dto)
 
                 logger.debug(f"Chapter content downloaded (index={chapter_dto.index}, title='{chapter_dto.title}').")
                 successes += 1
-            else:
-                exc = future.exception()
+            except ContentUpdateFailedException as e:
                 logger.error(f"An error occurred during content download "
-                             f"(title='{exc.chapter.title}', error={type(exc.exception)}).")
-                logger.debug("An error occurred during content download {}", vars(exc))
+                             f"(title='{e.chapter.title}', error={type(e.exception)}).")
+                logger.debug("An error occurred during content download {}", vars(e))
 
             pbar.update(1)
 

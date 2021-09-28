@@ -68,7 +68,7 @@ def create_novel(
     novel_service.insert_metadata(novel, novel_dto.metadata)
 
     chapters = [c for v in novel_dto.volumes for c in v.chapters]
-    logger.info(f"Added new novel (id={novel.id}, title='{novel.title}', chapters={len(chapters)}').")
+    logger.info(f"Added new novel (id={novel.id}, title='{novel.title}', chapters={len(chapters)}).")
 
     data_dir = path_service.novel_data_path(novel)
     if data_dir.exists():

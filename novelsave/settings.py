@@ -35,7 +35,7 @@ DIVISION_RULES = {k: v.split('/', maxsplit=1)[0] for k, v in mimetypes.types_map
 
 def console_formatter(record):
     if record['level'].name == 'INFO':
-        return '<level>{message}</level>\n'
+        return '{message}\n'
     else:
         return '<level>{level}: {message}</level>\n'
 

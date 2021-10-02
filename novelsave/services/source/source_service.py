@@ -2,7 +2,7 @@ from functools import lru_cache
 
 import novelsave_sources
 import requests
-from novelsave_sources import parse_source, parse_metasource, UnknownSourceException
+from novelsave_sources import locate_novel_source, locate_metadata_source, UnknownSourceException
 
 from .meta_source_gateway import MetaSourceGateway
 from .source_gateway import SourceGateway
@@ -32,13 +32,13 @@ class SourceService(BaseSourceService):
     @lru_cache(1)
     def source_from_url(self, url: str) -> SourceGateway:
         try:
-            return SourceGateway(parse_source(url), source_adapter=self.source_adapter)
+            return SourceGateway(locate_novel_source(url)(), source_adapter=self.source_adapter)
         except UnknownSourceException:
             raise SourceNotFoundException(url)
 
     @lru_cache(1)
     def meta_source_from_url(self, url: str) -> MetaSourceGateway:
         try:
-            return MetaSourceGateway(parse_metasource(url), source_adapter=self.source_adapter)
+            return MetaSourceGateway(locate_metadata_source(url)(), source_adapter=self.source_adapter)
         except UnknownSourceException:
             raise SourceNotFoundException(url)

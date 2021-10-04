@@ -1,26 +1,28 @@
-import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock
 
-from loguru import logger
+import pytest
 
-from novelsave.cli.controllers import package
+from novelsave.cli import controllers
 
 
-@patch('novelsave.services.packagers.PackagerProvider')
-@patch('novelsave.cli.controllers._package.get_novel')
-class TestCompileController(unittest.TestCase):
+@pytest.fixture
+def packager_provider():
+    return MagicMock()
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        logger.remove()
 
-    def test_compile_no_novel(self, get_novel, compiler_provider):
-        get_novel.side_effect = ValueError()
+@pytest.fixture
+def path_service():
+    return MagicMock()
 
-        with self.assertRaises(SystemExit):
-            package('https://novel.site', compiler_provider)
 
-    def test_compile_with_novel(self, get_novel, compiler_provider):
-        get_novel.return_value = 'novel'
+def test_compile_no_novel(mocker, packager_provider, path_service):
+    mocker.patch('novelsave.cli.controllers._package.get_novel', side_effect=ValueError())
 
-        package('https://novel.site', compiler_provider)
+    with pytest.raises(SystemExit):
+        controllers.package('https://novel.site', ['epub'], False, packager_provider, path_service)
+
+
+def test_compile_with_novel(mocker, packager_provider, path_service):
+    mocker.patch('novelsave.cli.controllers._package.get_novel', return_value='novel')
+
+    controllers.package('https://novel.site', ['epub'], False, packager_provider, path_service)

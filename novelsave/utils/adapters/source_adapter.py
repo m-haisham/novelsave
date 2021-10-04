@@ -22,17 +22,6 @@ class SourceAdapter(object):
             **arguments
         )
 
-    def novel_to_external(self, novel: dtos.NovelDTO) -> sm.Novel:
-        """convert novel from source to internal"""
-
-        arguments = {
-            key: value
-            for key, value in vars(novel).items()
-            if key in {'title', 'url', 'author', 'synopsis', 'thumbnail_url', 'lang'}
-        }
-
-        return sm.Novel(**arguments)
-
     def volume_to_internal(self, volume: sm.Volume) -> dtos.VolumeDTO:
         """convert volume from source to internal"""
 
@@ -67,16 +56,6 @@ class SourceAdapter(object):
         """convert metadata from source to internal"""
 
         return dtos.MetaDataDTO(
-            name=metadata.name,
-            value=metadata.value,
-            namespace=metadata.namespace,
-            others=metadata.others,
-        )
-
-    def metadata_to_external(self, metadata: dtos.MetaDataDTO) -> sm.Metadata:
-        """convert metadata from internal to source"""
-
-        return sm.Metadata(
             name=metadata.name,
             value=metadata.value,
             namespace=metadata.namespace,

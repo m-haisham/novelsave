@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from novelsave.services import FileService, NovelService, PathService, AssetService, MetaService, CalibreService
 from novelsave.services.packagers import EpubPackager, HtmlPackager, MobiPackager, PackagerProvider, PdfPackager, \
-    Azw3Packager
+    Azw3Packager, TextPackager
 from novelsave.services.config import ConfigService
 from novelsave.services.source import SourceService
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
@@ -106,6 +106,13 @@ class Packagers(containers.DeclarativeContainer):
         asset_service=services.asset_service,
     )
 
+    text_packager = providers.Factory(
+        TextPackager,
+        novel_service=services.novel_service,
+        file_service=services.file_service,
+        path_service=services.path_service,
+    )
+
     mobi_packager = providers.Factory(
         MobiPackager,
         calibre_service=services.calibre_service,
@@ -127,7 +134,7 @@ class Packagers(containers.DeclarativeContainer):
     packager_provider = providers.Factory(
         PackagerProvider,
         epub_packager, html_packager, mobi_packager, pdf_packager,
-        azw3_packager,
+        azw3_packager, text_packager,
     )
 
 

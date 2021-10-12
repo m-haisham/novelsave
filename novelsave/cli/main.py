@@ -11,7 +11,7 @@ from .events import update_check_event
 from .. import __version__
 from ..containers import Application
 from ..exceptions import NSError
-from ..infrastructure.migrations import commands as migration_commands
+from ..migrations import commands as migration_commands
 from ..settings import config, DATABASE_URL, LOGGER_CONFIG
 from ..utils.helpers import config_helper
 

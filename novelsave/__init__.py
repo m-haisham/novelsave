@@ -1,2 +1,4 @@
-__version__ = '0.7.7'
+from importlib.metadata import version
+
+__version__ = version('novelsave')
 __source__ = 'https://github.com/mHaisham/novelsave'

@@ -21,7 +21,9 @@ def inject_dependencies():
     application.config.from_dict(config)
 
     try:
-        application.config.from_dict(config_helper.from_file())
+        file_config = config_helper.from_file()
+        if file_config:
+            application.config.from_dict(file_config)
     except FileNotFoundError:
         pass
 
@@ -54,7 +56,7 @@ def cli(debug: bool, plain: bool, skip_updates: bool):
         atexit.register(update_check_event)
 
 
-@logger.catch()
+# @logger.catch()
 def main():
     try:
         cli()

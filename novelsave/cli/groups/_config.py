@@ -1,4 +1,4 @@
-from pathlib import Path
+import sys
 
 import click
 from dependency_injector.wiring import inject, Provide
@@ -11,26 +11,51 @@ from ...core.services.config import BaseConfigService
 
 @cli.group(name='config')
 def _config():
-    """Manage customizable configurations"""
+    """Manage customizable configurations."""
 
 
-@_config.group(name='novel_dir')
-def _novel_dir():
-    """Manage configuration novel save location"""
-
-
-@_novel_dir.command(name='set')
-@click.argument('path')
+@_config.command(name='show')
+@click.option('--key', help="View configuration for only this key.")
 @inject
-def _set_novel_dir(path, config_service: BaseConfigService = Provide[Application.services.config_service]):
-    """Set novel save location"""
-    config_service.set_config('novel.dir', str(Path(path)))
-    logger.info(f"Novel save directory has been updated ({path=})")
+def _show_config(key: str, config_service: BaseConfigService = Provide[Application.services.config_service]):
+    """View the current configuration."""
+    if key is not None:
+        try:
+            value = config_service.get_config(key)
+        except KeyError as e:
+            logger.error(str(e).strip('"'))
+            sys.exit(1)
+
+        logger.info(f"Config ({key=}, {value=}).")
+
+    for key, value in config_service.get_all_configs().items():
+        logger.info(f"Config ({key=}, {value=}).")
 
 
-@_novel_dir.command(name='reset')
+@_config.command(name='set')
+@click.argument('key')
+@click.option('--value', required=True, help="New value for the configuration.")
 @inject
-def _reset_novel_dir(config_service: BaseConfigService = Provide[Application.services.config_service]):
-    """Reset novel save location to default"""
-    config_service.reset_config('novel.dir')
-    logger.info(f"Novel save directory has been reset (path={config_service.get_config('novel.dir')})")
+def _set_config(key, value, config_service: BaseConfigService = Provide[Application.services.config_service]):
+    """Change the configuration value."""
+    try:
+        config_service.set_config(key, value)
+    except KeyError as e:
+        logger.error(str(e).strip('"'))
+        sys.exit(1)
+
+    logger.info(f'Set config ({key=}, {value=}).')
+
+
+@_config.command(name='reset')
+@click.argument('key')
+@inject
+def _reset_config(key, config_service: BaseConfigService = Provide[Application.services.config_service]):
+    """Reset the configuration back to default."""
+    try:
+        config_service.reset_config(key)
+    except KeyError as e:
+        logger.error(str(e).strip('"'))
+        sys.exit(1)
+
+    logger.info(f"Reset config ({key=}, value='{config_service.get_config(key)}').")

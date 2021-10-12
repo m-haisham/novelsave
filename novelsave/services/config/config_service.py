@@ -13,7 +13,7 @@ def ensure_key_exists(func):
     def wrapped(*args, **kwargs):
         self, key = args[0], kwargs.get('key', args[1])
         if key not in self._defaults:
-            raise KeyError(f"The specified key is not in configurations: {key}")
+            raise KeyError(f"The specified key is not in configurations: '{key}'")
 
         return func(*args, **kwargs)
 
@@ -27,7 +27,7 @@ class ConfigService(BaseConfigService):
         self.data = {'version': self.version, 'config': {}}
 
         self._defaults = {
-            'novel.dir': default_novel_dir,
+            'novel.dir': str(default_novel_dir),
         }
 
         self.config_file = config_file
@@ -72,5 +72,5 @@ class ConfigService(BaseConfigService):
 
     @ensure_key_exists
     def reset_config(self, key: str):
-        self.config[key] = self._defaults[key]
+        del self.config[key]
         self.save()

@@ -24,7 +24,7 @@ def _novel_dir():
 @inject
 def _set_novel_dir(path, config_service: BaseConfigService = Provide[Application.services.config_service]):
     """Set novel save location"""
-    config_service.set_novel_dir(Path(path))
+    config_service.set_config('novel.dir', str(Path(path)))
     logger.info(f"Novel save directory has been updated ({path=})")
 
 
@@ -32,5 +32,5 @@ def _set_novel_dir(path, config_service: BaseConfigService = Provide[Application
 @inject
 def _reset_novel_dir(config_service: BaseConfigService = Provide[Application.services.config_service]):
     """Reset novel save location to default"""
-    config_service.reset_novel_dir()
-    logger.info(f"Novel save directory has been reset (path={config_service.get_novel_dir()})")
+    config_service.reset_config('novel.dir')
+    logger.info(f"Novel save directory has been reset (path={config_service.get_config('novel.dir')})")

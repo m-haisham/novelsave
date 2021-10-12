@@ -91,25 +91,26 @@ novelsave process --help
 
 ### Configurations
 
-#### Novel Directory
-
-You can change your desired novels package's saving location using the following command. Novels are by default saved to folder `novels` in user home.
-
-```bash
-novelsave config novel_dir set <dir>
-```
-
-And to reset to default, use the command shown below.
+Use the following command to show all the current configurations. Default value will be shown
+in case none is set.
 
 ```bash
-novelsave config novel_dir reset
+novelsave config show
 ```
 
-For more information, run
+You may change your configurations using `set` or `reset`. For example:
 
 ```bash
-novelsave config novel_dir --help
+novelsave config set novel.dir --value ~/mynovels
 ```
+
+```bash
+novelsave config reset novel.dir
+```
+
+All supported configurations are:
+
+- `novel.dir` - Your desired novel's packaged data (epub, mobi) save location
 
 ### More
 

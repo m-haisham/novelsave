@@ -34,9 +34,10 @@ def update_database_schema():
 
 @click.group()
 @click.version_option(__version__)
-@click.option('-d', '--debug', is_flag=True, help="Print debugging information to console")
-@click.option('-p', '--plain', is_flag=True, help="Disable reactive and interactive elements")
-def cli(debug: bool, plain: bool):
+@click.option('-d', '--debug', is_flag=True, help="Print debugging information to console.")
+@click.option('-p', '--plain', is_flag=True, help="Disable reactive and interactive elements.")
+@click.option('-s', '--skip-updates', is_flag=True, help="Dont check for updates at the end of program.")
+def cli(debug: bool, plain: bool, skip_updates: bool):
     logger_config = LOGGER_CONFIG.copy()
     if debug:
         logger_config['handlers'][0]['level'] = 'DEBUG'
@@ -49,7 +50,7 @@ def cli(debug: bool, plain: bool):
     inject_dependencies()
 
     # only check for updates if this is not a help call
-    if '--help' not in sys.argv[1:]:
+    if '--help' not in sys.argv[1:] or skip_updates:
         atexit.register(update_check_event)
 
 

@@ -41,7 +41,7 @@ novelsave-sources = "^0.2.1"
 click = "^8.0.1"
 beautifulsoup4 = "^4.10.0"
 lxml = "^4.6.3"
-browser-cookie3 = "^0.12.1"
+browser-cookie3 = "^0.13.0"
 tqdm = "^4.62.3"
 Mako = "^1.1.5"
 

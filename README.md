@@ -145,7 +145,7 @@ novelsave [update|process] <id_or_url> --browser <browser>
 
 **Supported**
 
-`chrome` `firefox` `chromium` `opera` `edge`
+`chrome` `firefox` `chromium` `opera` `edge` `brave`
 
 ## Sources
 

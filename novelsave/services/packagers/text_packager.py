@@ -102,12 +102,13 @@ class TextPackager(BasePackager):
         return text
 
     def chapter(self, novel, volume, chapter):
-        text = ''
+        title = novel.title + ' - ' + chapter.title
 
-        text += novel.title + self.endl
+        text = ''
+        text += title + self.endl
         if volume.index >= 0:
             text += '> ' + volume.name + self.endl
-        text += '=' * max(10, len(novel.title) // 4) + self.endl
+        text += '=' * max(10, len(title) // 4) + self.endl
         text += self.endl + self.endl
 
         soup = BeautifulSoup(chapter.content, 'lxml')

@@ -61,10 +61,9 @@ class TextPackager(BasePackager):
         for volume, chapters in volumes.items():
             for chapter in chapters:
                 volume_prefix = ('v' + str(volume.index).zfill(2)) if volume.index >= 0 else ''
-                filename = volume_prefix + 'c' + str(chapter.index).zfill(4) \
-                           + '_' + string_helper.slugify(chapter.title, ' ') + '.txt'
+                filename = volume_prefix + 'c' + str(chapter.index).zfill(4) + '.txt'
                 with (folder / filename).open('w', encoding='utf-8') as f:
-                    f.write(self.chapter(novel, volume, chapter))
+                    f.write(self.chapter(volume, chapter))
 
         logger.debug(f'Written chapter content to text files (count={chapter_count})')
 
@@ -73,7 +72,7 @@ class TextPackager(BasePackager):
     @lru_cache(maxsize=1)
     def destination(self, novel: Novel):
         path = self.path_service.novel_save_path(novel)
-        return path / f'[T] {path.name}'
+        return path / f'{path.name} (text)'
 
     def preface(self, novel, metadata, sources) -> str:
         text = ''
@@ -101,15 +100,12 @@ class TextPackager(BasePackager):
 
         return text
 
-    def chapter(self, novel, volume, chapter):
-        title = novel.title + ' - ' + chapter.title
+    def chapter(self, volume, chapter):
+        volume_prefix = volume.name if volume.index >= 0 else ''
 
         text = ''
-        text += title + self.endl
-        if volume.index >= 0:
-            text += '> ' + volume.name + self.endl
-        text += '=' * max(10, len(title) // 4) + self.endl
-        text += self.endl + self.endl
+        text += volume_prefix + chapter.title + self.endl
+        text += self.endl
 
         soup = BeautifulSoup(chapter.content, 'lxml')
         for line in soup.text.splitlines():

@@ -18,9 +18,7 @@ class DTOAdapter:
         )
 
         url = NovelUrl(
-            # ensure trailing forward slash, it is preferred that a uri that isn't
-            # a file end in a slash to signify a path
-            url=novel_dto.url.rstrip('/') + ('/' if Path(novel_dto.url).suffix else ''),
+            url=novel_dto.url,
         )
 
         return novel, url

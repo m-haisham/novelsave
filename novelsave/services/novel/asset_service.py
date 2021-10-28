@@ -126,7 +126,7 @@ class AssetService(BaseAssetService):
     def mapping_dict(self, path_mapping: Dict[int, str]):
         return defaultdict(
             str,
-            {f'id{key}': path for key, path in path_mapping.items()}
+            {f'id{key}': path for key, path in path_mapping.items() if path}
         )
 
     def inject_assets(self, html: str, mapping_dict: Dict[int, str]):

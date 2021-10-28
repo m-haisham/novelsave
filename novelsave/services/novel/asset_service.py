@@ -130,4 +130,7 @@ class AssetService(BaseAssetService):
         )
 
     def inject_assets(self, html: str, mapping_dict: Dict[int, str]):
+        if not mapping_dict:
+            return html
+
         return html.format_map(mapping_dict)

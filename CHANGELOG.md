@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added `--json` output option for info command
 - Added pre-commit checks for consistent style
 - Added pre-commit badge to README.md
+- Added change log to database migrations README.md
 
 ### Changed
 

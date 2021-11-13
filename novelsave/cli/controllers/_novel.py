@@ -3,6 +3,7 @@ import sys
 
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
+from tabulate import tabulate
 
 from novelsave.cli import helpers as cli_helpers
 from novelsave.containers import Application
@@ -49,6 +50,9 @@ def list_novels(
         source_service: BaseSourceService = Provide[Application.services.source_service],
 ):
     novels = novel_service.get_all_novels()
+
+    table = [['Id', 'Title', 'Source', 'Last updated']]
+
     for novel in novels:
         url = novel_service.get_primary_url(novel)
 
@@ -57,7 +61,10 @@ def list_novels(
         except SourceNotFoundException:
             source = None
 
-        logger.info(f"id={novel.id} title='{novel.title}' {source=} last_updated='{novel.last_updated}'")
+        table.append([novel.id, novel.title, source, novel.last_updated])
+
+    for line in tabulate(table, headers='firstrow', tablefmt='github').splitlines():
+        logger.info(line)
 
 
 @inject

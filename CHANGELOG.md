@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Updated project dependencies
 - Changed logging style to be more readable
+- Changed novel list to display as a table
 
 ### Fixed
 

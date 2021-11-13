@@ -44,6 +44,7 @@ lxml = "^4.6.4"
 browser-cookie3 = "^0.13.0"
 tqdm = "^4.62.3"
 Mako = "^1.1.5"
+tabulate = "^0.8.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

@@ -50,15 +50,11 @@ class SourceGateway(BaseSourceGateway):
         except AttributeError:
             raise CookieBrowserNotSupportedException(browser)
 
-        logger.debug(
-            f"Extracted cookies from browser ({browser=}, count={len(cookies)})"
-        )
+        logger.debug(f"Extracted {len(cookies)} cookies from '{browser=}'.")
 
         cookiejar = self.where_cookies_in_domain(cookies)
         self.source.set_cookies(cookiejar)
-        logger.debug(
-            f"Filtered and set extracted cookies ({browser=}, source='{type(self).__name__}', count={len(cookiejar)})"
-        )
+        logger.debug(f"Filtered {len(cookiejar)} cookies for '{self.name}'.")
 
     def where_cookies_in_domain(self, cookies):
         cj = RequestsCookieJar()

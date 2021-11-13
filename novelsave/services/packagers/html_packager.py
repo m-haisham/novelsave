@@ -47,9 +47,9 @@ class HtmlPackager(BasePackager):
         volumes = self.novel_service.get_volumes_with_chapters(novel)
         chapter_count = len([c for cl in volumes.values() for c in cl])
         metadata = self.novel_service.get_metadata(novel)
+        logger.debug(f"Preparing to package '{novel.title}' ({novel.id}) to html.")
         logger.debug(
-            f"Preparing to package to web (id={novel.id}, title='{novel.title}', volumes={len(volumes)}, "
-            f"chapters={chapter_count}, metadata={len(metadata)})."
+            f"Novel contains {len(volumes)} volumes, {chapter_count} chapters, and {len(metadata)}) metadata."
         )
 
         html_file = self.destination(novel)
@@ -76,13 +76,13 @@ class HtmlPackager(BasePackager):
             .encode("utf-8")
         )
         logger.debug(
-            f"Rendered html file (size='{string_helper.format_bytes(len(rendered_data))}')."
+            f"Rendered html file of size {string_helper.format_bytes(len(rendered_data))}'."
         )
 
         self.file_service.write_bytes(html_file, rendered_data)
 
         logger.debug(
-            f"Compiled and saved html file (file='{self.path_service.relative_to_novel_dir(html_file)}')."
+            f"Compiled and saved html file to {{novel.dir}}/{self.path_service.relative_to_novel_dir(html_file)}."
         )
         return html_file
 
@@ -137,7 +137,9 @@ class HtmlPackager(BasePackager):
                 }
             )
 
-        logger.debug(f"Constructed table of contents for web (volumes={len(volumes)}).")
+        logger.debug(
+            f"Constructed table of contents for web with {len(volumes)} volumes."
+        )
 
         return volume_wrappers
 
@@ -151,5 +153,5 @@ class HtmlPackager(BasePackager):
             ),
         }
 
-        logger.debug(f"Retrieved static data (count={len(static)}).")
+        logger.debug(f"Retrieved {len(static)} static data.")
         return static

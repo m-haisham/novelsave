@@ -45,9 +45,9 @@ class EpubPackager(BasePackager):
         volumes = self.novel_service.get_volumes_with_chapters(novel)
         chapter_count = len([c for cl in volumes.values() for c in cl])
         metadata = self.novel_service.get_metadata(novel)
+        logger.debug(f"Preparing to package '{novel.title}' ({novel.id}) to epub.")
         logger.debug(
-            f"Preparing to package to epub (id={novel.id}, title='{novel.title}', volumes={len(volumes)}, "
-            f"chapters={chapter_count}, metadata={len(metadata)})"
+            f"Novel contains, {len(volumes)} volumes, {chapter_count} chapters, and {len(metadata)}) metadata."
         )
 
         book = epub.EpubBook()
@@ -57,19 +57,17 @@ class EpubPackager(BasePackager):
         book.add_author(novel.author)
         self.set_cover(book, novel)
 
+        logger.debug("Binding description attribute to epub…")
         if novel.synopsis:
             book.add_metadata("DC", "description", novel.synopsis)
-            logger.debug(
-                f"Bound attributes to epub (synopsis={novel.synopsis[:min(30, len(novel.synopsis))]}…)"
-            )
         else:
-            logger.debug("Bound attributes to epub (synopsis=None")
+            logger.debug("Binding cancelled since no synopsis exists for novel.")
 
+        logger.debug(f"Binding {len(metadata)} metadata attributes to epub.")
         for data in metadata:
             book.add_metadata(
                 data.namespace, data.name, data.value, json.loads(data.others)
             )
-        logger.debug(f"Bound attributes to epub (metadata.count={len(metadata)})")
 
         book_preface = self.preface_html(novel, urls, metadata)
         book.add_item(book_preface)
@@ -84,9 +82,7 @@ class EpubPackager(BasePackager):
                 book.add_item(epub_chapter)
                 book_chapters[volume_tuple].append(epub_chapter)
 
-        logger.debug(
-            f"Added pages to epub (pages=(preface, chapters), count={chapter_count + 1})."
-        )
+        logger.debug(f"Added {chapter_count + 1} pages to epub.")
 
         self.add_assets(book, novel)
 
@@ -94,13 +90,13 @@ class EpubPackager(BasePackager):
         book.toc = [book_preface]
         if len(book_chapters.keys()) == 1:  # no volume sections
             book.toc += list(book_chapters.values())[0]
-            logger.debug("Built table of content of epub (type='single')")
+            logger.debug("Built single section table of content of epub.")
         else:
             book.toc += [
                 (epub.Section(volume[1]), tuple(book_chapters[volume]))
                 for volume in sorted(book_chapters.keys(), key=lambda k: k[0])
             ]
-            logger.debug("Built table of content of epub (type='multi')")
+            logger.debug("Built multi sectioned table of content of epub.")
 
         # add default NCX and Nav file
         book.add_item(epub.EpubNcx())
@@ -115,7 +111,7 @@ class EpubPackager(BasePackager):
 
         epub.write_epub(path, book, {})
         logger.debug(
-            f"Saved epub file (path='{self.path_service.relative_to_novel_dir(path)}')"
+            f"Saved epub file to {{novel.dir}}/{self.path_service.relative_to_novel_dir(path)}'."
         )
 
         return path
@@ -131,17 +127,20 @@ class EpubPackager(BasePackager):
             possible_cover = self.path_service.resolve_data_path(
                 Path(novel.thumbnail_path)
             )
+
             if possible_cover.exists() and possible_cover.is_file():
                 cover = possible_cover
 
         if cover is None:
             logger.debug(
-                f"Copying cover image aborted (path='{novel.thumbnail_path}', reason='file does not exist')"
+                f"Copying cover image aborted since file does not exist: {{data.dir}}/{novel.thumbnail_path}."
             )
             return
 
         book.set_cover(cover.name, self.file_service.read_bytes(cover))
-        logger.debug(f"Copied cover image to epub (path='{novel.thumbnail_path}')")
+        logger.debug(
+            f"Copied cover image to epub: {{data.dir}}/{novel.thumbnail_path}."
+        )
 
     @lru_cache(maxsize=1)
     def path_mapping(self, novel: Novel) -> Dict[int, str]:
@@ -184,7 +183,7 @@ class EpubPackager(BasePackager):
 
             book.add_item(image)
 
-        logger.debug(f"Added assets to epub (count={len(assets)})")
+        logger.debug(f"Added {len(assets)} assets to epub.")
 
     def preface_html(
         self, novel: Novel, urls: List[NovelUrl], metadata: List[MetaData]

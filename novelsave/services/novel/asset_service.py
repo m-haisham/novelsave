@@ -74,13 +74,11 @@ class AssetService(BaseAssetService):
         # we only interact with the database if we have something to add
         # this is [expected] to be more performant
         if assets_to_add:
-            logger.debug(f"Adding newly found assets (count={len(assets_to_add)}).")
+            logger.debug(f"Adding {len(assets)} newly found assets.")
             self.session.add_all(assets_to_add)
             self.session.flush()
         else:
-            logger.debug(
-                f"Skipping adding assets ({novel.id=}, reason='No assets to add')"
-            )
+            logger.debug("Skipping adding assets since there is no reason to.")
 
         return indexed_specific
 
@@ -108,12 +106,10 @@ class AssetService(BaseAssetService):
 
             assets.append(asset)
 
-        logger.debug(
-            f"Identified asset images (novel='{novel.title}', count={len(assets)})."
-        )
+        logger.debug(f"Identified {len(assets)} asset images.")
         if not assets:
             logger.debug(
-                f"Skipped further asset processing (novel='{novel.title}', reason='No assets identified')"
+                "Skipped further asset processing since no assets were identified."
             )
             return chapter.content
 
@@ -126,7 +122,9 @@ class AssetService(BaseAssetService):
             url = url_helper.absolute_url(src, chapter.url)
             img["src"] = f"{{id{indexed_assets[url].id}}}"
 
-        logger.debug(f"Embedded asset markers (chapter='{chapter.title}').")
+        logger.debug(
+            f"Embedded asset markers into '{chapter.title}' ({chapter.index}) chapter."
+        )
 
         return str(soup)
 

@@ -45,7 +45,7 @@ def set_cookies(source_gateway: BaseSourceGateway, browser: Optional[str]):
 def retrieve_novel_info(source_gateway: BaseSourceGateway, url: str, browser: str):
     set_cookies(source_gateway, browser)
 
-    logger.info(f"Retrieving novel information from {url}...")
+    logger.info(f"Retrieving novel information from {url}…")
     try:
         output = source_gateway.novel_by_url(url)
     except requests.ConnectionError:
@@ -181,7 +181,7 @@ def download_chapters(
             raise ContentUpdateFailedException(dto, exc)
 
     logger.info(
-        f"Downloading {len(chapters)} pending chapters with {thread_count} threads..."
+        f"Downloading {len(chapters)} pending chapters with {thread_count} threads…"
     )
     successes = 0
     with tqdm(total=len(chapters), **TQDM_CONFIG) as pbar:
@@ -197,7 +197,7 @@ def download_chapters(
                 novel_service.update_content(chapter_dto)
 
                 logger.debug(
-                    f"Chapter content downloaded: {chapter_dto.title} ({chapter_dto.index})"
+                    f"Chapter content downloaded: '{chapter_dto.title}' ({chapter_dto.index})"
                 )
                 successes += 1
             except ContentUpdateFailedException as e:
@@ -281,7 +281,7 @@ def get_novel(
         raise ValueError(msg)
 
     if not silent:
-        logger.info(f"Acquired novel from database: {novel.title} ({novel.id}).")
+        logger.info(f"Acquired '{novel.title}' ({novel.id}) from database.")
 
     return novel
 

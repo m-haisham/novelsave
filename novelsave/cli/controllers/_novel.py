@@ -128,7 +128,7 @@ def delete_associations(
     except ValueError:
         sys.exit(1)
 
-    logger.info(f"Removing associated data from '{novel.title}' ({novel.id})...")
+    logger.info(f"Removing associated data from '{novel.title}' ({novel.id})…")
 
     novel_service.delete_volumes(novel)
     logger.info("Deleted volumes and chapters of novel.")
@@ -143,7 +143,7 @@ def delete_associations(
     if novel_dir.exists():
         shutil.rmtree(novel_dir)
     logger.info(
-        f"Deleted saved file data of novel: {{data.dir}}/{path_service.resolve_data_path(novel_dir)}."
+        f"Deleted saved file data of novel: {{data.dir}}/{path_service.relative_to_data_dir(novel_dir)}."
     )
 
 
@@ -172,13 +172,13 @@ def delete_novel(
     except ValueError:
         sys.exit(1)
 
-    logger.info(f"Deleting '{novel.title}' ({novel.id})...")
+    logger.info(f"Deleting '{novel.title}' ({novel.id})…")
 
     novel_dir = path_service.novel_data_path(novel)
     if novel_dir.exists():
         shutil.rmtree(novel_dir)
     logger.info(
-        f"Deleted data of novel: {{data.dir}}/{path_service.resolve_data_path(novel_dir)}."
+        f"Deleted data of novel: {{data.dir}}/{path_service.relative_to_data_dir(novel_dir)}."
     )
 
     novel_service.delete_novel(novel)

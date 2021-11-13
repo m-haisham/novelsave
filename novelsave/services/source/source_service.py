@@ -27,7 +27,7 @@ class SourceService(BaseSourceService):
         response = requests.get("https://pypi.org/pypi/novelsave-sources/json")
         if not response.ok:
             raise ConnectionError(
-                f"Response received was not valid: GET {response.url} {response.status_code}"
+                f"Response received was not valid: GET {response.url} - {response.status_code} {response.reason}"
             )
 
         data = response.json()

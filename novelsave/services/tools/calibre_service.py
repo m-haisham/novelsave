@@ -13,7 +13,7 @@ class CalibreService(BaseCalibreService):
         self, input_file: Path, output_file: Path, pass_args: List[str] = None
     ):
         if not input_file.exists() or not input_file.is_file():
-            raise FileNotFoundError(f"File cannot be found (file='{input_file}')")
+            raise FileNotFoundError(f"'{input_file}' cannot be found.")
 
         if pass_args is None:
             pass_args = []
@@ -25,7 +25,12 @@ class CalibreService(BaseCalibreService):
             *pass_args,
         ]
 
-        logger.debug("Calling calibre commandline tool (tool='ebook-convert').")
+        logger.debug(
+            f"Invoking calibre 'ebook-convert' commandline tool with {len(pass_args)} args."
+        )
+        logger.debug(
+            f"Converting ebook from '{input_file.suffix}' to '{output_file.suffix}'…"
+        )
 
         try:
             subprocess.run(args, capture_output=True, check=True)
@@ -36,6 +41,4 @@ class CalibreService(BaseCalibreService):
                 "Make sure 'Calibre' is installed and added to path (https://calibre-ebook.com/download)."
             )
         except subprocess.CalledProcessError:
-            raise ToolException(
-                "Command did not finish correctly (command='ebook-convert')."
-            )
+            raise ToolException("'ebook-convert' command did not finish correctly.")

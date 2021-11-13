@@ -44,5 +44,5 @@ def package(
             logger.exception(e)
         else:
             logger.info(
-                f"Packaging to '{packager.keywords()[0]}' succeeded and saved to '{{novel.dir}}/{path_service.relative_to_novel_dir(path)}."
+                f"Packaging to '{packager.keywords()[0]}' succeeded and saved to '{{novel.dir}}/{path_service.relative_to_novel_dir(path)}'."
             )

@@ -31,7 +31,7 @@ def update(
         if not is_url:
             sys.exit(1)
 
-        logger.info("Attempting to create new novel entry using url...")
+        logger.info("Attempting to create new novel entry using url…")
         novel = helpers.create_novel(id_or_url, browser)
     else:
         helpers.update_novel(novel, browser)

@@ -12,7 +12,7 @@ def update_check_event(
     source_service: BaseSourceService = Provide[Application.services.source_service],
     meta_service: BaseMetaService = Provide[Application.services.meta_service],
 ):
-    logger.debug("Checking for new package versions...")
+    logger.debug("Checking for new package versions…")
 
     if type(source_service) == Provide:
         logger.debug("Service injection failed. Exiting process silently.")
@@ -28,7 +28,7 @@ def update_check_event(
     except requests.ConnectionError as e:
         errors.append(e)
         logger.debug(
-            "Connection terminated unexpectedly while checking for update (package='novelsave-sources')."
+            "Connection terminated unexpectedly while 'novelsave-sources' checking for update."
         )
 
     try:  # novelsave
@@ -38,11 +38,11 @@ def update_check_event(
     except requests.ConnectionError as e:
         errors.append(e)
         logger.debug(
-            "Connection terminated unexpectedly while checking for update (package='novelsave')."
+            "Connection terminated unexpectedly while checking 'novelsave' for update."
         )
 
     if not available_updates:
-        logger.debug(f"No upgrades to packages detected (errors={len(errors)}).")
+        logger.debug(f"No upgrades to packages detected with {len(errors)} errors.")
         return
 
     logger.warning(

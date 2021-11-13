@@ -66,9 +66,13 @@ def _list():
 
 @cli.command(name='info')
 @click.argument('id_or_url')
-def _info(id_or_url: str):
+@click.option('--json', is_flag=True, help="Output the information as json")
+def _info(id_or_url: str, json: bool):
     """Show saved information of a novel"""
-    controllers.show_info(id_or_url)
+    if json:
+        controllers.show_info(id_or_url, fmt='json')
+    else:
+        controllers.show_info(id_or_url)
 
 
 @cli.group(name='novel')

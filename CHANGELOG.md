@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added github issue templates
 - Added CHANGELOG.md
+- Added `--json` output option for info command
  
 ### Changed
 

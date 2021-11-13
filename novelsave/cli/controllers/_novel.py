@@ -1,5 +1,7 @@
+import json
 import shutil
 import sys
+from typing import Literal
 
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
@@ -9,12 +11,13 @@ from novelsave.cli import helpers as cli_helpers
 from novelsave.containers import Application
 from novelsave.core.services import BaseNovelService, BasePathService, BaseAssetService
 from novelsave.core.services.source import BaseSourceService
-from novelsave.exceptions import SourceNotFoundException
+from novelsave.exceptions import SourceNotFoundException, NSError
 
 
 @inject
 def show_info(
         id_or_url: str,
+        fmt: Literal['default', 'json'] = 'default',
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ):
     """print current information of novel"""
@@ -23,25 +26,55 @@ def show_info(
     except ValueError:
         sys.exit(1)
 
-    logger.info('[novel]')
-    logger.info(f'id = {novel.id}')
-    logger.info(f'title = {novel.title}')
-    logger.info(f'author = {novel.author}')
-    logger.info(f'lang = {novel.lang}')
-    logger.info(f'thumbnail = {novel.thumbnail_url}')
-    logger.info(f'synopsis = ')
-    for line in novel.synopsis.splitlines():
-        logger.info(f'{"":<4}{line.strip()}')
-
-    logger.info(f'urls = ')
-    for n_url in novel_service.get_urls(novel):
-        logger.info(f'{"":<4}{n_url.url}')
-
-    logger.info('')
-    logger.info('[chapters]')
     chapters = novel_service.get_chapters(novel)
-    logger.info(f'total = {len(chapters)}')
-    logger.info(f'downloaded = {len([c for c in chapters if c.content])}')
+
+    data = {
+        'novel': {
+            'id': novel.id,
+            'title': novel.title,
+            'author': novel.author,
+            'lang': novel.lang,
+            'thumbnail': novel.thumbnail_url,
+            'synopsis': novel.synopsis.splitlines(),
+            'urls': [o.url for o in novel_service.get_urls(novel)],
+        },
+        'chapters': {
+            'total': len(chapters),
+            'downloaded': len([c for c in chapters if c.content]),
+        }
+    }
+
+    if fmt is None or fmt == 'default':
+        endl = '\n'
+        text = '[novel]' + endl
+
+        def format_keyvalue(key, value):
+            text = f"{key} = "
+
+            if type(value) == str:
+                text += f"'{value}'"
+            else:
+                text += str(value)
+
+            text += endl
+            return text
+
+        for key, value in data['novel'].items():
+            text += format_keyvalue(key, value)
+
+        text += endl
+        text += '[chapters]' + endl
+
+        for key, value in data['chapters'].items():
+            text += format_keyvalue(key, value)
+
+    elif fmt == 'json':
+        text = json.dumps(data, indent=4)
+    else:
+        raise NSError(f"Provided novel information formatter is not supported: {fmt}.")
+
+    for line in text.splitlines():
+        logger.info(line)
 
 
 @inject

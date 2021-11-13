@@ -7,6 +7,7 @@
 ![Last Commit](https://img.shields.io/github/last-commit/mensch272/novelsave/main)
 ![Issues](https://img.shields.io/github/issues/mensch272/novelsave)
 ![Pull Requests](https://img.shields.io/github/issues-pr/mensch272/novelsave)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/mensch272/novelsave/main.svg)](https://results.pre-commit.ci/latest/github/mensch272/novelsave/main)
 [![License](https://img.shields.io/github/license/mensch272/novelsave)](LICENSE)
 
 This is a tool to download and convert novels from popular sites to e-books.

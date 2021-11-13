@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fix empty dict-value error in inject_assets
+
 ## [0.7.8] - 2021-11-03
 
 ### Added

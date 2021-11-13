@@ -1,11 +1,20 @@
 import mimetypes
+import os
+
+import dotenv
 from pathlib import Path
 
 from appdirs import user_config_dir
 from tqdm import tqdm
 
+
 NAME = "novelsave"
 AUTHOR = "Mensch272"
+
+# load environment variables
+dotenv.load_dotenv()  # take environment variables from .env
+
+STORAGE = os.environ.get("STORAGE") or "filesystem"
 
 # base project directory
 BASE_DIR = Path(__file__).resolve().parent.parent

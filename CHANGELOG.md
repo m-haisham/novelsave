@@ -12,7 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added CHANGELOG.md
  
 ### Changed
- 
+
+- Updated project dependencies
+
 ### Fixed
 
 ## [0.7.8] - 2021-11-03

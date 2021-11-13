@@ -38,7 +38,7 @@ def package(
         try:
             path = packager.package(novel)
         except (ToolException, RequirementException, FileNotFoundError) as e:
-            logger.error(f"Packaging failed (type='{packager.keywords()[0]}').")
+            logger.error(f"Packaging to '{packager.keywords()[0]}' failed: {e}.")
             logger.exception(e)
         else:
-            logger.info(f"Packaging completed (type='{packager.keywords()[0]}', path='{path_service.relative_to_novel_dir(path)}').")
+            logger.info(f"Packaging to '{packager.keywords()[0]}' succeeded and saved to '{{novel.dir}}/{path_service.relative_to_novel_dir(path)}.")

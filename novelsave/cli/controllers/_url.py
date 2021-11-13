@@ -25,7 +25,7 @@ def remove_url(
         logger.error(e)
         sys.exit(1)
     else:
-        logger.info(f"Removed url from novel (id={novel.id}, title='{novel.title}', {url=}).")
+        logger.info(f"Removed '{url}' from '{novel.title}' ({novel.id}).")
 
 
 @inject
@@ -46,4 +46,4 @@ def add_url(
         logger.error(e)
         sys.exit(1)
     else:
-        logger.info(f"Url added to novel (id={novel.id}, title='{novel.title}', {new_url=}).")
+        logger.info(f"Added '{new_url}' to '{novel.title}' ({novel.id}).")

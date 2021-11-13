@@ -57,7 +57,7 @@ def list_novels(
         except SourceNotFoundException:
             source = None
 
-        logger.info(f"Novel (id={novel.id}, title='{novel.title}', {source=}, last_updated='{novel.last_updated}').")
+        logger.info(f"id={novel.id} title='{novel.title}' {source=} last_updated='{novel.last_updated}'")
 
 
 @inject
@@ -72,7 +72,7 @@ def delete_downloaded_content(
         sys.exit(1)
 
     novel_service.delete_content(novel)
-    logger.info(f"Deleted chapter content from novel (id={novel.id}, title='{novel.title}').")
+    logger.info(f"Deleted chapter content from '{novel.title}' ({novel.id}).")
 
 
 @inject
@@ -88,19 +88,21 @@ def delete_associations(
     except ValueError:
         sys.exit(1)
 
+    logger.info(f"Removing associated data from '{novel.title}' ({novel.id})...")
+
     novel_service.delete_volumes(novel)
-    logger.info(f"Deleted volumes and chapters of novel (id={novel.id}, title='{novel.title}').")
+    logger.info(f"Deleted volumes and chapters of novel.")
 
     novel_service.delete_metadata(novel)
-    logger.info(f"Deleted metadata of novel (id={novel.id}, title='{novel.title}').")
+    logger.info(f"Deleted metadata of novel.")
 
     asset_service.delete_assets_of_novel(novel)
-    logger.info(f"Deleted asset entries of novel (id={novel.id}, title='{novel.title}').")
+    logger.info(f"Deleted asset entries of novel.")
 
     novel_dir = path_service.novel_data_path(novel)
     if novel_dir.exists():
         shutil.rmtree(novel_dir)
-    logger.info(f"Deleted data of novel (path='{path_service.resolve_data_path(novel_dir)}')")
+    logger.info(f"Deleted saved file data of novel: {{data.dir}}/{path_service.resolve_data_path(novel_dir)}.")
 
 
 def clean_novel(id_or_url: str, content_only: bool):
@@ -128,13 +130,15 @@ def delete_novel(
     except ValueError:
         sys.exit(1)
 
+    logger.info(f"Deleting '{novel.title}' ({novel.id})...")
+
     novel_dir = path_service.novel_data_path(novel)
     if novel_dir.exists():
         shutil.rmtree(novel_dir)
-    logger.info(f"Deleted data of novel (path='{path_service.resolve_data_path(novel_dir)}')")
+    logger.info(f"Deleted data of novel: {{data.dir}}/{path_service.resolve_data_path(novel_dir)}.")
 
     novel_service.delete_novel(novel)
-    logger.info(f"Deleted novel (id={novel.id}, title='{novel.title}')")
+    logger.info(f"Deleted novel entry.")
 
 
 @inject

@@ -31,16 +31,16 @@ def set_cookies(source_gateway: BaseSourceGateway, browser: Optional[str]):
     try:
         source_gateway.use_cookies_from_browser(browser)
     except CookieBrowserNotSupportedException:
-        logger.error(f"Extracting cookies from browser not supported. ({browser=})")
+        logger.error(f"Extracting cookies from '{browser=}' not supported.")
         sys.exit(1)
 
-    logger.info(f"Applied cookies from browser ({browser=}).")
+    logger.info(f"Extracted and applied cookies from '{browser}'.")
 
 
 def retrieve_novel_info(source_gateway: BaseSourceGateway, url: str, browser: str):
     set_cookies(source_gateway, browser)
 
-    logger.info(f"Retrieving novel information ({url=})...")
+    logger.info(f"Retrieving novel information from {url}...")
     try:
         output = source_gateway.novel_by_url(url)
     except requests.ConnectionError:
@@ -68,12 +68,12 @@ def create_novel(
     novel_service.insert_metadata(novel, novel_dto.metadata)
 
     chapters = [c for v in novel_dto.volumes for c in v.chapters]
-    logger.info(f"Added new novel (id={novel.id}, title='{novel.title}', chapters={len(chapters)}).")
+    logger.info(f"Added new novel with values: id={novel.id} title='{novel.title}' chapters={len(chapters)}.")
 
     data_dir = path_service.novel_data_path(novel)
     if data_dir.exists():
+        logger.debug(f"Removing existing data in novel data dir: {{data.dir}}/{path_service.relative_to_data_dir(data_dir)}.")
         shutil.rmtree(data_dir)
-        logger.debug(f"Cleaned existing data in novel data dir (path='{path_service.relative_to_data_dir(data_dir)}')")
 
     return novel
 
@@ -85,7 +85,7 @@ def update_novel(
         novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ):
     url = novel_service.get_primary_url(novel)
-    logger.debug(f"Using primary url ({url=})")
+    logger.debug(f"Acquired primary novel url: {url}.")
 
     source_gateway = get_source_gateway(url)
     novel_dto = retrieve_novel_info(source_gateway, url, browser)
@@ -95,7 +95,7 @@ def update_novel(
     novel_service.update_metadata(novel, novel_dto.metadata)
 
     chapters = [c for v in novel_dto.volumes for c in v.chapters]
-    logger.info(f"Updated novel (id={novel.id}, title='{novel.title}', chapters={len(chapters)})")
+    logger.info(f"Novel updated using new values: id={novel.id} title='{novel.title}' chapters={len(chapters)}")
     return novel
 
 
@@ -111,24 +111,24 @@ def download_thumbnail(
     novel_service.set_thumbnail_asset(novel, path_service.relative_to_data_dir(thumbnail_path))
 
     if not force and thumbnail_path.exists() and thumbnail_path.is_file():
-        logger.info(f"Skipped thumbnail download (title='{novel.title}', reason='File already exists')")
+        logger.info(f"Skipped thumbnail download since file already exists.")
         return
 
-    logger.debug(f"Attempting thumbnail download (title='{novel.title}', thumbnail='{novel.thumbnail_path}').")
+    logger.debug(f"Attempting to download thumbnail from {novel.thumbnail_url}.")
     try:
         response = requests.get(novel.thumbnail_url)
-    except requests.ConnectionError as e:
+    except requests.ConnectionError as exc:
         raise NSError(f"Connection terminated unexpectedly; Make sure you are connected to the internet.")
 
     if not response.ok:
-        logger.error(f"Error during thumbnail download (title='{novel.title=}', {response.status_code=}).")
+        logger.error(f"Encountered an error during thumbnail download: {response.status_code} {response.reason}.")
         return
 
     thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
     file_service.write_bytes(thumbnail_path, response.content)
 
     size = string_helper.format_bytes(len(response.content))
-    logger.info(f"Downloaded thumbnail image (title='{novel.title}', thumbnail='{novel.thumbnail_path}', {size=}).")
+    logger.info(f"Downloaded and saved thumbnail image to {novel.thumbnail_path} ({size}).")
 
 
 @inject
@@ -142,11 +142,11 @@ def download_chapters(
 ):
     chapters = novel_service.get_pending_chapters(novel, limit)
     if not chapters:
-        logger.info(f"Skipped chapter download (title='{novel.title}', reason='No pending chapters').")
+        logger.info(f"Skipped chapter download as none are pending.")
         return
 
     url = novel_service.get_primary_url(novel)
-    logger.debug(f"Using primary novel url ({url=}).")
+    logger.debug(f"Acquired primary novel url: {url}.")
 
     source_gateway = get_source_gateway(url)
     thread_count = min(threads, os.cpu_count()) if threads is not None else os.cpu_count()
@@ -154,10 +154,10 @@ def download_chapters(
     def download(dto: ChapterDTO):
         try:
             return source_gateway.update_chapter_content(dto)
-        except Exception as e:
-            raise ContentUpdateFailedException(dto, e)
+        except Exception as exc:
+            raise ContentUpdateFailedException(dto, exc)
 
-    logger.info(f"Downloading pending chapters (count={len(chapters)}, threads={thread_count})...")
+    logger.info(f"Downloading {len(chapters)} pending chapters with {thread_count} threads...")
     successes = 0
     with tqdm(total=len(chapters), **TQDM_CONFIG) as pbar:
         executor = futures.ThreadPoolExecutor(max_workers=thread_count)
@@ -169,18 +169,17 @@ def download_chapters(
                 chapter_dto.content = asset_service.collect_assets(novel, chapter_dto)
                 novel_service.update_content(chapter_dto)
 
-                logger.debug(f"Chapter content downloaded (index={chapter_dto.index}, title='{chapter_dto.title}').")
+                logger.debug(f"Chapter content downloaded: {chapter_dto.title} ({chapter_dto.index})")
                 successes += 1
             except ContentUpdateFailedException as e:
-                logger.error(f"An error occurred during content download "
-                             f"(title='{e.chapter.title}', error={type(e.exception)}).")
-                logger.debug("An error occurred during content download {}", vars(e))
+                logger.error(f"An error occurred during content download: {type(e.exception)}.")
+                logger.debug("An error occurred during content download: {}", type(e.exception))
 
             pbar.update(1)
 
         executor.shutdown()
 
-    logger.info(f"Chapters download complete (successes={successes}, errors={len(chapters) - successes}).")
+    logger.info(f"Chapters download complete, {successes} succeeded, with {len(chapters) - successes} errors.")
 
 
 @inject
@@ -192,14 +191,14 @@ def download_assets(
 ):
     pending = asset_service.pending_assets(novel)
     if not pending:
-        logger.info(f"Skipped assets download (title='{novel.title}', reason='No pending assets').")
+        logger.info(f"Skipped assets download as none are pending.")
         return
 
     logger.info(f"Downloading pending assets (count={len(pending)}).")
     for asset in tqdm(pending, **TQDM_CONFIG):
         response = requests.get(asset.url)
         if not response.ok:
-            logger.error(f"Error during asset download (id={asset.id}, url={asset.url}).")
+            logger.error(f"Error during asset download: {asset.url} ({asset.id}).")
             continue
 
         file = path_service.asset_path(novel, asset)
@@ -210,7 +209,7 @@ def download_assets(
         asset.path = str(path_service.relative_to_data_dir(file))
         asset_service.update_asset_path(asset)
 
-        logger.debug(f"Asset downloaded and saved (id={asset.id}, url={asset.url}, path={asset.path}).")
+        logger.debug(f"Asset downloaded and saved: {asset.url} ({asset.id}).")
 
     logger.info(f"Assets download complete.")
 
@@ -234,16 +233,18 @@ def get_novel(
         try:
             novel = novel_service.get_novel_by_id(int(id_or_url))
         except ValueError:
-            logger.error(f"Value provided is neither a url or an id (value={({id_or_url})}).")
+            logger.error(f"Value provided is neither a url or an id: {id_or_url}.")
             sys.exit(1)
 
     if not novel:
         quote = "'" if is_url else ''
-        logger.error(f"Novel not found ({'url' if is_url else 'id'}={quote}{id_or_url}{quote}).")
-        raise ValueError("Novel was not found.")
+        msg = f"Novel not found: ({'url' if is_url else 'id'}={quote}{id_or_url}{quote})."
+
+        logger.info(msg)
+        raise ValueError(msg)
 
     if not silent:
-        logger.info(f"Acquired novel from database (id={novel.id}, title='{novel.title}').")
+        logger.info(f"Acquired novel from database: {novel.title} ({novel.id}).")
 
     return novel
 

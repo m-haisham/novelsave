@@ -16,10 +16,10 @@ def get_source_gateway(
     try:
         source_gateway = source_service.source_from_url(url)
     except SourceNotFoundException:
-        logger.error(f"Could not find source corresponding to url ({url=}).")
+        logger.error(f"Could not find source corresponding to url: {url}.")
         sys.exit(1)
 
-    logger.debug(f"Acquired source (name='{source_gateway.name}').")
+    logger.debug(f"Acquired novel source: {source_gateway.name}.")
     return source_gateway
 
 
@@ -31,8 +31,8 @@ def get_meta_source_gateway(
     try:
         meta_source_gateway = source_service.meta_source_from_url(url)
     except SourceNotFoundException:
-        logger.error(f"Could not find metadata source corresponding to url ({url=}).")
+        logger.error(f"Could not find metadata source corresponding to url: {url}.")
         sys.exit(1)
 
-    logger.debug(f"Acquired metadata source (name='{meta_source_gateway.name}').")
+    logger.debug(f"Acquired metadata source: {meta_source_gateway.name}.")
     return meta_source_gateway

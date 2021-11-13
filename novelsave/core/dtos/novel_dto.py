@@ -17,7 +17,7 @@ class NovelDTO:
     thumbnail_url: str = None
     thumbnail_path: str = None
 
-    lang: str = 'en'
+    lang: str = "en"
     last_updated: datetime = None
 
     volumes: List[VolumeDTO] = field(default_factory=lambda: [])

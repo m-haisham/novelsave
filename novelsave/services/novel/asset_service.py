@@ -14,11 +14,10 @@ from novelsave.utils.helpers import url_helper
 
 
 class AssetService(BaseAssetService):
-
     def __init__(
-            self,
-            session: Session,
-            path_service: BasePathService,
+        self,
+        session: Session,
+        path_service: BasePathService,
     ):
         self.session = session
         self.path_service = path_service
@@ -51,7 +50,9 @@ class AssetService(BaseAssetService):
         return pending
 
     def update_asset_path(self, asset: Asset):
-        self.session.execute(update(Asset).where(Asset.id == asset.id).values(path=asset.path))
+        self.session.execute(
+            update(Asset).where(Asset.id == asset.id).values(path=asset.path)
+        )
         self.session.commit()
 
     def delete_assets_of_novel(self, novel: Novel):
@@ -73,11 +74,13 @@ class AssetService(BaseAssetService):
         # we only interact with the database if we have something to add
         # this is [expected] to be more performant
         if assets_to_add:
-            logger.debug(f'Adding newly found assets (count={len(assets_to_add)}).')
+            logger.debug(f"Adding newly found assets (count={len(assets_to_add)}).")
             self.session.add_all(assets_to_add)
             self.session.flush()
         else:
-            logger.debug(f"Skipping adding assets ({novel.id=}, reason='No assets to add')")
+            logger.debug(
+                f"Skipping adding assets ({novel.id=}, reason='No assets to add')"
+            )
 
         return indexed_specific
 
@@ -86,12 +89,12 @@ class AssetService(BaseAssetService):
         # using default parser since lxml inserts <html> and <body> tags
         # those would have to be removed since the input doesnt require to have them
         # so its better to not insert them at all
-        soup = BeautifulSoup(chapter.content, 'html.parser')
+        soup = BeautifulSoup(chapter.content, "html.parser")
 
         assets = []
-        for img in soup.select('img'):
-            src = img.get('src', default=None)
-            alt = img.get('alt', default='[Unspecified]')
+        for img in soup.select("img"):
+            src = img.get("src", default=None)
+            alt = img.get("alt", default="[Unspecified]")
             if not src:
                 continue
 
@@ -105,19 +108,23 @@ class AssetService(BaseAssetService):
 
             assets.append(asset)
 
-        logger.debug(f"Identified asset images (novel='{novel.title}', count={len(assets)}).")
+        logger.debug(
+            f"Identified asset images (novel='{novel.title}', count={len(assets)})."
+        )
         if not assets:
-            logger.debug(f"Skipped further asset processing (novel='{novel.title}', reason='No assets identified')")
+            logger.debug(
+                f"Skipped further asset processing (novel='{novel.title}', reason='No assets identified')"
+            )
             return chapter.content
 
         indexed_assets = self.update_assets(novel, assets)
-        for img in soup.select('img'):
-            src = img.get('src', default=None)
+        for img in soup.select("img"):
+            src = img.get("src", default=None)
             if not src:
                 continue
 
             url = url_helper.absolute_url(src, chapter.url)
-            img['src'] = f'{{id{indexed_assets[url].id}}}'
+            img["src"] = f"{{id{indexed_assets[url].id}}}"
 
         logger.debug(f"Embedded asset markers (chapter='{chapter.title}').")
 
@@ -125,8 +132,7 @@ class AssetService(BaseAssetService):
 
     def mapping_dict(self, path_mapping: Dict[int, str]):
         return defaultdict(
-            str,
-            {f'id{key}': path for key, path in path_mapping.items() if path}
+            str, {f"id{key}": path for key, path in path_mapping.items() if path}
         )
 
     def inject_assets(self, html: str, mapping_dict: Dict[int, str]):

@@ -3,10 +3,24 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from novelsave.services import FileService, NovelService, PathService, AssetService, MetaService, CalibreService
-from novelsave.services.packagers import EpubPackager, HtmlPackager, MobiPackager, PackagerProvider, PdfPackager, \
-    Azw3Packager, TextPackager
+from novelsave.services import (
+    FileService,
+    NovelService,
+    PathService,
+    AssetService,
+    MetaService,
+    CalibreService,
+)
 from novelsave.services.config import ConfigService
+from novelsave.services.packagers import (
+    EpubPackager,
+    HtmlPackager,
+    MobiPackager,
+    PackagerProvider,
+    PdfPackager,
+    Azw3Packager,
+    TextPackager,
+)
 from novelsave.services.source import SourceService
 from novelsave.utils.adapters import SourceAdapter, DTOAdapter
 
@@ -133,8 +147,12 @@ class Packagers(containers.DeclarativeContainer):
 
     packager_provider = providers.Factory(
         PackagerProvider,
-        epub_packager, html_packager, mobi_packager, pdf_packager,
-        azw3_packager, text_packager,
+        epub_packager,
+        html_packager,
+        mobi_packager,
+        pdf_packager,
+        azw3_packager,
+        text_packager,
     )
 
 

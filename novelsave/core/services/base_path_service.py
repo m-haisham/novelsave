@@ -6,7 +6,6 @@ from novelsave.core.entities.novel import Novel, Asset
 
 
 class BasePathService(ABC):
-
     @abstractmethod
     def divide(self, r_path: Path) -> Path:
         """add additional sub folder to the parent depending on the file type"""

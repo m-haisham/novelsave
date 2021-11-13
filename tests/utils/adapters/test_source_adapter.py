@@ -12,23 +12,23 @@ def source_adapter() -> SourceAdapter:
 
 def test_novel_to_internal(source_adapter):
     test_novel = sm.Novel(
-        title='title',
-        author='author',
-        synopsis=['a nice description'],
-        thumbnail_url='thumbnail',
-        lang='language',
-        url='link',
+        title="title",
+        author="author",
+        synopsis=["a nice description"],
+        thumbnail_url="thumbnail",
+        lang="language",
+        url="link",
     )
 
     expected_novel = dtos.NovelDTO(
         id=None,
-        title='title',
-        author='author',
-        synopsis='a nice description',
-        thumbnail_url='thumbnail',
+        title="title",
+        author="author",
+        synopsis="a nice description",
+        thumbnail_url="thumbnail",
         thumbnail_path=None,
-        lang='language',
-        url='link',
+        lang="language",
+        url="link",
         last_updated=None,
     )
 

@@ -1,4 +1,5 @@
 from novelsave_sources import models as sm
+
 from novelsave.core import dtos
 
 
@@ -11,12 +12,12 @@ class SourceAdapter(object):
         arguments = {
             key: value
             for key, value in vars(novel).items()
-            if key in {'title', 'url', 'author', 'thumbnail_url', 'lang'}
+            if key in {"title", "url", "author", "thumbnail_url", "lang"}
         }
 
         return dtos.NovelDTO(
             id=None,
-            synopsis='\n'.join(novel.synopsis),
+            synopsis="\n".join(novel.synopsis),
             volumes=[self.volume_to_internal(c) for c in novel.volumes],
             metadata=[self.metadata_to_internal(m) for m in novel.metadata],
             **arguments
@@ -29,7 +30,7 @@ class SourceAdapter(object):
             id=None,
             index=volume.index,
             name=volume.name,
-            chapters=[self.chapter_to_internal(c) for c in volume.chapters]
+            chapters=[self.chapter_to_internal(c) for c in volume.chapters],
         )
 
     def chapter_to_internal(self, chapter: sm.Chapter) -> dtos.ChapterDTO:
@@ -62,6 +63,8 @@ class SourceAdapter(object):
             others=metadata.others,
         )
 
-    def chapter_content_to_internal(self, source_chapter: sm.Chapter, internal_chapter: dtos.ChapterDTO):
+    def chapter_content_to_internal(
+        self, source_chapter: sm.Chapter, internal_chapter: dtos.ChapterDTO
+    ):
         """map content from source chapter to internal chapter"""
         internal_chapter.content = source_chapter.paragraphs

@@ -16,9 +16,9 @@ from novelsave.exceptions import SourceNotFoundException, NSError
 
 @inject
 def show_info(
-        id_or_url: str,
-        fmt: Literal['default', 'json'] = 'default',
-        novel_service: BaseNovelService = Provide[Application.services.novel_service],
+    id_or_url: str,
+    fmt: Literal["default", "json"] = "default",
+    novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ):
     """print current information of novel"""
     try:
@@ -29,24 +29,24 @@ def show_info(
     chapters = novel_service.get_chapters(novel)
 
     data = {
-        'novel': {
-            'id': novel.id,
-            'title': novel.title,
-            'author': novel.author,
-            'lang': novel.lang,
-            'thumbnail': novel.thumbnail_url,
-            'synopsis': novel.synopsis.splitlines(),
-            'urls': [o.url for o in novel_service.get_urls(novel)],
+        "novel": {
+            "id": novel.id,
+            "title": novel.title,
+            "author": novel.author,
+            "lang": novel.lang,
+            "thumbnail": novel.thumbnail_url,
+            "synopsis": novel.synopsis.splitlines(),
+            "urls": [o.url for o in novel_service.get_urls(novel)],
         },
-        'chapters': {
-            'total': len(chapters),
-            'downloaded': len([c for c in chapters if c.content]),
-        }
+        "chapters": {
+            "total": len(chapters),
+            "downloaded": len([c for c in chapters if c.content]),
+        },
     }
 
-    if fmt is None or fmt == 'default':
-        endl = '\n'
-        text = '[novel]' + endl
+    if fmt is None or fmt == "default":
+        endl = "\n"
+        text = "[novel]" + endl
 
         def format_keyvalue(key, value):
             text = f"{key} = "
@@ -59,16 +59,16 @@ def show_info(
             text += endl
             return text
 
-        for key, value in data['novel'].items():
+        for key, value in data["novel"].items():
             text += format_keyvalue(key, value)
 
         text += endl
-        text += '[chapters]' + endl
+        text += "[chapters]" + endl
 
-        for key, value in data['chapters'].items():
+        for key, value in data["chapters"].items():
             text += format_keyvalue(key, value)
 
-    elif fmt == 'json':
+    elif fmt == "json":
         text = json.dumps(data, indent=4)
     else:
         raise NSError(f"Provided novel information formatter is not supported: {fmt}.")
@@ -79,12 +79,12 @@ def show_info(
 
 @inject
 def list_novels(
-        novel_service: BaseNovelService = Provide[Application.services.novel_service],
-        source_service: BaseSourceService = Provide[Application.services.source_service],
+    novel_service: BaseNovelService = Provide[Application.services.novel_service],
+    source_service: BaseSourceService = Provide[Application.services.source_service],
 ):
     novels = novel_service.get_all_novels()
 
-    table = [['Id', 'Title', 'Source', 'Last updated']]
+    table = [["Id", "Title", "Source", "Last updated"]]
 
     for novel in novels:
         url = novel_service.get_primary_url(novel)
@@ -96,14 +96,14 @@ def list_novels(
 
         table.append([novel.id, novel.title, source, novel.last_updated])
 
-    for line in tabulate(table, headers='firstrow', tablefmt='github').splitlines():
+    for line in tabulate(table, headers="firstrow", tablefmt="github").splitlines():
         logger.info(line)
 
 
 @inject
 def delete_downloaded_content(
-        id_or_url: str,
-        novel_service: BaseNovelService = Provide[Application.services.novel_service],
+    id_or_url: str,
+    novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ):
     """deletes all the downloaded content from chapters of novel"""
     try:
@@ -117,10 +117,10 @@ def delete_downloaded_content(
 
 @inject
 def delete_associations(
-        id_or_url: str,
-        novel_service: BaseNovelService = Provide[Application.services.novel_service],
-        path_service: BasePathService = Provide[Application.services.path_service],
-        asset_service: BaseAssetService = Provide[Application.services.asset_service],
+    id_or_url: str,
+    novel_service: BaseNovelService = Provide[Application.services.novel_service],
+    path_service: BasePathService = Provide[Application.services.path_service],
+    asset_service: BaseAssetService = Provide[Application.services.asset_service],
 ):
     """Removes all except vital information related to novel, this includes chapters, metadata, and assets."""
     try:
@@ -131,18 +131,20 @@ def delete_associations(
     logger.info(f"Removing associated data from '{novel.title}' ({novel.id})...")
 
     novel_service.delete_volumes(novel)
-    logger.info(f"Deleted volumes and chapters of novel.")
+    logger.info("Deleted volumes and chapters of novel.")
 
     novel_service.delete_metadata(novel)
-    logger.info(f"Deleted metadata of novel.")
+    logger.info("Deleted metadata of novel.")
 
     asset_service.delete_assets_of_novel(novel)
-    logger.info(f"Deleted asset entries of novel.")
+    logger.info("Deleted asset entries of novel.")
 
     novel_dir = path_service.novel_data_path(novel)
     if novel_dir.exists():
         shutil.rmtree(novel_dir)
-    logger.info(f"Deleted saved file data of novel: {{data.dir}}/{path_service.resolve_data_path(novel_dir)}.")
+    logger.info(
+        f"Deleted saved file data of novel: {{data.dir}}/{path_service.resolve_data_path(novel_dir)}."
+    )
 
 
 def clean_novel(id_or_url: str, content_only: bool):
@@ -160,9 +162,9 @@ def clean_novel(id_or_url: str, content_only: bool):
 
 @inject
 def delete_novel(
-        id_or_url: str,
-        novel_service: BaseNovelService = Provide[Application.services.novel_service],
-        path_service: BasePathService = Provide[Application.services.path_service],
+    id_or_url: str,
+    novel_service: BaseNovelService = Provide[Application.services.novel_service],
+    path_service: BasePathService = Provide[Application.services.path_service],
 ):
     """delete all records of novel. this includes chapters, and assets"""
     try:
@@ -175,17 +177,19 @@ def delete_novel(
     novel_dir = path_service.novel_data_path(novel)
     if novel_dir.exists():
         shutil.rmtree(novel_dir)
-    logger.info(f"Deleted data of novel: {{data.dir}}/{path_service.resolve_data_path(novel_dir)}.")
+    logger.info(
+        f"Deleted data of novel: {{data.dir}}/{path_service.resolve_data_path(novel_dir)}."
+    )
 
     novel_service.delete_novel(novel)
-    logger.info(f"Deleted novel entry.")
+    logger.info("Deleted novel entry.")
 
 
 @inject
 def import_metadata(
-        id_or_url: str,
-        metadata_url: str,
-        novel_service: BaseNovelService = Provide[Application.services.novel_service],
+    id_or_url: str,
+    metadata_url: str,
+    novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ):
     """import metadata from a metadata supplied into an existing novel"""
     try:

@@ -10,8 +10,8 @@ from novelsave.core.services import BaseNovelService
 
 @inject
 def remove_url(
-        url: str,
-        novel_service: BaseNovelService = Provide[Application.services.novel_service],
+    url: str,
+    novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ):
     """Removes the selected url from the database"""
     try:
@@ -30,9 +30,9 @@ def remove_url(
 
 @inject
 def add_url(
-        id_or_url: str,
-        new_url: str,
-        novel_service: BaseNovelService = Provide[Application.services.novel_service],
+    id_or_url: str,
+    new_url: str,
+    novel_service: BaseNovelService = Provide[Application.services.novel_service],
 ):
     """Deletes the novel and all its data"""
     try:

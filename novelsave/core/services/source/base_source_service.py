@@ -4,7 +4,6 @@ from . import BaseSourceGateway, BaseMetaSourceGateway
 
 
 class BaseSourceService(ABC):
-
     @property
     @abstractmethod
     def current_version(self) -> str:

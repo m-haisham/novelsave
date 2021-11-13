@@ -6,7 +6,6 @@ from novelsave.core.entities.novel import Novel, Asset
 
 
 class BaseAssetService(ABC):
-
     @abstractmethod
     def downloaded_assets(self, novel: Novel) -> List[Asset]:
         """all assets belonging to novel that have been downloaded"""

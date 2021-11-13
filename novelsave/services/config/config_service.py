@@ -11,7 +11,7 @@ def ensure_key_exists(func):
 
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
-        self, key = args[0], kwargs.get('key', args[1])
+        self, key = args[0], kwargs.get("key", args[1])
         if key not in self._defaults:
             raise KeyError(f"The specified key is not in configurations: '{key}'")
 
@@ -24,10 +24,10 @@ class ConfigService(BaseConfigService):
     version = 2
 
     def __init__(self, config_file: Path, default_novel_dir: Path):
-        self.data = {'version': self.version, 'config': {}}
+        self.data = {"version": self.version, "config": {}}
 
         self._defaults = {
-            'novel.dir': str(default_novel_dir),
+            "novel.dir": str(default_novel_dir),
         }
 
         self.config_file = config_file
@@ -35,21 +35,21 @@ class ConfigService(BaseConfigService):
         self.load()
 
     def save(self):
-        with self.config_file.open('w') as f:
+        with self.config_file.open("w") as f:
             json.dump(self.data, f, indent=4)
 
     def load(self):
         try:
-            with self.config_file.open('r') as f:
+            with self.config_file.open("r") as f:
                 self.data = json.load(f)
 
-            self.data['version'] = self.version
+            self.data["version"] = self.version
         except FileNotFoundError:
             pass
 
     @property
     def config(self) -> dict:
-        return self.data.setdefault('config', {})
+        return self.data.setdefault("config", {})
 
     def get_all_configs(self) -> Dict:
         config = self._defaults.copy()

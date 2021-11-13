@@ -19,4 +19,4 @@ def test_source_from_url(source_service):
 
 def test_source_from_url_unavailable(source_service):
     with pytest.raises(SourceNotFoundException):
-        source_service.source_from_url('https://test.site')
+        source_service.source_from_url("https://test.site")

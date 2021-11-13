@@ -12,7 +12,10 @@ def source_gateway():
 
 
 def test_use_cookies_from_browser_attribute_error(mocker, source_gateway):
-    mocker.patch('novelsave.services.source.source_gateway.browser_cookie3.chrome', side_effect=AttributeError())
+    mocker.patch(
+        "novelsave.services.source.source_gateway.browser_cookie3.chrome",
+        side_effect=AttributeError(),
+    )
 
     with pytest.raises(CookieBrowserNotSupportedException):
-        source_gateway.use_cookies_from_browser('chrome')
+        source_gateway.use_cookies_from_browser("chrome")

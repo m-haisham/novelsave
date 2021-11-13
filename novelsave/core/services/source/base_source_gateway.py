@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List
 
 from novelsave.core import dtos
 
 
 class BaseSourceGateway(ABC):
-
     @property
     @abstractmethod
     def name(self) -> str:

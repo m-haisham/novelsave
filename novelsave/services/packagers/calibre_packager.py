@@ -10,9 +10,9 @@ from novelsave.core.services.packagers import BasePackager
 
 class CalibrePackager(BasePackager, ABC):
     def __init__(
-            self,
-            calibre_service: BaseCalibreService,
-            path_service: BasePathService,
+        self,
+        calibre_service: BaseCalibreService,
+        path_service: BasePathService,
     ):
         self.path_service = path_service
         self.calibre_service = calibre_service
@@ -25,14 +25,15 @@ class CalibrePackager(BasePackager, ABC):
         output_file = self.destination(novel)
         output_format = self.keywords()[0].capitalize()
 
-        input_file = output_file.parent / f'{output_file.parent.name}.epub'
+        input_file = output_file.parent / f"{output_file.parent.name}.epub"
 
         args = [
-            '--book-producer', 'novelsave',
-            '--unsmarten-punctuation',
-            '--no-chapters-in-toc',
-            '--enable-heuristics',
-            '--disable-renumber-headings',
+            "--book-producer",
+            "novelsave",
+            "--unsmarten-punctuation",
+            "--no-chapters-in-toc",
+            "--enable-heuristics",
+            "--disable-renumber-headings",
             *self.args,
         ]
 
@@ -49,7 +50,7 @@ class CalibrePackager(BasePackager, ABC):
     @lru_cache(maxsize=1)
     def destination(self, novel: Novel):
         path = self.path_service.novel_save_path(novel)
-        return path / f'{path.name}{self.ext}'
+        return path / f"{path.name}{self.ext}"
 
     @property
     @abstractmethod

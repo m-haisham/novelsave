@@ -1,7 +1,7 @@
 import re
 
 
-def slugify(s: str, replace=''):
+def slugify(s: str, replace=""):
     """Remove special characters that will prevent string from being used as file name
 
     It is important that 'replace' is not a special character.
@@ -32,9 +32,9 @@ def format_bytes(size: int) -> str:
     # 2**10 = 1024
     power = 2 ** 10
     n = 0
-    power_labels = {0: '', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
+    power_labels = {0: "", 1: "K", 2: "M", 3: "G", 4: "T"}
     while size > power:
         size /= power
         n += 1
 
-    return f'{size:.2f} {power_labels[n]}b'
+    return f"{size:.2f} {power_labels[n]}b"

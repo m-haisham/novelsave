@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Callable, List, Dict, Tuple
+from typing import Optional, List, Dict, Tuple
 
 from loguru import logger
 from sqlalchemy import delete, select, update
@@ -13,12 +13,11 @@ from novelsave.utils.adapters import DTOAdapter
 
 
 class NovelService(BaseNovelService):
-
     def __init__(
-            self,
-            session: Session,
-            dto_adapter: DTOAdapter,
-            file_service: FileService,
+        self,
+        session: Session,
+        dto_adapter: DTOAdapter,
+        file_service: FileService,
     ):
         self.session = session
         self.dto_adapter = dto_adapter
@@ -33,7 +32,9 @@ class NovelService(BaseNovelService):
 
     def get_novel_by_url(self, url: str) -> Optional[Novel]:
         """retrieve a novel from persistence using its url"""
-        return self.session.query(Novel).join(NovelUrl).filter(NovelUrl.url == url).first()
+        return (
+            self.session.query(Novel).join(NovelUrl).filter(NovelUrl.url == url).first()
+        )
 
     def get_primary_url(self, novel: Novel) -> str:
         return novel.urls[0].url
@@ -42,12 +43,22 @@ class NovelService(BaseNovelService):
         return novel.urls
 
     def get_chapters(self, novel: Novel) -> List[Chapter]:
-        return self.session.execute(
-            select(Chapter).join(Volume).where(Volume.novel_id == novel.id)
-        ).scalars().all()
+        return (
+            self.session.execute(
+                select(Chapter).join(Volume).where(Volume.novel_id == novel.id)
+            )
+            .scalars()
+            .all()
+        )
 
     def get_pending_chapters(self, novel: Novel, limit: int = -1):
-        stmt = select(Chapter).join(Volume).where((Chapter.content == None) & (Volume.novel_id == novel.id))
+        stmt = (
+            select(Chapter)
+            .join(Volume)
+            .where(
+                (Chapter.content == None) & (Volume.novel_id == novel.id)  # noqa: E711
+            )
+        )
         if limit is not None and limit > 0:
             stmt = stmt.limit(limit)
 
@@ -57,12 +68,21 @@ class NovelService(BaseNovelService):
         return novel.volumes
 
     def get_volumes_with_chapters(self, novel: Novel) -> Dict[Volume, List[Chapter]]:
-        volumes = self.session.execute(select(Volume).where(Volume.novel_id == novel.id)).scalars().all()
+        volumes = (
+            self.session.execute(select(Volume).where(Volume.novel_id == novel.id))
+            .scalars()
+            .all()
+        )
 
         return {
             volume: self.session.execute(
-                select(Chapter).where((Chapter.content != None) & (Chapter.volume_id == volume.id))
-            ).scalars().all()
+                select(Chapter).where(
+                    (Chapter.content != None)  # noqa: E711
+                    & (Chapter.volume_id == volume.id)
+                )
+            )
+            .scalars()
+            .all()
             for volume in volumes
         }
 
@@ -81,10 +101,10 @@ class NovelService(BaseNovelService):
         return novel
 
     def insert_chapters(
-            self,
-            novel: Novel,
-            volume_dtos: List[VolumeDTO],
-            previous: Dict[str, Chapter] = None
+        self,
+        novel: Novel,
+        volume_dtos: List[VolumeDTO],
+        previous: Dict[str, Chapter] = None,
     ):
         volume_mapped_chapters = self.dto_adapter.volumes_from_dto(novel, volume_dtos)
 
@@ -122,7 +142,11 @@ class NovelService(BaseNovelService):
         self.session.commit()
 
     def update_chapters(self, novel: Novel, volume_dtos: List[VolumeDTO]):
-        volumes = self.session.execute(select(Volume).where(Volume.novel_id == novel.id)).scalars().all()
+        volumes = (
+            self.session.execute(select(Volume).where(Volume.novel_id == novel.id))
+            .scalars()
+            .all()
+        )
         chapters = self.get_chapters(novel)
         volume_mapped_chapters = self.dto_adapter.volumes_from_dto(novel, volume_dtos)
 
@@ -134,8 +158,14 @@ class NovelService(BaseNovelService):
 
                 # update names of volumes that already exist
                 if existing_volume.name != v.name:
-                    logger.debug(f"Updating volume name (index={v.index}, name='{existing_volume.name}' -> '{v.name}')")
-                    self.session.execute(update(Volume).where(Volume.id == existing_volume.id).values(name=v.name))
+                    logger.debug(
+                        f"Updating volume name (index={v.index}, name='{existing_volume.name}' -> '{v.name}')"
+                    )
+                    self.session.execute(
+                        update(Volume)
+                        .where(Volume.id == existing_volume.id)
+                        .values(name=v.name)
+                    )
 
                 # index exists so map the chapters into existing volume
                 volume_mapped_chapters[existing_volume] = volume_mapped_chapters.pop(v)
@@ -160,13 +190,15 @@ class NovelService(BaseNovelService):
                     ece = indexed_chapters.pop(chapter.url)
 
                     # update chapters that need to be updated
-                    if ece.volume_id != volume.id \
-                            or ece.index != chapter.index:
-                        logger.debug(f"Updating chapter parent volume (index={ece.index} -> {chapter.index}, "
-                                     f"volume_id={ece.volume_id} -> {volume.id})")
+                    if ece.volume_id != volume.id or ece.index != chapter.index:
+                        logger.debug(
+                            f"Updating chapter parent volume (index={ece.index} -> {chapter.index}, "
+                            f"volume_id={ece.volume_id} -> {volume.id})"
+                        )
                         self.session.execute(
                             update(Chapter)
-                                .where(Chapter.url == chapter.url).values(index=chapter.index, volume_id=volume.id)
+                            .where(Chapter.url == chapter.url)
+                            .values(index=chapter.index, volume_id=volume.id)
                         )
                 except KeyError:
                     chapters_to_add.append(chapter)
@@ -176,12 +208,16 @@ class NovelService(BaseNovelService):
         self.session.add_all(chapters_to_add)
 
         # delete chapters that dont exist anymore
-        logger.debug(f"Deleting chapter rows that dont exist anymore (count={len(indexed_chapters)}).")
+        logger.debug(
+            f"Deleting chapter rows that dont exist anymore (count={len(indexed_chapters)})."
+        )
         for old in indexed_chapters.values():
             self.session.delete(old)
 
         # delete volumes that dont exist anymore
-        logger.debug(f"Deleting volume rows that dont exist anymore (count={len(indexed_volumes)}).")
+        logger.debug(
+            f"Deleting volume rows that dont exist anymore (count={len(indexed_volumes)})."
+        )
         for old in indexed_volumes.values():
             self.session.delete(old)
 
@@ -189,18 +225,24 @@ class NovelService(BaseNovelService):
 
     def update_metadata(self, novel: Novel, metadata_dtos: List[MetaDataDTO]):
         current_metadata = self.get_metadata(novel)
-        indexed_metadata: Dict[Tuple, MetaData] = {(data.name, data.value): data for data in current_metadata}
+        indexed_metadata: Dict[Tuple, MetaData] = {
+            (data.name, data.value): data for data in current_metadata
+        }
 
         metadata_to_add = []
         for dto in metadata_dtos:
             this_metadata = self.dto_adapter.metadata_from_dto(novel, dto)
 
             try:
-                current_metadata = indexed_metadata.pop((this_metadata.name, this_metadata.value))
+                current_metadata = indexed_metadata.pop(
+                    (this_metadata.name, this_metadata.value)
+                )
                 if current_metadata.others != this_metadata.others:
                     current_metadata.others = this_metadata
-                    logger.debug(f"Updating metadata (id={current_metadata.id}, "
-                                 f"others={current_metadata.others} -> {this_metadata.others})")
+                    logger.debug(
+                        f"Updating metadata (id={current_metadata.id}, "
+                        f"others={current_metadata.others} -> {this_metadata.others})"
+                    )
 
             except KeyError:
                 metadata_to_add.append(this_metadata)
@@ -208,20 +250,28 @@ class NovelService(BaseNovelService):
         logger.debug(f"Adding newly found metadata (count={len(metadata_to_add)})")
         self.session.add_all(metadata_to_add)
 
-        logger.debug(f"Deleting metadata rows that dont exist anymore (count={len(indexed_metadata)})")
+        logger.debug(
+            f"Deleting metadata rows that dont exist anymore (count={len(indexed_metadata)})"
+        )
         for metadata in indexed_metadata.values():
             self.session.delete(metadata)
 
         self.session.commit()
 
     def update_content(self, chapter_dto: ChapterDTO):
-        stmt = update(Chapter).where(Chapter.url == chapter_dto.url).values(content=chapter_dto.content)
+        stmt = (
+            update(Chapter)
+            .where(Chapter.url == chapter_dto.url)
+            .values(content=chapter_dto.content)
+        )
         self.session.execute(stmt)
         self.session.commit()
 
     def add_url(self, novel: Novel, url: str):
         if url in [novel_url.url for novel_url in self.get_urls(novel)]:
-            raise ValueError(f"Url already exists in novel (id={novel.id}, title='{novel.title}', {url=}).")
+            raise ValueError(
+                f"Url already exists in novel (id={novel.id}, title='{novel.title}', {url=})."
+            )
 
         novel_url = NovelUrl(url=url, novel_id=novel.id)
         self.session.add(novel_url)
@@ -230,18 +280,26 @@ class NovelService(BaseNovelService):
     def remove_url(self, novel: Novel, url: str):
         urls = [novel_url.url for novel_url in self.get_urls(novel)]
         if len(urls) <= 1:
-            raise ValueError(f"Novel has only one url (id={novel.id}, title='{novel.title}').\n"
-                             f"You must add another before this may be removed.")
+            raise ValueError(
+                f"Novel has only one url (id={novel.id}, title='{novel.title}').\n"
+                f"You must add another before this may be removed."
+            )
         if url not in urls:
-            raise ValueError(f"Url not in novel (id={novel.id}, title='{novel.title}', {url=}).")
+            raise ValueError(
+                f"Url not in novel (id={novel.id}, title='{novel.title}', {url=})."
+            )
 
-        stmt = delete(NovelUrl).where((NovelUrl.url == url) & (NovelUrl.novel_id == novel.id))
+        stmt = delete(NovelUrl).where(
+            (NovelUrl.url == url) & (NovelUrl.novel_id == novel.id)
+        )
         self.session.execute(stmt)
         self.session.commit()
 
     def delete_content(self, novel: Novel):
         volumes = [v.id for v in self.get_volumes(novel)]
-        stmt = update(Chapter).where(Chapter.volume_id.in_(volumes)).values(content=None)
+        stmt = (
+            update(Chapter).where(Chapter.volume_id.in_(volumes)).values(content=None)
+        )
 
         self.session.execute(stmt)
         self.session.commit()
@@ -263,14 +321,3 @@ class NovelService(BaseNovelService):
         stmt = delete(MetaData).where(MetaData.novel_id == novel.id)
         self.session.execute(stmt)
         self.session.commit()
-
-
-
-
-
-
-
-
-
-
-

@@ -5,7 +5,7 @@ from .calibre_packager import CalibrePackager
 
 class Azw3Packager(CalibrePackager):
     def keywords(self) -> List[str]:
-        return ['azw3']
+        return ["azw3"]
 
     @property
     def args(self) -> List[str]:
@@ -13,4 +13,4 @@ class Azw3Packager(CalibrePackager):
 
     @property
     def ext(self) -> str:
-        return '.azw3'
+        return ".azw3"

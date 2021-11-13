@@ -5,10 +5,10 @@ from ..base import Base
 
 
 class NovelUrl(Base):
-    __tablename__ = 'novel_urls'
+    __tablename__ = "novel_urls"
 
     id = Column(Integer, primary_key=True)
     url = Column(String, nullable=False)
 
-    novel_id = Column(Integer, ForeignKey('novels.id'))
-    novel = relationship('Novel', back_populates='urls', lazy='joined')
+    novel_id = Column(Integer, ForeignKey("novels.id"))
+    novel = relationship("Novel", back_populates="urls", lazy="joined")

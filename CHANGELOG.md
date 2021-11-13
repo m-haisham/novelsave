@@ -1,17 +1,18 @@
 # Change Log
 All notable changes to this project will be documented in this file.
- 
+
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
- 
+
 ## [Unreleased] - yyyy-mm-dd
- 
+
 ### Added
 
 - Added github issue templates
 - Added CHANGELOG.md
 - Added `--json` output option for info command
- 
+- Added pre-commit checks for consistent style
+
 ### Changed
 
 - Updated project dependencies
@@ -113,20 +114,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fix novelsave-sources==0.1.1 import error
 
 ## [0.7.1] - 2021-09-01
- 
+
 ### Added
- 
+
 - Auto check for updates at end of program execution.
 - New command `list` that would show all the novels in database.
 - Handle connection error during updating and remind to check for internet connection.
 
 ### Changed
-  
+
 - All novel urls must now end in slash `/` and will be adjusted appropriately.
 - Show logging level label if its not info `DEBUG: ...` `ERROR: ...`
 - Logger now keeps an individual log file for each run that is compressed at end.
 - Some adjustments to log console output.
- 
+
 ## [0.7.0] - 2021-08-28
 
 Due to the extreme change in code it is recommended that you explicitly uninstall the existing version

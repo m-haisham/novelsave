@@ -5,10 +5,10 @@ from ...settings import CONFIG_FILE
 
 
 def _version_1(data: dict):
-    config = data.get('config', {})
+    config = data.get("config", {})
 
     try:
-        config['novel']['dir'] = Path(config['novel']['dir'])
+        config["novel"]["dir"] = Path(config["novel"]["dir"])
     except KeyError:
         pass
 
@@ -16,10 +16,10 @@ def _version_1(data: dict):
 
 
 def _version_2(data: dict):
-    config = data.get('config', {})
+    config = data.get("config", {})
 
     types = {
-        'novel.dir': Path,
+        "novel.dir": Path,
     }
 
     parsed = {}
@@ -31,19 +31,19 @@ def _version_2(data: dict):
             pass
 
         parent = parsed
-        for segment in key.split('.')[:-1]:
+        for segment in key.split(".")[:-1]:
             parent = parent.setdefault(segment, {})
 
-        parent[key.split('.')[-1]] = value
+        parent[key.split(".")[-1]] = value
 
     return parsed
 
 
 def from_file() -> dict:
-    with CONFIG_FILE.open('r') as f:
+    with CONFIG_FILE.open("r") as f:
         data: dict = json.load(f)
 
-    version = data.get('version', 0)
+    version = data.get("version", 0)
     if version == 0:
         return {}
     elif version == 1:

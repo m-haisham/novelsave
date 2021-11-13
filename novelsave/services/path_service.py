@@ -10,14 +10,13 @@ from novelsave.utils.helpers import string_helper
 
 
 class PathService(BasePathService):
-
     def __init__(
-            self,
-            data_dir: Path,
-            novels_dir: Path,
-            division_rules: Dict[str, str],
-            novel_service: BaseNovelService,
-            source_service: BaseSourceService,
+        self,
+        data_dir: Path,
+        novels_dir: Path,
+        division_rules: Dict[str, str],
+        novel_service: BaseNovelService,
+        source_service: BaseSourceService,
     ):
         self.data_dir = data_dir
         self.novels_dir = novels_dir
@@ -26,7 +25,7 @@ class PathService(BasePathService):
         self.source_service = source_service
 
     def divide(self, path: Path) -> Path:
-        parent = path.parent / self.division_rules.get(path.suffix, '')
+        parent = path.parent / self.division_rules.get(path.suffix, "")
         return parent.resolve() / path.name
 
     def novel_save_path(self, novel: Novel) -> Path:
@@ -35,7 +34,7 @@ class PathService(BasePathService):
             source_gateway = self.source_service.source_from_url(url)
             source_folder_name = source_gateway.name
         except SourceNotFoundException:
-            source_folder_name = ''
+            source_folder_name = ""
 
         novel_name_slug = string_helper.slugify(novel.title, "_")
 
@@ -54,10 +53,10 @@ class PathService(BasePathService):
     def thumbnail_path(self, novel: Novel) -> Path:
         suffix = Path(novel.thumbnail_url).suffix
 
-        return self.data_dir / str(novel.id) / f'cover{suffix}'
+        return self.data_dir / str(novel.id) / f"cover{suffix}"
 
     def resolve_data_path(self, r_path: Union[Path, str]) -> Path:
-        return self.data_dir / str(r_path).lstrip('.').lstrip('/\\')
+        return self.data_dir / str(r_path).lstrip(".").lstrip("/\\")
 
     def relative_to_novel_dir(self, path: Path) -> Path:
         return path.relative_to(self.novels_dir)

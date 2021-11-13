@@ -14,6 +14,7 @@ class NSError(Exception):
 @dataclass
 class CookieBrowserNotSupportedException(NSException):
     """the specified browser does not support cookie extraction"""
+
     browser: str
 
 
@@ -26,6 +27,7 @@ class ContentUpdateFailedException(NSException):
 @dataclass
 class SourceNotFoundException(NSException):
     """source for the url was not found"""
+
     url: str
 
 

@@ -3,9 +3,9 @@ from dataclasses import dataclass, field
 
 @dataclass
 class MetaDataDTO:
-    DEFAULT_NAMESPACE = 'DC'
-    SOURCE_INTERNAL = 'int'
-    SOURCE_EXTERNAL = 'ext'
+    DEFAULT_NAMESPACE = "DC"
+    SOURCE_INTERNAL = "int"
+    SOURCE_EXTERNAL = "ext"
 
     name: str
     value: str

@@ -1,11 +1,11 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, TIMESTAMP, func
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 from ..base import Base
 
 
 class MetaData(Base):
-    __tablename__ = 'novel_metadata'
+    __tablename__ = "novel_metadata"
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
@@ -13,5 +13,5 @@ class MetaData(Base):
     namespace = Column(String)
     others = Column(String)
 
-    novel_id = Column(Integer, ForeignKey('novels.id'))
-    novel = relationship('Novel', back_populates='novel_metadata')
+    novel_id = Column(Integer, ForeignKey("novels.id"))
+    novel = relationship("Novel", back_populates="novel_metadata")

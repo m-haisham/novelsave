@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class BaseMetaService(ABC):
-
     @property
     @abstractmethod
     def current_version(self) -> str:

@@ -5,7 +5,6 @@ from novelsave.core.dtos import MetaDataDTO
 
 
 class BaseMetaSourceGateway(ABC):
-
     @property
     @abstractmethod
     def name(self):

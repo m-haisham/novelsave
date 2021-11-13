@@ -8,10 +8,10 @@ from .. import helpers
 
 
 def update(
-        id_or_url: str,
-        browser: Optional[str],
-        limit: Optional[int],
-        threads: Optional[int],
+    id_or_url: str,
+    browser: Optional[str],
+    limit: Optional[int],
+    threads: Optional[int],
 ):
     """
     update the novel metadata and downloads any new chapters if not specified otherwise
@@ -31,7 +31,7 @@ def update(
         if not is_url:
             sys.exit(1)
 
-        logger.info(f"Attempting to create new novel entry using url...")
+        logger.info("Attempting to create new novel entry using url...")
         novel = helpers.create_novel(id_or_url, browser)
     else:
         helpers.update_novel(novel, browser)
@@ -41,6 +41,6 @@ def update(
     if limit is None or limit > 0:
         helpers.download_chapters(novel, limit, threads)
     else:
-        logger.info(f"Skipped chapter download since it was specified as such.")
+        logger.info("Skipped chapter download since it was specified as such.")
 
     helpers.download_assets(novel)

@@ -13,11 +13,13 @@ from novelsave.exceptions import RequirementException, ToolException
 
 @inject
 def package(
-        id_or_url: str,
-        targets: Iterable[str],
-        target_all: bool,
-        packager_provider: BasePackagerProvider = Provide[Application.packagers.packager_provider],
-        path_service: BasePathService = Provide[Application.services.path_service],
+    id_or_url: str,
+    targets: Iterable[str],
+    target_all: bool,
+    packager_provider: BasePackagerProvider = Provide[
+        Application.packagers.packager_provider
+    ],
+    path_service: BasePathService = Provide[Application.services.path_service],
 ):
     """Package the selected novel into the formats of choosing"""
     if target_all:
@@ -41,4 +43,6 @@ def package(
             logger.error(f"Packaging to '{packager.keywords()[0]}' failed: {e}.")
             logger.exception(e)
         else:
-            logger.info(f"Packaging to '{packager.keywords()[0]}' succeeded and saved to '{{novel.dir}}/{path_service.relative_to_novel_dir(path)}.")
+            logger.info(
+                f"Packaging to '{packager.keywords()[0]}' succeeded and saved to '{{novel.dir}}/{path_service.relative_to_novel_dir(path)}."
+            )

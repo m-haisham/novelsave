@@ -1,2 +1,2 @@
-from .base import Base
 from . import novel
+from .base import Base

@@ -16,13 +16,19 @@ def path_service():
 
 
 def test_compile_no_novel(mocker, packager_provider, path_service):
-    mocker.patch('novelsave.cli.controllers._package.get_novel', side_effect=ValueError())
+    mocker.patch(
+        "novelsave.cli.controllers._package.get_novel", side_effect=ValueError()
+    )
 
     with pytest.raises(SystemExit):
-        controllers.package('https://novel.site', ['epub'], False, packager_provider, path_service)
+        controllers.package(
+            "https://novel.site", ["epub"], False, packager_provider, path_service
+        )
 
 
 def test_compile_with_novel(mocker, packager_provider, path_service):
-    mocker.patch('novelsave.cli.controllers._package.get_novel', return_value='novel')
+    mocker.patch("novelsave.cli.controllers._package.get_novel", return_value="novel")
 
-    controllers.package('https://novel.site', ['epub'], False, packager_provider, path_service)
+    controllers.package(
+        "https://novel.site", ["epub"], False, packager_provider, path_service
+    )

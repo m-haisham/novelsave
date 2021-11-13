@@ -3,7 +3,6 @@ from typing import Dict
 
 
 class BaseConfigService(ABC):
-
     @abstractmethod
     def get_all_configs(self) -> Dict:
         """Get all configurations saved or default"""

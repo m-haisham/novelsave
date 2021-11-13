@@ -9,15 +9,18 @@ from ...containers import Application
 from ...core.services.config import BaseConfigService
 
 
-@cli.group(name='config')
+@cli.group(name="config")
 def _config():
     """Manage customizable configurations."""
 
 
-@_config.command(name='show')
-@click.option('--key', help="View configuration for only this key.")
+@_config.command(name="show")
+@click.option("--key", help="View configuration for only this key.")
 @inject
-def _show_config(key: str, config_service: BaseConfigService = Provide[Application.services.config_service]):
+def _show_config(
+    key: str,
+    config_service: BaseConfigService = Provide[Application.services.config_service],
+):
     """View the current configuration."""
     if key is not None:
         try:
@@ -32,11 +35,15 @@ def _show_config(key: str, config_service: BaseConfigService = Provide[Applicati
         logger.info(f"Config ({key=}, {value=}).")
 
 
-@_config.command(name='set')
-@click.argument('key')
-@click.option('--value', required=True, help="New value for the configuration.")
+@_config.command(name="set")
+@click.argument("key")
+@click.option("--value", required=True, help="New value for the configuration.")
 @inject
-def _set_config(key, value, config_service: BaseConfigService = Provide[Application.services.config_service]):
+def _set_config(
+    key,
+    value,
+    config_service: BaseConfigService = Provide[Application.services.config_service],
+):
     """Change the configuration value."""
     try:
         config_service.set_config(key, value)
@@ -44,13 +51,16 @@ def _set_config(key, value, config_service: BaseConfigService = Provide[Applicat
         logger.error(str(e).strip('"'))
         sys.exit(1)
 
-    logger.info(f'Set config ({key=}, {value=}).')
+    logger.info(f"Set config ({key=}, {value=}).")
 
 
-@_config.command(name='reset')
-@click.argument('key')
+@_config.command(name="reset")
+@click.argument("key")
 @inject
-def _reset_config(key, config_service: BaseConfigService = Provide[Application.services.config_service]):
+def _reset_config(
+    key,
+    config_service: BaseConfigService = Provide[Application.services.config_service],
+):
     """Reset the configuration back to default."""
     try:
         config_service.reset_config(key)

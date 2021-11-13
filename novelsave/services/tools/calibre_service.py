@@ -9,8 +9,9 @@ from novelsave.exceptions import RequirementException, ToolException
 
 
 class CalibreService(BaseCalibreService):
-
-    def ebook_convert(self, input_file: Path, output_file: Path, pass_args: List[str] = None):
+    def ebook_convert(
+        self, input_file: Path, output_file: Path, pass_args: List[str] = None
+    ):
         if not input_file.exists() or not input_file.is_file():
             raise FileNotFoundError(f"File cannot be found (file='{input_file}')")
 
@@ -18,7 +19,7 @@ class CalibreService(BaseCalibreService):
             pass_args = []
 
         args = [
-            'ebook-convert',
+            "ebook-convert",
             input_file,
             output_file,
             *pass_args,
@@ -35,4 +36,6 @@ class CalibreService(BaseCalibreService):
                 "Make sure 'Calibre' is installed and added to path (https://calibre-ebook.com/download)."
             )
         except subprocess.CalledProcessError:
-            raise ToolException("Command did not finish correctly (command='ebook-convert').")
+            raise ToolException(
+                "Command did not finish correctly (command='ebook-convert')."
+            )

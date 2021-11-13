@@ -1,10 +1,11 @@
 import re
 from urllib.parse import urlparse
 
-url_start_pattern = re.compile(r'^https?://')
+url_start_pattern = re.compile(r"^https?://")
 
 url_pattern = re.compile(
-    r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)')
+    r"https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)"
+)
 
 
 def absolute_url(url: str, location: str) -> str:
@@ -14,16 +15,16 @@ def absolute_url(url: str, location: str) -> str:
     :param location: Location from which the url was retrieved.
     :returns: Absolute url derived using the parameters.
     """
-    if url.startswith('http://') or url.startswith('https:'):
+    if url.startswith("http://") or url.startswith("https:"):
         return url
 
     r = urlparse(location)
-    if url.startswith('//'):
-        return f'{r.scheme}:{url}'
-    elif url.startswith('/'):
-        return f'{r.scheme}://{r.netloc}{url}'
+    if url.startswith("//"):
+        return f"{r.scheme}:{url}"
+    elif url.startswith("/"):
+        return f"{r.scheme}://{r.netloc}{url}"
 
-    return location.rstrip('/') + url
+    return location.rstrip("/") + url
 
 
 def is_url(p_url: str):

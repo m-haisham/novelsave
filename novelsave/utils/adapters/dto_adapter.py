@@ -6,7 +6,6 @@ from novelsave.core.entities.novel import Novel, NovelUrl, Chapter, Volume, Meta
 
 
 class DTOAdapter:
-
     def novel_from_dto(self, novel_dto: NovelDTO) -> Tuple[Novel, NovelUrl]:
         novel = Novel(
             title=novel_dto.title,
@@ -31,7 +30,9 @@ class DTOAdapter:
 
         return novel
 
-    def volumes_from_dto(self, novel: Novel, volume_dtos: List[VolumeDTO]) -> Dict[Volume, List[ChapterDTO]]:
+    def volumes_from_dto(
+        self, novel: Novel, volume_dtos: List[VolumeDTO]
+    ) -> Dict[Volume, List[ChapterDTO]]:
         return {
             Volume(
                 id=dto.id,

@@ -162,4 +162,3 @@ We are not affiliated, associated, authorized, endorsed by, or in any way offici
 ## License
 
 [Apache-2.0](https://github.com/mensch272/novelsave/blob/master/LICENSE)
-

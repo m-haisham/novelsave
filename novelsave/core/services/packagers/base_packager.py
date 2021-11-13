@@ -6,7 +6,6 @@ from novelsave.core.entities.novel import Novel
 
 
 class BasePackager(ABC):
-
     @property
     @abstractmethod
     def priority(self):

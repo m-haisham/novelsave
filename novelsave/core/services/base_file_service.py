@@ -3,7 +3,6 @@ from pathlib import Path
 
 
 class BaseFileService(ABC):
-
     @abstractmethod
     def write_str(self, path: Path, data: str):
         """write and replace strings to a file"""

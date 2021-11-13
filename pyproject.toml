@@ -7,7 +7,7 @@ maintainers = ["Mensch272 <47662901+mensch272@users.noreply.github.com>"]
 repository = "https://github.com/mensch272/novelsave"
 license = "Apache-2.0"
 readme = "README.md"
-include = ["novelsave/static/*.*"]
+include = ["novelsave/resources/*.*"]
 keywords = ["novel", "lightnovel", "scraper", "epub", "mobi"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",

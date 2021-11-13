@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Updated project dependencies
 - Changed logging style
 - Changed novel list to display as a table
+- Renamed novelsave/static to novelsave/resources
 
 ### Fixed
 

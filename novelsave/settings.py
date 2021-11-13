@@ -10,7 +10,7 @@ AUTHOR = "Mensch272"
 # base project directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-STATIC_DIR = BASE_DIR / "novelsave/static"
+STATIC_DIR = BASE_DIR / "novelsave/resources"
 
 # operating system specific configuration file
 # config directory is used to place logs, config, cache

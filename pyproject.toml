@@ -45,11 +45,15 @@ browser-cookie3 = "^0.13.0"
 tqdm = "^4.62.3"
 Mako = "^1.1.5"
 tabulate = "^0.8.9"
+nextcord = { version = "^2.0.0-alpha.3", optional = true }
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
 pytest-mock = "^3.6.1"
 pre-commit = "^2.15.0"
+
+[tool.poetry.extras]
+discord = ["nextcord"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

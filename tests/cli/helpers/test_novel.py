@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from novelsave.cli.helpers import novel as novel_helper
+from novelsave.client.cli.helpers import novel as novel_helper
 from novelsave.exceptions import CookieBrowserNotSupportedException
 
 

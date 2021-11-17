@@ -2,8 +2,7 @@ from unittest.mock import DEFAULT, Mock
 
 import pytest
 
-from novelsave.cli.controllers import update
-from novelsave.cli.controllers._update import helpers
+from novelsave.client.cli.controllers import update, helpers
 
 
 @pytest.fixture

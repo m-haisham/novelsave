@@ -10,7 +10,7 @@ from dependency_injector.wiring import inject, Provide
 from loguru import logger
 from tqdm import tqdm
 
-from novelsave.cli.helpers.source import get_source_gateway
+from novelsave.client.cli.helpers.source import get_source_gateway
 from novelsave.containers import Application
 from novelsave.core.dtos import ChapterDTO
 from novelsave.core.entities.novel import Novel

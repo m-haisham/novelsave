@@ -26,7 +26,7 @@ classifiers = [
 "Documentation" = "https://github.com/mensch272/novelsave/blob/master/README.md"
 
 [tool.poetry.scripts]
-novelsave = "novelsave.cli.main:main"
+novelsave = "novelsave.client.cli.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"

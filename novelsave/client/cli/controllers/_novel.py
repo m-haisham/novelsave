@@ -7,7 +7,7 @@ from dependency_injector.wiring import inject, Provide
 from loguru import logger
 from tabulate import tabulate
 
-from novelsave.cli import helpers as cli_helpers
+from novelsave.client.cli import helpers as cli_helpers
 from novelsave.containers import Application
 from novelsave.core.services import BaseNovelService, BasePathService, BaseAssetService
 from novelsave.core.services.source import BaseSourceService

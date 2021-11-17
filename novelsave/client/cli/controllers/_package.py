@@ -4,7 +4,7 @@ from typing import Iterable
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
 
-from novelsave.cli.helpers import get_novel
+from novelsave.client.cli.helpers import get_novel
 from novelsave.containers import Application
 from novelsave.core.services import BasePathService
 from novelsave.core.services.packagers import BasePackagerProvider

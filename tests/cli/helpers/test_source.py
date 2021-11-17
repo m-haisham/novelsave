@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from loguru import logger
 
-from novelsave.cli.helpers.source import get_source_gateway
+from novelsave.client.cli.helpers import get_source_gateway
 from novelsave.exceptions import SourceNotFoundException
 
 

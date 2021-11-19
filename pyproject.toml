@@ -47,6 +47,7 @@ Mako = "^1.1.5"
 tabulate = "^0.8.9"
 nextcord = { version = "^2.0.0-alpha.3", optional = true }
 discord-ui = { version = "^5.0.2", optional = true }
+python-dotenv = "^0.19.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

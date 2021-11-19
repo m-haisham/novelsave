@@ -15,11 +15,9 @@ STATIC_DIR = BASE_DIR / "novelsave/resources"
 # operating system specific configuration file
 # config directory is used to place logs, config, cache
 CONFIG_DIR = Path(user_config_dir(NAME, AUTHOR))
-CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
 DATA_DIR = CONFIG_DIR / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 DATABASE_FILE = (CONFIG_DIR / "data.sqlite").resolve()
 DATABASE_URL = "sqlite:///" + str(DATABASE_FILE)

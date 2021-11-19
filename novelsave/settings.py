@@ -85,6 +85,4 @@ config = {
             "url": DATABASE_URL,
         }
     },
-    "logger": LOGGER_CONFIG,
-    "tqdm": TQDM_CONFIG,
 }

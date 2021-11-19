@@ -1,7 +1,7 @@
 from dependency_injector import containers, providers
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from novelsave.services import (
     FileService,
@@ -46,7 +46,10 @@ class Infrastructure(containers.DeclarativeContainer):
     config = providers.Configuration()
 
     engine = providers.Singleton(create_engine, url=config.database.url, future=True)
-    session = providers.Singleton(Session, engine, future=True)
+    session_factory = providers.Singleton(
+        sessionmaker, autocommit=False, autoflush=False, bind=engine
+    )
+    session = providers.Singleton(scoped_session, session_factory)
 
 
 class Services(containers.DeclarativeContainer):

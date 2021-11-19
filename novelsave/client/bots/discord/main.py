@@ -1,7 +1,3 @@
-import sys
-
-from loguru import logger
-
 from novelsave.containers import Application
 from . import config
 from .containers import DiscordApplication
@@ -21,24 +17,9 @@ def wire(packages):
 
 def main():
     """Start the discord bot"""
-    logger.configure(**config.logger())
-
-    try:
-        from nextcord.ext import commands
-    except ImportError as e:
-        logger.exception(e)
-        sys.exit(1)
-
+    from .bot import bot
     from . import endpoints
 
     application, discord_application = wire([endpoints])
 
-    # initialize
-    bot = commands.Bot(">> ")
-
-    # register commands
-    bot.command()(endpoints.start)
-    bot.command()(endpoints.test)
-
-    # start server
     bot.run(discord_application.config.get("key"))

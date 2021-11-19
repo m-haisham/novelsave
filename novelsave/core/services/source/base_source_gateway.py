@@ -12,6 +12,11 @@ class BaseSourceGateway(ABC):
 
     @property
     @abstractmethod
+    def base_url(self) -> str:
+        """Base url or network location of the source"""
+
+    @property
+    @abstractmethod
     def is_search_capable(self) -> bool:
         """identifies whether the source provides search capability"""
 

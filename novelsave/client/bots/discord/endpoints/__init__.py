@@ -3,14 +3,18 @@ from nextcord.ext import commands
 
 from novelsave.containers import Application
 from novelsave.core.services import BaseNovelService
+from novelsave.core.services.source import BaseSourceService
+from ..bot import bot
 
 
+@bot.command()
 async def start(ctx):
     """Initialize the bot"""
     # you can use docstrings for the slash command description too
     await ctx.send("Initialized the bot")
 
 
+@bot.command()
 @inject
 async def test(
     ctx: commands.Context,
@@ -18,5 +22,27 @@ async def test(
     novel_service: BaseNovelService = Provide[Application.services.novel_service],
     **kwargs,
 ):
-    for novel in novel_service.get_all_novels():
-        await ctx.send(f"{novel.id:<2}: {novel.title} by {novel.author}")
+    await ctx.send("[link](https://www.wattpad.com)")
+
+
+@bot.command()
+@inject
+async def sources(
+    ctx: commands.Context,
+    *args,
+    source_service: BaseSourceService = Provide[Application.services.source_service],
+):
+    await ctx.send("The currently supported sources include:")
+
+    source_list = "\n".join(
+        f"• <{gateway.base_url}> " + ("🔍" if gateway.is_search_capable else "")
+        for gateway in sorted(
+            source_service.get_supported_novel_sources(), key=lambda g: g.base_url
+        )
+    )
+
+    await ctx.send(source_list)
+    await ctx.send(
+        "You can request a new source by creating an issue at "
+        "<https://github.com/mensch272/novelsave/issues/new/choose>"
+    )

@@ -19,6 +19,10 @@ class SourceGateway(BaseSourceGateway):
         return getattr(self.source, "name", type(self.source).__name__)
 
     @property
+    def base_url(self) -> str:
+        return self.source.base_urls[0]
+
+    @property
     def is_search_capable(self) -> bool:
         return self.source.search_viable
 

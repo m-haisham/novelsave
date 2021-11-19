@@ -1,8 +1,10 @@
 from functools import lru_cache
+from typing import List
 
 import novelsave_sources
 import requests
 from novelsave_sources import (
+    novel_source_types,
     locate_novel_source,
     locate_metadata_source,
     UnknownSourceException,
@@ -53,3 +55,9 @@ class SourceService(BaseSourceService):
             )
         except UnknownSourceException:
             raise SourceNotFoundException(url)
+
+    def get_supported_novel_sources(self) -> List[SourceGateway]:
+        return [
+            SourceGateway(source_type(), source_adapter=self.source_adapter)
+            for source_type in novel_source_types()
+        ]

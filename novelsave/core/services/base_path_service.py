@@ -10,6 +10,11 @@ class BasePathService(ABC):
     def divide(self, r_path: Path) -> Path:
         """add additional sub folder to the parent depending on the file type"""
 
+    @property
+    @abstractmethod
+    def config_path(self):
+        """Absolute path to configurations"""
+
     @abstractmethod
     def novel_save_path(self, novel: Novel) -> Path:
         """:return absolute path to novel save directory"""

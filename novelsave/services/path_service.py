@@ -14,12 +14,14 @@ class PathService(BasePathService):
         self,
         data_dir: Path,
         novels_dir: Path,
+        config_dir: Path,
         division_rules: Dict[str, str],
         novel_service: BaseNovelService,
         source_service: BaseSourceService,
     ):
         self.data_dir = data_dir
         self.novels_dir = novels_dir
+        self.config_dir = config_dir
         self.division_rules = division_rules
         self.novel_service = novel_service
         self.source_service = source_service
@@ -27,6 +29,10 @@ class PathService(BasePathService):
     def divide(self, path: Path) -> Path:
         parent = path.parent / self.division_rules.get(path.suffix, "")
         return parent.resolve() / path.name
+
+    @property
+    def config_path(self) -> Path:
+        return self.config_dir
 
     def novel_save_path(self, novel: Novel) -> Path:
         url = self.novel_service.get_primary_url(novel)

@@ -88,6 +88,7 @@ class Services(containers.DeclarativeContainer):
         PathService,
         data_dir=config.data.dir,
         novels_dir=config.novel.dir,
+        config_dir=config.config.dir,
         division_rules=config.data.division_rules,
         novel_service=novel_service,
         source_service=source_service,

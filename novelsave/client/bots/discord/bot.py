@@ -12,4 +12,5 @@ except ImportError as e:
     logger.exception(e)
     sys.exit(1)
 
+
 bot = commands.Bot(">> ")

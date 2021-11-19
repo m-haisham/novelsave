@@ -1,9 +1,14 @@
+from loguru import logger
+
 from novelsave.containers import Application
 from . import config
 from .containers import DiscordApplication
 
 
 def wire(packages):
+    app_config = config.app()
+    app_config["config"]["dir"].mkdir(parents=True, exist_ok=True)
+
     application = Application()
     application.config.from_dict(config.app())
     application.wire(packages=packages)
@@ -22,4 +27,8 @@ def main():
 
     application, discord_application = wire([endpoints])
 
+    # cogs
+    bot.add_cog(endpoints.DownloadCog(bot))
+
+    logger.debug("Running discord bot...")
     bot.run(discord_application.config.get("key"))

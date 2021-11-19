@@ -1,9 +1,11 @@
 import functools
 import os
+import sys
+from datetime import timedelta
 
 import dotenv
 
-from novelsave.settings import config
+from novelsave.settings import config, console_formatter
 
 
 @functools.lru_cache()
@@ -15,6 +17,11 @@ def app() -> dict:
 def logger() -> dict:
     return {
         "handlers": [
+            {
+                "sink": sys.stderr,
+                "level": "DEBUG",
+                "format": console_formatter,
+            },
             {
                 "sink": config["config"]["dir"] / "logs" / "{time}.log",
                 "level": "TRACE",
@@ -33,4 +40,9 @@ def discord() -> dict:
     """
     dotenv.load_dotenv()
 
-    return {"key": os.getenv("DISCORD_TOKEN")}
+    return {
+        "key": os.getenv("DISCORD_TOKEN"),
+        "session": {
+            "retain": timedelta(minutes=10),
+        },
+    }

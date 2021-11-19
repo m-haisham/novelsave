@@ -18,8 +18,7 @@ def logger() -> dict:
             {
                 "sink": config["config"]["dir"] / "logs" / "{time}.log",
                 "level": "TRACE",
-                "retention": "2 days",
-                "compression": "zip",
+                "retention": "15 days",
                 "encoding": "utf-8",
             },
         ]

@@ -322,7 +322,7 @@ class Download(commands.Cog):
         self.handlers: Dict[str, DownloadHandler] = {}
 
     async def cog_check(self, ctx: commands.Context) -> bool:
-        if ctx.guild is None:
+        if ctx.invoked_with == "help" or ctx.guild is None:
             return True
 
         await ctx.send(

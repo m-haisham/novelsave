@@ -33,24 +33,30 @@ from ..containers import DiscordApplication
 DownloadState = Callable[[commands.Context], Coroutine]
 
 
-def catch_error(func):
+def ensure_close(func):
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            self = args[0]
+        self = args[0]
 
+        result = None
+        try:
+            result = func(*args, **kwargs)
+        except Exception as e:
             if not self.is_closed:
                 self.send_sync(f"`❗ {str(e).strip()}`")
-                self.close_and_inform()
 
             logging.exception(e)
+
+        if not self.is_closed:
+            self.close_and_inform()
+
+        return result
 
     return wrapped
 
 
 class DownloadHandler:
+    application: Application
     source_service: BaseSourceService
     novel_service: BaseNovelService
     path_service: BasePathService
@@ -78,27 +84,25 @@ class DownloadHandler:
         self.setup()
 
     def setup(self):
-        application = Application()
-        application.config.from_dict(self.config())
+        self.application = Application()
+        self.application.config.from_dict(self.config())
 
         # acquire services
-        self.source_service = application.services.source_service()
-        self.novel_service = application.services.novel_service()
-        self.path_service = application.services.path_service()
-        self.dto_adapter = application.adapters.dto_adapter()
-        self.asset_service = application.services.asset_service()
-        self.file_service = application.services.file_service()
-        self.packager_provider = application.packagers.packager_provider()
-
-        def _close_session():
-            application.infrastructure.session().close()
-            application.infrastructure.session_factory().close_all()
-            application.infrastructure.engine().dispose()
-
-        self.close_session = _close_session
+        self.source_service = self.application.services.source_service()
+        self.novel_service = self.application.services.novel_service()
+        self.path_service = self.application.services.path_service()
+        self.dto_adapter = self.application.adapters.dto_adapter()
+        self.asset_service = self.application.services.asset_service()
+        self.file_service = self.application.services.file_service()
+        self.packager_provider = self.application.packagers.packager_provider()
 
         # migrate database to latest schema
-        migrations.migrate(application.config.get("infrastructure.database.url"))
+        migrations.migrate(self.application.config.get("infrastructure.database.url"))
+
+    def close_session(self):
+        self.application.infrastructure.session().close()
+        self.application.infrastructure.session_factory().close_all()
+        self.application.infrastructure.engine().dispose()
 
     def config(self):
         temp: dict = config.app()
@@ -180,7 +184,7 @@ class DownloadHandler:
         self.last_activity = datetime.now()
         self.executor.submit(self.start, url)
 
-    @catch_error
+    @ensure_close
     def start(self, url: str):
         self.state = self.info_state
 
@@ -215,8 +219,6 @@ class DownloadHandler:
 
         self.state = self.packaging_state
         self.package(novel)
-
-        self.close_and_inform()
 
     def retrieve_novel_info(
         self, source_gateway: BaseSourceGateway, url: str
@@ -351,12 +353,12 @@ class DownloadCog(commands.Cog):
     async def cancel(self, ctx: commands.Context):
         key = str(ctx.author.id)
         if key not in self.handlers:
-            await ctx.send("You have no active session.")
+            await ctx.send("`❗ You have no active download session.`")
             return
 
         handler = self.handlers[key]
         if handler.is_closed:
-            await ctx.send("You have no active session.")
+            await ctx.send("`❗ You have no active download session.`")
             del self.handlers[key]
             return
 

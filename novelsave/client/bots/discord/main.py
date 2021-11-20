@@ -28,7 +28,7 @@ def main():
     application, discord_application = wire([endpoints])
 
     # cogs
-    bot.add_cog(endpoints.DownloadCog(bot))
+    bot.add_cog(endpoints.Download(bot))
 
     logger.debug("Running discord bot...")
     bot.run(discord_application.config.get("key"))

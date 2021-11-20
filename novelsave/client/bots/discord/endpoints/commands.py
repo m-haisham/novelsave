@@ -3,31 +3,13 @@ from nextcord.ext import commands
 
 from novelsave import __version__
 from novelsave.containers import Application
-from novelsave.core.services import BaseNovelService
 from novelsave.core.services.source import BaseSourceService
 from ..bot import bot
 
 
 @bot.command()
-async def start(ctx):
-    """Initialize the bot"""
-    # you can use docstrings for the slash command description too
-    await ctx.send("Initialized the bot")
-
-
-@bot.command()
-@inject
-async def test(
-    ctx: commands.Context,
-    *args,
-    novel_service: BaseNovelService = Provide[Application.services.novel_service],
-    **kwargs,
-):
-    await ctx.send("[link](https://www.wattpad.com)")
-
-
-@bot.command()
 async def dm(ctx: commands.Context):
+    """Send a direct message to you"""
     await ctx.author.send(f"Hello, {ctx.author.name}.")
 
 
@@ -38,6 +20,7 @@ async def sources(
     *args,
     source_service: BaseSourceService = Provide[Application.services.source_service],
 ):
+    """List all the sources supported"""
     with ctx.typing():
         await ctx.send(f"The sources currently supported include (v{__version__}):")
 

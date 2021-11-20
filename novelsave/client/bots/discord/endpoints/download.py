@@ -29,6 +29,7 @@ from novelsave.utils.adapters import DTOAdapter
 from novelsave.utils.helpers import url_helper, string_helper
 from .. import config
 from ..containers import DiscordApplication
+from .. import format
 
 DownloadState = Callable[[commands.Context], Coroutine]
 
@@ -191,7 +192,7 @@ class DownloadHandler:
         try:
             source_gateway = self.source_service.source_from_url(url)
         except SourceNotFoundException:
-            self.send_sync("This website is not yet supported.")
+            self.send_sync(format.error("This website is not yet supported."))
             self.send_sync(
                 "You can request a new source by creating an issue at "
                 "<https://github.com/mensch272/novelsave/issues/new/choose>"
@@ -226,7 +227,7 @@ class DownloadHandler:
         try:
             return source_gateway.novel_by_url(url)
         except requests.ConnectionError:
-            self.send_sync("`Connection terminated unexpectedly.`")
+            self.send_sync(format.error("Connection terminated unexpectedly."))
 
     def download_thumbnail(self, novel: Novel):
         if novel.thumbnail_url is None:
@@ -237,11 +238,11 @@ class DownloadHandler:
         try:
             response = requests.get(novel.thumbnail_url)
         except requests.ConnectionError:
-            self.send_sync("❗ Connection terminated unexpectedly.")
+            self.send_sync(format.error("Connection terminated unexpectedly."))
             return
 
         if not response.ok:
-            self.send_sync(f"❗ {response.status_code} {response.reason}")
+            self.send_sync(format.error(f"{response.status_code} {response.reason}"))
             return
 
         thumbnail_path = self.path_service.thumbnail_path(novel)
@@ -272,7 +273,7 @@ class DownloadHandler:
                     self.dto_adapter.chapter_to_dto(chapter)
                 )
             except Exception as e:
-                self.send_sync(f"❗ Error downloading {chapter.url}")
+                self.send_sync(format.error(f"Error downloading {chapter.url}."))
                 logger.exception(e)
                 continue
 
@@ -312,26 +313,43 @@ class DownloadHandler:
         self.is_closed = True
 
 
-class DownloadCog(commands.Cog):
+class Download(commands.Cog):
+    """This controls download sessions on a per user basis"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
         self.handlers: Dict[str, DownloadHandler] = {}
 
+    async def cog_check(self, ctx: commands.Context) -> bool:
+        if ctx.guild is None:
+            return True
+
+        await ctx.send(
+            format.error(
+                "You may not create a download session inside a guild.",
+                f"Use the '{ctx.clean_prefix}dm' to start a private session.",
+            )
+        )
+
+        return False
+
     @commands.command()
     async def status(self, ctx: commands.Context):
+        """Show status of current download session"""
         if str(ctx.author.id) not in self.handlers:
-            await ctx.send("You have no active download session.")
+            await ctx.send(format.error("You have no active download session."))
             return
 
         handler = self.handlers[str(ctx.author.id)]
         if handler.state is None:
-            await ctx.send("You have no active download session.")
+            await ctx.send(format.error("You have no active download session."))
         else:
             await handler.state(ctx)
 
     @commands.command()
     async def download(self, ctx: commands.Context, url: str = None):
+        """Start a new download session"""
         if not await self.valid(ctx, url):
             return
 
@@ -351,14 +369,15 @@ class DownloadCog(commands.Cog):
 
     @commands.command()
     async def cancel(self, ctx: commands.Context):
+        """Cancel the current download session"""
         key = str(ctx.author.id)
         if key not in self.handlers:
-            await ctx.send("`❗ You have no active download session.`")
+            await ctx.send(format.error("You have no active download session."))
             return
 
         handler = self.handlers[key]
         if handler.is_closed:
-            await ctx.send("`❗ You have no active download session.`")
+            await ctx.send(format.error("You have no active download session."))
             del self.handlers[key]
             return
 
@@ -367,14 +386,14 @@ class DownloadCog(commands.Cog):
     @staticmethod
     async def valid(ctx: commands.Context, url: str = None) -> bool:
         if ctx.author.bot:
-            await ctx.send("Download is not allowed with bots")
+            await ctx.send(format.error("Download is not allowed with bots"))
         elif url is None:
             await ctx.send(
-                "Please confirm your request to the following format:\n"
-                "`>> download <required:url>`"
+                format.error("Please confirm your request to the following format:")
             )
+            await ctx.send(f"`{ctx.clean_prefix}download <required:url>`")
         elif not url_helper.is_url(url):
-            await ctx.send("The url provided is not valid.\n")
+            await ctx.send(format.error("The url provided is not valid."))
         else:
             return True
 

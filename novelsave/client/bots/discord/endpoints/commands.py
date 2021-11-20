@@ -27,6 +27,11 @@ async def test(
 
 
 @bot.command()
+async def dm(ctx: commands.Context):
+    await ctx.author.send(f"Hello, {ctx.author.name}.")
+
+
+@bot.command()
 @inject
 async def sources(
     ctx: commands.Context,

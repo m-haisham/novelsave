@@ -12,7 +12,7 @@ class BasePathService(ABC):
 
     @property
     @abstractmethod
-    def config_path(self):
+    def config_path(self) -> Path:
         """Absolute path to configurations"""
 
     @abstractmethod

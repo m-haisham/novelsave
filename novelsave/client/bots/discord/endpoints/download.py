@@ -4,24 +4,25 @@ import logging
 import shutil
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, Callable, Coroutine, Optional
+from typing import Dict, Callable, Coroutine
 
+import nextcord
 import requests
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
 from nextcord.ext import commands
 
+from novelsave import migrations
 from novelsave.containers import Application
 from novelsave.core.dtos import NovelDTO
 from novelsave.core.entities.novel import Novel
-from novelsave import migrations
 from novelsave.core.services import (
     BaseNovelService,
     BasePathService,
     BaseAssetService,
     BaseFileService,
 )
+from novelsave.core.services.packagers import BasePackagerProvider
 from novelsave.core.services.source import BaseSourceService, BaseSourceGateway
 from novelsave.exceptions import SourceNotFoundException
 from novelsave.utils.adapters import DTOAdapter
@@ -38,7 +39,12 @@ def catch_error(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            args[0].send_sync(str(e))
+            self = args[0]
+
+            if not self.is_closed:
+                self.send_sync(f"`❗ {str(e).strip()}`")
+                self.close_and_inform()
+
             logging.exception(e)
 
     return wrapped
@@ -51,6 +57,8 @@ class DownloadHandler:
     dto_adapter: DTOAdapter
     asset_service: BaseAssetService
     file_service: BaseFileService
+    packager_provider: BasePackagerProvider
+    close_session: Callable[[], None]
 
     def __init__(self, bot: commands.Bot, ctx: commands.Context):
         self.bot = bot
@@ -80,6 +88,14 @@ class DownloadHandler:
         self.dto_adapter = application.adapters.dto_adapter()
         self.asset_service = application.services.asset_service()
         self.file_service = application.services.file_service()
+        self.packager_provider = application.packagers.packager_provider()
+
+        def _close_session():
+            application.infrastructure.session().close()
+            application.infrastructure.session_factory().close_all()
+            application.infrastructure.engine().dispose()
+
+        self.close_session = _close_session
 
         # migrate database to latest schema
         migrations.migrate(application.config.get("infrastructure.database.url"))
@@ -87,22 +103,33 @@ class DownloadHandler:
     def config(self):
         temp: dict = config.app()
 
-        # make the config directories message specific
-        temp["config"]["dir"] /= str(self.ctx.author.id)
-        temp["config"]["file"] = temp["config"]["dir"] / temp["config"]["file"].name
-        temp["novel"]["dir"] = temp["config"]["dir"] / "novels"
-        temp["data"]["dir"] = temp["config"]["dir"] / "data"
-
+        config_dir = temp["config"]["dir"] / str(self.ctx.author.id)
         schema, url = temp["infrastructure"]["database"]["url"].split(
             ":///", maxsplit=1
         )
-        db_path = Path(url)
-        new_url = f"{schema}:///{str(db_path.parent / str(self.ctx.author.id) / db_path.name)}"
 
-        temp["infrastructure"]["database"]["url"] = new_url
+        temp.update(
+            {
+                "config": {
+                    "dir": config_dir,
+                    "file": config_dir / temp["config"]["file"].name,
+                },
+                "novel": {
+                    "dir": config_dir / "novels",
+                },
+                "data": {
+                    "dir": config_dir / "data",
+                },
+                "infrastructure": {
+                    "database": {
+                        "url": f"{schema}:///{str(config_dir / 'data.sqlite')}",
+                    },
+                },
+            }
+        )
 
-        # create config directories
-        temp["config"]["dir"].mkdir(parents=True, exist_ok=True)
+        shutil.rmtree(config_dir, ignore_errors=True)
+        config_dir.mkdir(parents=True, exist_ok=True)
 
         return temp
 
@@ -127,21 +154,27 @@ class DownloadHandler:
             return True
 
     async def initial_state(self, ctx: commands.Context):
-        pass
+        await ctx.send("Just spinning things up.")
 
     async def info_state(self, ctx: commands.Context):
         await ctx.send("I'm busy retrieving novel information.")
 
     async def download_state(self, ctx: commands.Context):
         await ctx.send(
-            f"I'm currently downloading with progress {self.value} of {self.total}."
+            f"The current download progress is {self.value} of {self.total}."
         )
 
+    async def packaging_state(self, ctx: commands.Context):
+        await ctx.send("I'm currently packaging the novel.")
+
     def send_sync(self, *args, **kwargs):
+        logger.debug(
+            " ".join(args) + ", " + " ".join(f"{k}={v}" for k, v in kwargs.items())
+        )
         asyncio.run_coroutine_threadsafe(
             self.ctx.send(*args, **kwargs),
             self.bot.loop,
-        )
+        ).result(timeout=3 * 60)
 
     def process(self, url: str):
         self.last_activity = datetime.now()
@@ -178,7 +211,12 @@ class DownloadHandler:
 
         self.state = self.download_state
         self.download_thumbnail(novel)
-        self.download_chapters(novel, url, source_gateway)
+        self.download_chapters(novel, source_gateway)
+
+        self.state = self.packaging_state
+        self.package(novel)
+
+        self.close_and_inform()
 
     def retrieve_novel_info(
         self, source_gateway: BaseSourceGateway, url: str
@@ -215,10 +253,8 @@ class DownloadHandler:
         size = string_helper.format_bytes(len(response.content))
         self.send_sync(f"Downloaded and saved thumbnail image ({size}).")
 
-    def download_chapters(
-        self, novel: Novel, url: str, source_gateway: BaseSourceGateway
-    ):
-        chapters = self.novel_service.get_pending_chapters(novel)
+    def download_chapters(self, novel: Novel, source_gateway: BaseSourceGateway):
+        chapters = self.novel_service.get_pending_chapters(novel, -1)
         if not chapters:
             logger.info("Skipped chapter download as none are pending.")
             return
@@ -247,9 +283,29 @@ class DownloadHandler:
 
             self.value += 1
 
+    def package(self, novel: Novel):
+        packagers = self.packager_provider.filter_packagers(["epub"])
+        self.send_sync("Packing the novel into the formats: epub…")
+
+        for packager in packagers:
+            output = packager.package(novel)
+            if output.is_file():
+                self.send_sync(f"Uploading {output.name}…")
+                self.send_sync(file=nextcord.File(output, output.name))
+
+    def close_and_inform(self):
+        self.send_sync("Cleaning up temporary files…")
+        self.close()
+
+        self.send_sync("Session closed.")
+
     def close(self):
+        if self.is_closed:
+            raise ValueError("This download session is already closed.")
+
         self.executor.shutdown(wait=False, cancel_futures=True)
-        shutil.rmtree(self.path_service.config_path)
+        self.close_session()
+        shutil.rmtree(self.path_service.config_path, ignore_errors=True)
 
         self.is_closed = True
 
@@ -258,17 +314,17 @@ class DownloadCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        self.handlers: Dict[str, Optional[DownloadHandler]] = {}
+        self.handlers: Dict[str, DownloadHandler] = {}
 
     @commands.command()
     async def status(self, ctx: commands.Context):
         if str(ctx.author.id) not in self.handlers:
-            await ctx.send("You have no active download.")
+            await ctx.send("You have no active download session.")
             return
 
         handler = self.handlers[str(ctx.author.id)]
         if handler.state is None:
-            await ctx.send("You have no active download.")
+            await ctx.send("You have no active download session.")
         else:
             await handler.state(ctx)
 
@@ -291,6 +347,21 @@ class DownloadCog(commands.Cog):
         self.handlers[key] = handler
         handler.process(url)
 
+    @commands.command()
+    async def cancel(self, ctx: commands.Context):
+        key = str(ctx.author.id)
+        if key not in self.handlers:
+            await ctx.send("You have no active session.")
+            return
+
+        handler = self.handlers[key]
+        if handler.is_closed:
+            await ctx.send("You have no active session.")
+            del self.handlers[key]
+            return
+
+        handler.close_and_inform()
+
     @staticmethod
     async def valid(ctx: commands.Context, url: str = None) -> bool:
         if ctx.author.bot:
@@ -310,9 +381,14 @@ class DownloadCog(commands.Cog):
     async def cleanup(self):
         current_time = datetime.now()
 
+        expired = []
         for key, handler in self.handlers.items():
             if handler.is_closed:
-                self.handlers[key] = None
+                expired.append(key)
             elif handler.is_expired(current_time):
+                logger.debug(f"Closing expired session: {handler.ctx.author.id}.")
                 handler.close()
-                self.handlers[key] = None
+                expired.append(key)
+
+        for key in expired:
+            del self.handlers[key]

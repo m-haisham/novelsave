@@ -5,6 +5,7 @@ from novelsave import __version__
 from novelsave.containers import Application
 from novelsave.core.services.source import BaseSourceService
 from ..bot import bot
+from .. import checks
 
 
 @bot.command()
@@ -14,6 +15,7 @@ async def dm(ctx: commands.Context):
 
 
 @bot.command()
+@commands.check(checks.direct_only)
 @inject
 async def sources(
     ctx: commands.Context,
@@ -36,3 +38,9 @@ async def sources(
             "You can request a new source by creating an issue at "
             "<https://github.com/mensch272/novelsave/issues/new/choose>"
         )
+
+
+@sources.error
+async def sources_error(ctx: commands.Context, error: Exception):
+    if isinstance(error, commands.CheckFailure):
+        await ctx.send(str(error))

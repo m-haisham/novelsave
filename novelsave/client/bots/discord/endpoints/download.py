@@ -12,22 +12,13 @@ from dependency_injector.wiring import inject, Provide
 from loguru import logger
 from nextcord.ext import commands
 
-from novelsave import migrations
-from novelsave.containers import Application
 from novelsave.core.dtos import NovelDTO
 from novelsave.core.entities.novel import Novel
-from novelsave.core.services import (
-    BaseNovelService,
-    BasePathService,
-    BaseAssetService,
-    BaseFileService,
-)
-from novelsave.core.services.packagers import BasePackagerProvider, BasePackager
-from novelsave.core.services.source import BaseSourceService, BaseSourceGateway
+from novelsave.core.services.packagers import BasePackager
+from novelsave.core.services.source import BaseSourceGateway
 from novelsave.exceptions import SourceNotFoundException
-from novelsave.utils.adapters import DTOAdapter
 from novelsave.utils.helpers import url_helper, string_helper
-from .. import config, checks, mfmt
+from .. import checks, mfmt, mixins
 from ..containers import DiscordApplication
 
 DownloadState = Callable[[commands.Context], Coroutine]
@@ -55,17 +46,7 @@ def ensure_close(func):
     return wrapped
 
 
-class DownloadHandler:
-    application: Application
-    source_service: BaseSourceService
-    novel_service: BaseNovelService
-    path_service: BasePathService
-    dto_adapter: DTOAdapter
-    asset_service: BaseAssetService
-    file_service: BaseFileService
-    packager_provider: BasePackagerProvider
-    close_session: Callable[[], None]
-
+class DownloadHandler(mixins.ContainerMixin):
     def __init__(self, bot: commands.Bot, ctx: commands.Context):
         self.bot = bot
         self.ctx = ctx
@@ -81,61 +62,7 @@ class DownloadHandler:
 
         self.is_closed = False
 
-        self.setup()
-
-    def setup(self):
-        self.application = Application()
-        self.application.config.from_dict(self.config())
-
-        # acquire services
-        self.source_service = self.application.services.source_service()
-        self.novel_service = self.application.services.novel_service()
-        self.path_service = self.application.services.path_service()
-        self.dto_adapter = self.application.adapters.dto_adapter()
-        self.asset_service = self.application.services.asset_service()
-        self.file_service = self.application.services.file_service()
-        self.packager_provider = self.application.packagers.packager_provider()
-
-        # migrate database to latest schema
-        migrations.migrate(self.application.config.get("infrastructure.database.url"))
-
-    def close_session(self):
-        self.application.infrastructure.session().close()
-        self.application.infrastructure.session_factory().close_all()
-        self.application.infrastructure.engine().dispose()
-
-    def config(self):
-        temp: dict = config.app()
-
-        config_dir = temp["config"]["dir"] / str(self.ctx.author.id)
-        schema, url = temp["infrastructure"]["database"]["url"].split(
-            ":///", maxsplit=1
-        )
-
-        temp.update(
-            {
-                "config": {
-                    "dir": config_dir,
-                    "file": config_dir / temp["config"]["file"].name,
-                },
-                "novel": {
-                    "dir": config_dir / "novels",
-                },
-                "data": {
-                    "dir": config_dir / "data",
-                },
-                "infrastructure": {
-                    "database": {
-                        "url": f"{schema}:///{str(config_dir / 'data.sqlite')}",
-                    },
-                },
-            }
-        )
-
-        shutil.rmtree(config_dir, ignore_errors=True)
-        config_dir.mkdir(parents=True, exist_ok=True)
-
-        return temp
+        self.setup_container(str(self.ctx.author.id))
 
     def is_busy(self) -> bool:
         return any(

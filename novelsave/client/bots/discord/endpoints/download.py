@@ -294,6 +294,7 @@ class Download(commands.Cog):
         key = str(ctx.author.id)
         if key in self.handlers:
             if self.handlers[key].is_busy():
+                await ctx.send("Please wait…")
                 await self.status(ctx)
                 return
             elif not self.handlers[key].is_closed:

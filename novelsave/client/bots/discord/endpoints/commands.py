@@ -5,7 +5,7 @@ from novelsave import __version__
 from novelsave.containers import Application
 from novelsave.core.services.source import BaseSourceService
 from ..bot import bot
-from .. import checks
+from .. import checks, mfmt
 
 
 @bot.command()
@@ -43,4 +43,4 @@ async def sources(
 @sources.error
 async def sources_error(ctx: commands.Context, error: Exception):
     if isinstance(error, commands.CheckFailure):
-        await ctx.send(str(error))
+        await ctx.send(mfmt.error(str(error)))

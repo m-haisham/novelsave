@@ -1,5 +1,4 @@
 from nextcord.ext import commands
-from . import mfmt
 
 
 async def direct_only(ctx: commands.Context):
@@ -14,9 +13,8 @@ async def direct_only(ctx: commands.Context):
 
     if ctx.guild is not None:
         raise commands.CheckFailure(
-            mfmt.error(
-                f"You may not use this command inside a guild. Use the '{ctx.clean_prefix}dm' to start a private session.",
-            )
+            f"You may not use this command inside a guild. "
+            f"Use the '{ctx.clean_prefix}dm' to start a private session.",
         )
 
     return True

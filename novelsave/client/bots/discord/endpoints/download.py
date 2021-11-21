@@ -335,9 +335,9 @@ class Download(commands.Cog):
         return await checks.direct_only(ctx)
 
     async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, commands.CheckFailure):
-            await ctx.send(str(error))
-        elif isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, commands.CheckFailure) or isinstance(
+            error, commands.MissingRequiredArgument
+        ):
             await ctx.send(mfmt.error(str(error)))
 
         logger.exception(repr(error))

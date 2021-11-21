@@ -4,7 +4,7 @@ import logging
 import shutil
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from typing import Dict, Callable, Coroutine
+from typing import Dict, Callable, Coroutine, List, Iterable
 
 import nextcord
 import requests
@@ -22,14 +22,13 @@ from novelsave.core.services import (
     BaseAssetService,
     BaseFileService,
 )
-from novelsave.core.services.packagers import BasePackagerProvider
+from novelsave.core.services.packagers import BasePackagerProvider, BasePackager
 from novelsave.core.services.source import BaseSourceService, BaseSourceGateway
 from novelsave.exceptions import SourceNotFoundException
 from novelsave.utils.adapters import DTOAdapter
 from novelsave.utils.helpers import url_helper, string_helper
 from .. import config, checks, mfmt
 from ..containers import DiscordApplication
-
 
 DownloadState = Callable[[commands.Context], Coroutine]
 
@@ -181,12 +180,12 @@ class DownloadHandler:
             self.bot.loop,
         ).result(timeout=3 * 60)
 
-    def process(self, url: str):
+    def process(self, url: str, targets: List[str]):
         self.last_activity = datetime.now()
-        self.executor.submit(self.start, url)
+        self.executor.submit(self.start, url, targets)
 
     @ensure_close
-    def start(self, url: str):
+    def start(self, url: str, targets: List[str]):
         self.state = self.info_state
 
         try:
@@ -197,6 +196,12 @@ class DownloadHandler:
                 "You can request a new source by creating an issue at "
                 "<https://github.com/mensch272/novelsave/issues/new/choose>"
             )
+            return
+
+        try:
+            packagers = self.packager_provider.filter_packagers(targets)
+        except ValueError as e:
+            self.send_sync(mfmt.error(str(e)))
             return
 
         self.send_sync(f"Retrieving novel information from <{url}>…")
@@ -219,7 +224,7 @@ class DownloadHandler:
         self.download_chapters(novel, source_gateway)
 
         self.state = self.packaging_state
-        self.package(novel)
+        self.package(novel, packagers)
 
     def retrieve_novel_info(
         self, source_gateway: BaseSourceGateway, url: str
@@ -286,8 +291,7 @@ class DownloadHandler:
 
             self.value += 1
 
-    def package(self, novel: Novel):
-        packagers = self.packager_provider.filter_packagers(["epub"])
+    def package(self, novel: Novel, packagers: Iterable[BasePackager]):
         self.send_sync("Packing the novel into the formats: epub…")
 
         for packager in packagers:
@@ -295,6 +299,12 @@ class DownloadHandler:
             if output.is_file():
                 self.send_sync(f"Uploading {output.name}…")
                 self.send_sync(file=nextcord.File(output, output.name))
+            else:
+                self.send_sync(
+                    mfmt.error(
+                        f"I do not yet have support to upload directories ({packager.keywords()[0]})."
+                    )
+                )
 
     def close_and_inform(self):
         self.send_sync("Cleaning up temporary files…")
@@ -327,6 +337,10 @@ class Download(commands.Cog):
     async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
         if isinstance(error, commands.CheckFailure):
             await ctx.send(str(error))
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(mfmt.error(str(error)))
+
+        logger.exception(repr(error))
 
     @commands.command()
     async def status(self, ctx: commands.Context):
@@ -342,8 +356,9 @@ class Download(commands.Cog):
             await handler.state(ctx)
 
     @commands.command()
-    async def download(self, ctx: commands.Context, url: str = None):
+    async def download(self, ctx: commands.Context, url: str, targets: str = None):
         """Start a new download session"""
+        targets = targets.lower().split(",") if targets is not None else ["epub"]
         if not await self.valid(ctx, url):
             return
 
@@ -359,7 +374,7 @@ class Download(commands.Cog):
 
         handler = DownloadHandler(self.bot, ctx)
         self.handlers[key] = handler
-        handler.process(url)
+        handler.process(url, targets)
 
     @commands.command()
     async def cancel(self, ctx: commands.Context):

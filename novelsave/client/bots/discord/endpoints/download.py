@@ -332,7 +332,7 @@ class Download(commands.Cog):
         self.handlers: Dict[str, DownloadHandler] = {}
 
     async def cog_check(self, ctx: commands.Context) -> bool:
-        return checks.direct_only(ctx)
+        return await checks.direct_only(ctx)
 
     async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
         if isinstance(error, commands.CheckFailure):

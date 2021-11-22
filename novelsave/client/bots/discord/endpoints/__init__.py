@@ -1,2 +1,2 @@
 from .commands import dm, sources
-from .download import Download
+from .download import Download, DownloadHandler

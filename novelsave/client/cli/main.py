@@ -60,7 +60,7 @@ def cli(debug: bool, plain: bool, skip_updates: bool):
     update_database_schema()
     inject_dependencies()
 
-    # only check for updates if this is not a help call
+    # only check for updates if this is not a help run
     if "--help" not in sys.argv[1:] and not skip_updates:
         atexit.register(update_check_event)
 

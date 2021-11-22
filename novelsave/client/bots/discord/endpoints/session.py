@@ -15,25 +15,23 @@ class SessionCog(commands.Cog, name="Session"):
         return await checks.direct_only(ctx)
 
     async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, commands.CheckFailure) or isinstance(
-            error, commands.MissingRequiredArgument
-        ):
+        if isinstance(error, commands.CheckFailure):
             await ctx.send(mfmt.error(str(error)))
 
         logger.exception(repr(error))
 
     @commands.command()
     async def status(self, ctx: commands.Context):
-        """Show status of current session"""
+        """Show status of the session"""
         try:
             await self.session_handler.get(ctx).state(ctx)
         except KeyError:
-            await ctx.send(mfmt.error("You have no active download session."))
+            await ctx.send(mfmt.error("You have no active session."))
 
     @commands.command()
     async def close(self, ctx: commands.Context):
-        """Force close the current session"""
+        """Force close the session"""
         try:
             self.session_handler.get(ctx).close_and_inform()
         except KeyError:
-            await ctx.send(mfmt.error("You have no active download session."))
+            await ctx.send(mfmt.error("You have no active session."))

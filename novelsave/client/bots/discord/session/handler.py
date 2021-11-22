@@ -17,12 +17,16 @@ class SessionHandler:
         self.session_factory = session_factory
 
     def get(self, ctx: commands.Context) -> Session:
-        return self.sessions.get(session_key(ctx))
+        return self.sessions[session_key(ctx)]
 
-    def get_or_create(self, ctx: commands.Context):
-        return self.sessions.setdefault(
-            session_key(ctx), self.session_factory(bot, ctx)
-        )
+    async def get_or_create(self, ctx: commands.Context):
+        try:
+            return self.get(ctx)
+        except KeyError:
+            await ctx.send("Starting new session…")
+            return self.sessions.setdefault(
+                session_key(ctx), self.session_factory(bot, ctx)
+            )
 
     def cleanup(self):
         current_time = datetime.now()

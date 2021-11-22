@@ -13,10 +13,10 @@ from novelsave.core.services.source import BaseSourceGateway
 from novelsave.exceptions import SourceNotFoundException
 from novelsave.utils.helpers import url_helper, string_helper
 from .. import checks, mfmt
-from ..session import session, ensure_close, SessionHandler
+from ..session import SessionFragment, ensure_close, SessionHandler
 
 
-class DownloadHandler(session.SessionFragment):
+class DownloadHandler(SessionFragment):
     def __init__(self, *args, **kwargs):
         super(DownloadHandler, self).__init__(*args, **kwargs)
 
@@ -173,12 +173,6 @@ class Download(commands.Cog):
 
     session_handler: SessionHandler = Provide["session.session_handler"]
 
-    def __init__(
-        self,
-        bot: commands.Bot,
-    ):
-        self.bot = bot
-
     async def cog_check(self, ctx: commands.Context) -> bool:
         return await checks.direct_only(ctx)
 
@@ -203,9 +197,8 @@ class Download(commands.Cog):
             return
 
         self.session_handler.cleanup()
-        await self.session_handler.get_or_create(ctx).call(
-            ctx, DownloadHandler.download, url, targets
-        )
+        session = await self.session_handler.get_or_create(ctx)
+        await session.run(ctx, DownloadHandler.download, url, targets)
 
     @staticmethod
     async def valid(ctx: commands.Context, url: str = None) -> bool:

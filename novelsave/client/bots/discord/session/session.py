@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import shutil
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
@@ -67,21 +68,36 @@ class Session(mixins.ContainerMixin):
             self.bot.loop,
         ).result(timeout=3 * 60)
 
-    async def call(self, ctx: commands.Context, func: Callable, *args, **kwargs):
+    async def run(self, ctx: commands.Context, func: Callable, *args, **kwargs):
         if self.is_busy():
             await ctx.send("Please wait…")
             await self.state(ctx)
             return
 
+        method = self._get_fragment_property(func)
+        if callable(method):
+            self.last_activity = datetime.now()
+
+        self.executor.submit(method, *args, **kwargs)
+
+    async def call(self, func: Callable, *args, **kwargs):
+        method = self._get_fragment_property(func)
+
+        if callable(method):
+            self.last_activity = datetime.now()
+
+        if inspect.isawaitable(method):
+            return await method(*args, **kwargs)
+        else:
+            return method(*args, **kwargs)
+
+    def _get_fragment_property(self, func: Callable):
         _type, func = func.__qualname__.split(".", maxsplit=1)
 
         fragment = self.fragments[_type]
         method = getattr(fragment, func)
 
-        if callable(method):
-            self.last_activity = datetime.now()
-
-        return self.executor.submit(method, *args, **kwargs)
+        return method
 
     def is_busy(self):
         return any(fragment.is_busy() for fragment in self.fragments.values())

@@ -4,8 +4,8 @@ from nextcord.ext import commands
 from novelsave import __version__
 from novelsave.containers import Application
 from novelsave.core.services.source import BaseSourceService
-from ..bot import bot
 from .. import checks, mfmt
+from ..bot import bot
 
 
 @bot.command()

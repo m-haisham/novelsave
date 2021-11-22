@@ -15,7 +15,7 @@ def wire(packages):
 
     discord_application = DiscordApplication()
     discord_application.config.from_dict(config.discord())
-    application.wire(packages=packages)
+    discord_application.wire(packages=packages)
 
     return application, discord_application
 

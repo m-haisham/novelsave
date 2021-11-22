@@ -194,7 +194,7 @@ class Download(commands.Cog):
     async def status(self, ctx: commands.Context):
         """Show status of current download session"""
         try:
-            await self.session_handler.get(self.bot, ctx).state(ctx)
+            await self.session_handler.get(ctx).state(ctx)
         except KeyError:
             await ctx.send(mfmt.error("You have no active download session."))
 
@@ -211,7 +211,7 @@ class Download(commands.Cog):
             return
 
         self.session_handler.cleanup()
-        await self.session_handler.get_or_create(self.bot, ctx).call(
+        await self.session_handler.get_or_create(ctx).call(
             ctx, DownloadHandler.download, url, targets
         )
 
@@ -219,7 +219,7 @@ class Download(commands.Cog):
     async def cancel(self, ctx: commands.Context):
         """Cancel the current download session"""
         try:
-            self.session_handler.get(self.bot, ctx).close_and_inform()
+            self.session_handler.get(ctx).close_and_inform()
         except KeyError:
             await ctx.send(mfmt.error("You have no active download session."))
 

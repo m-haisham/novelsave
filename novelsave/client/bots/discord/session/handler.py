@@ -6,6 +6,7 @@ from nextcord.ext import commands
 
 from .session_helper import session_key
 from .session import Session
+from ..bot import bot
 
 
 class SessionHandler:
@@ -15,10 +16,10 @@ class SessionHandler:
         self.sessions: Dict[str, Session] = {}
         self.session_factory = session_factory
 
-    def get(self, bot: commands.Bot, ctx: commands.Context) -> Session:
-        return self.sessions.get(session_key(ctx), self.session_factory(bot, ctx))
+    def get(self, ctx: commands.Context) -> Session:
+        return self.sessions.get(session_key(ctx))
 
-    def get_or_create(self, bot: commands.Bot, ctx: commands.Context):
+    def get_or_create(self, ctx: commands.Context):
         return self.sessions.setdefault(
             session_key(ctx), self.session_factory(bot, ctx)
         )

@@ -29,6 +29,7 @@ def main():
 
     # cogs
     bot.add_cog(endpoints.Download(bot))
+    bot.add_cog(endpoints.SessionCog())
 
     logger.debug("Running discord bot...")
     bot.run(discord_application.config.get("key"))

@@ -169,7 +169,7 @@ class DownloadHandler(session.SessionFragment):
 
 
 class Download(commands.Cog):
-    """This controls download sessions on a per user basis"""
+    """This controls download"""
 
     session_handler: SessionHandler = Provide["session.session_handler"]
 
@@ -191,14 +191,6 @@ class Download(commands.Cog):
         logger.exception(repr(error))
 
     @commands.command()
-    async def status(self, ctx: commands.Context):
-        """Show status of current download session"""
-        try:
-            await self.session_handler.get(ctx).state(ctx)
-        except KeyError:
-            await ctx.send(mfmt.error("You have no active download session."))
-
-    @commands.command()
     async def download(self, ctx: commands.Context, url: str, targets: str = None):
         """Start a new download session
 
@@ -214,14 +206,6 @@ class Download(commands.Cog):
         await self.session_handler.get_or_create(ctx).call(
             ctx, DownloadHandler.download, url, targets
         )
-
-    @commands.command()
-    async def cancel(self, ctx: commands.Context):
-        """Cancel the current download session"""
-        try:
-            self.session_handler.get(ctx).close_and_inform()
-        except KeyError:
-            await ctx.send(mfmt.error("You have no active download session."))
 
     @staticmethod
     async def valid(ctx: commands.Context, url: str = None) -> bool:

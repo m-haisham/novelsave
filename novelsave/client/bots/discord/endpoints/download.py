@@ -13,7 +13,8 @@ from novelsave.core.services.source import BaseSourceGateway
 from novelsave.exceptions import SourceNotFoundException
 from novelsave.utils.helpers import url_helper, string_helper
 from .. import checks, mfmt
-from ..session import SessionFragment, ensure_close, SessionHandler
+from ..decorators import ensure_close
+from ..session import SessionFragment, SessionHandler
 
 
 class DownloadHandler(SessionFragment):
@@ -196,7 +197,6 @@ class Download(commands.Cog):
         if not await self.valid(ctx, url):
             return
 
-        self.session_handler.cleanup()
         session = await self.session_handler.get_or_create(ctx)
         await session.run(ctx, DownloadHandler.download, url, targets)
 

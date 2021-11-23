@@ -10,7 +10,7 @@ from nextcord.ext import commands
 
 from .fragment import SessionFragment
 from .session_helper import session_key
-from .. import mixins
+from .. import mixins, mfmt
 from ..exceptions import AlreadyClosedException
 
 SessionState = Callable[[commands.Context], Coroutine]
@@ -39,6 +39,10 @@ class Session(mixins.ContainerMixin):
 
         self.setup_container(session_key(self.ctx))
 
+    def renew(self, ctx: commands.Context):
+        self.ctx = ctx
+        return self
+
     @classmethod
     def factory(
         cls,
@@ -60,9 +64,14 @@ class Session(mixins.ContainerMixin):
         await ctx.send("Just spinning things up.")
 
     def send_sync(self, *args, **kwargs):
-        logger.debug(
-            ", ".join([" ".join(args), " ".join(f"{k}={v}" for k, v in kwargs.items())])
+        message = ", ".join(
+            [" ".join(args), " ".join(f"{k}={v}" for k, v in kwargs.items())]
         )
+        if self.is_closed:
+            logger.debug("Attempted to send message when session is closed:", message)
+            return
+
+        logger.debug(message)
         asyncio.run_coroutine_threadsafe(
             self.ctx.send(*args, **kwargs),
             self.bot.loop,
@@ -110,11 +119,14 @@ class Session(mixins.ContainerMixin):
         else:
             return True
 
-    def close_and_inform(self):
-        self.send_sync("Cleaning up temporary files…")
-        self.close()
+    async def close_and_inform(self):
+        await self.ctx.send("Cleaning up temporary files…")
+        try:
+            self.close()
+        except AlreadyClosedException as e:
+            await self.ctx.send(mfmt.error(str(e)))
 
-        self.send_sync("Session closed.")
+        await self.ctx.send("Session closed.")
 
     def close(self):
         if self.is_closed:

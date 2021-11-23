@@ -17,11 +17,14 @@ class SessionHandler:
         self.session_factory = session_factory
 
     def get(self, ctx: commands.Context) -> Session:
-        return self.sessions[session_key(ctx)]
+        self.cleanup()
+        session = self.sessions[session_key(ctx)]
+
+        return session
 
     async def get_or_create(self, ctx: commands.Context):
         try:
-            return self.get(ctx)
+            return self.get(ctx).renew(ctx)
         except KeyError:
             await ctx.send("Starting new session…")
             return self.sessions.setdefault(

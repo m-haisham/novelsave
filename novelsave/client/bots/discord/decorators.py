@@ -25,3 +25,16 @@ def ensure_close(func):
         return result
 
     return wrapped
+
+
+def log_error(func):
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            logger.exception(e)
+            raise e
+
+    return wrapped

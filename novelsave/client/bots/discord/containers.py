@@ -19,9 +19,9 @@ class SessionContainer(containers.DeclarativeContainer):
 
 
 class DiscordApplication(containers.DeclarativeContainer):
-    config = providers.Configuration(strict=True)
+    discord_config = providers.Configuration(strict=True)
 
     session = providers.Container(
         SessionContainer,
-        config=config,
+        config=discord_config,
     )

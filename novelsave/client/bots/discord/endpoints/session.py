@@ -32,6 +32,6 @@ class SessionCog(commands.Cog, name="Session"):
     async def close(self, ctx: commands.Context):
         """Force close the session"""
         try:
-            self.session_handler.get(ctx).close_and_inform()
+            await self.session_handler.get(ctx).close_and_inform()
         except KeyError:
             await ctx.send(mfmt.error("You have no active session."))

@@ -8,12 +8,13 @@ from novelsave.containers import Application
 from novelsave.core.dtos import NovelDTO
 from novelsave.core.services.source import BaseSourceService
 from .. import checks, mfmt
+from ..decorators import log_error
 from ..session import SessionHandler, SessionFragment
 
 
 class SearchHandler(SessionFragment):
     source_service: BaseSourceService = Provide[Application.services.source_service]
-    search_limit: int = Provide["config.search.limit"]
+    search_limit: int = Provide["discord_config.search.limit"]
 
     def __init__(self, *args, **kwargs):
         super(SearchHandler, self).__init__(*args, **kwargs)
@@ -47,6 +48,7 @@ class SearchHandler(SessionFragment):
         )
         await ctx.send(self._source_list())
 
+    @log_error
     def search(self, word: str):
         self.session.state = self._state_searching
         search_capable = [
@@ -80,6 +82,7 @@ class SearchHandler(SessionFragment):
         self.session.send_sync(self._novel_list())
         self.session.state = self._state_novel_select
 
+    @log_error
     def select_novel(self, index: int):
         if index < 0 or index >= min(self.search_limit, len(self.results)):
             self.session.send_sync(
@@ -94,9 +97,15 @@ class SearchHandler(SessionFragment):
         self.session.send_sync(self._source_list())
         self.session.state = self._state_source_select
 
+    @log_error
     def select_source(self, index: int):
         try:
             novel = self.results[self.key][index]
+        except IndexError:
+            self.session.send_sync(
+                f"Select a valid source (1-{len(self.results[self.key])})."
+            )
+            return
         except KeyError:
             self.session.send_sync("Novel not found")
             return

@@ -14,7 +14,7 @@ def wire(packages):
     application.wire(packages=packages)
 
     discord_application = DiscordApplication()
-    discord_application.config.from_dict(config.discord())
+    discord_application.discord_config.from_dict(config.discord())
     discord_application.wire(packages=packages)
 
     return application, discord_application
@@ -33,4 +33,4 @@ def main():
     bot.add_cog(endpoints.Search())
 
     logger.debug("Running discord bot...")
-    bot.run(discord_application.config.get("key"))
+    bot.run(discord_application.discord_config.get("key"))

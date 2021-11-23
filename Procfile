@@ -1,1 +1,2 @@
-bot: python -m novelsave runbot discord
+release: python -m pip install .[discord]
+bot: novelsave-discord-bot

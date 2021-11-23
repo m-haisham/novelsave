@@ -1,4 +1,5 @@
 from dependency_injector.wiring import inject, Provide
+from loguru import logger
 from nextcord.ext import commands
 
 from novelsave import __version__
@@ -44,3 +45,5 @@ async def sources(
 async def sources_error(ctx: commands.Context, error: Exception):
     if isinstance(error, commands.CheckFailure):
         await ctx.send(mfmt.error(str(error)))
+
+    logger.exception(repr(error))

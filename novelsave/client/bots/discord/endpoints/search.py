@@ -13,6 +13,7 @@ from ..session import SessionHandler, SessionFragment
 
 class SearchHandler(SessionFragment):
     source_service: BaseSourceService = Provide[Application.services.source_service]
+    search_limit: int = Provide["config.search.limit"]
 
     def __init__(self, *args, **kwargs):
         super(SearchHandler, self).__init__(*args, **kwargs)
@@ -80,7 +81,7 @@ class SearchHandler(SessionFragment):
         self.session.state = self._state_novel_select
 
     def select_novel(self, index: int):
-        if index < 0 or index >= min(20, len(self.results)):
+        if index < 0 or index >= min(self.search_limit, len(self.results)):
             self.session.send_sync(
                 f"Please limit selection to between 1 and {min(20, len(self.results))}"
             )
@@ -101,11 +102,11 @@ class SearchHandler(SessionFragment):
             return
 
         self.session.state = self.session.initial
-        self.close()
+        self.clear()
 
         return novel.url
 
-    def close(self):
+    def clear(self):
         self.sorted_keys.clear()
         self.results.clear()
         self.key = None
@@ -114,9 +115,9 @@ class SearchHandler(SessionFragment):
         items = self.sorted_keys
 
         output = ""
-        if len(items) > 20:
-            items = items[:20]
-            output += "Limiting results to 20 novels!\n"
+        if len(items) > self.search_limit:
+            items = items[: self.search_limit]
+            output += f"Limiting results to {self.search_limit} novels!\n"
 
         output += "\n".join(
             f"{i + 1}: {title} ({len(self.results[title])} sources)"
@@ -141,9 +142,7 @@ class Search(commands.Cog):
         return await checks.direct_only(ctx)
 
     async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, commands.CheckFailure) or isinstance(
-            error, commands.MissingRequiredArgument
-        ):
+        if isinstance(error, (commands.CheckFailure, commands.MissingRequiredArgument)):
             await ctx.send(mfmt.error(str(error)))
 
         logger.exception(repr(error))

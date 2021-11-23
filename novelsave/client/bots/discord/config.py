@@ -45,4 +45,7 @@ def discord() -> dict:
         "session": {
             "retain": timedelta(minutes=10),
         },
+        "search": {
+            "limit": 20,
+        },
     }

@@ -27,7 +27,7 @@ classifiers = [
 
 [tool.poetry.scripts]
 novelsave = "novelsave.client.cli.main:main"
-discord-bot = "novelsave.client.bots.discord.main:main"
+novelsave-discord-bot = "novelsave.client.bots.discord.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"

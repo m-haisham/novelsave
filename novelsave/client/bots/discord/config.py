@@ -20,13 +20,13 @@ def logger_config() -> dict:
         "handlers": [
             {
                 "sink": sys.stderr,
-                "level": "DEBUG",
+                "level": "TRACE",
                 "format": console_formatter,
             },
             {
                 "sink": config["config"]["dir"] / "logs" / "{time}.log",
                 "level": "TRACE",
-                "retention": "15 days",
+                "retention": "3 days",
                 "encoding": "utf-8",
             },
         ]

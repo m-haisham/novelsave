@@ -1,1 +1,1 @@
-bot: novelsave-discord-bot
+bot: python -m novelsave runbot discord

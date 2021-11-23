@@ -2,13 +2,12 @@
 
 ![PyPI](https://img.shields.io/pypi/v/novelsave)
 ![Python Version](https://img.shields.io/badge/Python-v3.8-blue)
-![Repo Size](https://img.shields.io/github/repo-size/mensch272/novelsave)
-[![Contributors](https://img.shields.io/github/contributors/mensch272/novelsave)](https://github.com/mensch272/novelsave/graphs/contributors)
 ![Last Commit](https://img.shields.io/github/last-commit/mensch272/novelsave/main)
 ![Issues](https://img.shields.io/github/issues/mensch272/novelsave)
 ![Pull Requests](https://img.shields.io/github/issues-pr/mensch272/novelsave)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/mensch272/novelsave/main.svg)](https://results.pre-commit.ci/latest/github/mensch272/novelsave/main)
 [![License](https://img.shields.io/github/license/mensch272/novelsave)](LICENSE)
+![Discord](https://img.shields.io/discord/911120379341307904)
 
 This is a tool to download and convert novels from popular sites to e-books.
 

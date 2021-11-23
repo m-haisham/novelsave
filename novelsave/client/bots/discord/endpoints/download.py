@@ -208,9 +208,7 @@ class Download(commands.Cog):
             await ctx.send(
                 mfmt.error("Please confirm your request to the following format:")
             )
-            await ctx.send(
-                f"`{ctx.clean_prefix}download <required:url> <optional:targets>`"
-            )
+            await ctx.send(f"`{ctx.clean_prefix}download <url:str> [targets]`")
         elif not url_helper.is_url(url):
             await ctx.send(mfmt.error("The url provided is not valid."))
         else:

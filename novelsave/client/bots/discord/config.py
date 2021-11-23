@@ -4,6 +4,7 @@ import sys
 from datetime import timedelta
 
 import dotenv
+from loguru import logger
 
 from novelsave.settings import config, console_formatter
 
@@ -14,7 +15,7 @@ def app() -> dict:
     return config.copy()
 
 
-def logger() -> dict:
+def logger_config() -> dict:
     return {
         "handlers": [
             {
@@ -32,6 +33,14 @@ def logger() -> dict:
     }
 
 
+def intenv(key: str, default: int) -> int:
+    try:
+        return int(os.getenv(key))
+    except (TypeError, ValueError) as e:
+        logger.exception(e)
+        return default
+
+
 @functools.lru_cache()
 def discord() -> dict:
     """Initialize and return discord configurations as a dict
@@ -40,12 +49,16 @@ def discord() -> dict:
     """
     dotenv.load_dotenv()
 
+    discord_token = os.getenv("DISCORD_TOKEN")
+    if not discord_token:
+        logger.error("Required environment variable 'DISCORD_TOKEN' is not set.")
+
     return {
-        "key": os.getenv("DISCORD_TOKEN"),
+        "key": discord_token,
         "session": {
-            "retain": timedelta(minutes=10),
+            "retain": timedelta(minutes=intenv("DISCORD_SESSION_TIMEOUT", 10)),
         },
         "search": {
-            "limit": 20,
+            "limit": intenv("DISCORD_SEARCH_LIMIT", 20),
         },
     }

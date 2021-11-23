@@ -65,7 +65,7 @@ def cli(debug: bool, plain: bool, skip_updates: bool):
         atexit.register(update_check_event)
 
 
-# @logger.catch()
+# @logger_config.catch()
 def main():
     try:
         cli()

@@ -4,7 +4,7 @@ from loguru import logger
 
 from . import config
 
-logger.configure(**config.logger())
+logger.configure(**config.logger_config())
 
 try:
     from nextcord.ext import commands

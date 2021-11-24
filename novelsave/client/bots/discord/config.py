@@ -58,6 +58,9 @@ def discord() -> dict:
         "session": {
             "retain": timedelta(minutes=intenv("DISCORD_SESSION_TIMEOUT", 10)),
         },
+        "download": {
+            "threads": intenv("DISCORD_DOWNLOAD_THREADS", 4),
+        },
         "search": {
             "limit": intenv("DISCORD_SEARCH_LIMIT", 20),
         },

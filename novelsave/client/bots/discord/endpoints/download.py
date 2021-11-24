@@ -1,3 +1,4 @@
+from concurrent import futures
 from typing import List, Iterable
 
 import nextcord
@@ -18,6 +19,8 @@ from ..session import SessionFragment, SessionHandler
 
 
 class DownloadHandler(SessionFragment):
+    download_threads: int = Provide["discord_config.download.threads"]
+
     def __init__(self, *args, **kwargs):
         super(DownloadHandler, self).__init__(*args, **kwargs)
 
@@ -127,31 +130,40 @@ class DownloadHandler(SessionFragment):
             logger.info("Skipped chapter download as none are pending.")
             return
 
-        self.session.send_sync(f"Downloading {len(chapters)} chapters…")
+        self.session.send_sync(
+            f"Downloading {len(chapters)} chapters using {self.download_threads} threads…"
+        )
         self.total = len(chapters)
         self.value = 1
 
-        for chapter in chapters:
-
-            try:
-                chapter_dto = source_gateway.update_chapter_content(
-                    self.session.dto_adapter.chapter_to_dto(chapter)
+        with futures.ThreadPoolExecutor(
+            max_workers=self.download_threads
+        ) as download_executor:
+            download_futures = [
+                download_executor.submit(
+                    source_gateway.update_chapter_content,
+                    self.session.dto_adapter.chapter_to_dto(c),
                 )
-            except Exception as e:
-                self.session.send_sync(mfmt.error(f"Error downloading {chapter.url}."))
-                logger.exception(e)
-                continue
+                for c in chapters
+            ]
 
-            chapter_dto.content = self.session.asset_service.collect_assets(
-                novel, chapter_dto
-            )
-            self.session.novel_service.update_content(chapter_dto)
+            for chapter in futures.as_completed(download_futures):
+                try:
+                    chapter_dto = chapter.result()
+                except Exception as e:
+                    logger.exception(e)
+                    continue
 
-            logger.debug(
-                f"Chapter content downloaded: '{chapter_dto.title}' ({chapter_dto.index})"
-            )
+                chapter_dto.content = self.session.asset_service.collect_assets(
+                    novel, chapter_dto
+                )
+                self.session.novel_service.update_content(chapter_dto)
 
-            self.value += 1
+                logger.debug(
+                    f"Chapter content downloaded: '{chapter_dto.title}' ({chapter_dto.index})"
+                )
+
+                self.value += 1
 
     def package(self, novel: Novel, packagers: Iterable[BasePackager]):
         self.session.send_sync("Packing the novel into the formats: epub…")

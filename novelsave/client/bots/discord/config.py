@@ -65,5 +65,6 @@ def discord() -> dict:
         },
         "search": {
             "limit": intenv("DISCORD_SEARCH_LIMIT", 20),
+            "disabled": os.getenv("DISCORD_SEARCH_DISABLED", "no").lower(),
         },
     }

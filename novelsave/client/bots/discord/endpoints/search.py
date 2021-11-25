@@ -9,7 +9,7 @@ from novelsave.core.dtos import NovelDTO
 from novelsave.core.services.source import BaseSourceService
 from .. import checks, mfmt
 from ..decorators import log_error
-from ..session import SessionHandler, SessionFragment
+from ..session import SessionHandler, SessionFragment, Session
 
 
 class SearchHandler(SessionFragment):
@@ -146,33 +146,46 @@ class Search(commands.Cog):
     """This controls search"""
 
     session_handler: SessionHandler = Provide["session.session_handler"]
+    unsupported = mfmt.error("Search is disabled.")
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         return await checks.direct_only(ctx)
 
     async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, (commands.CheckFailure, commands.MissingRequiredArgument)):
+        if isinstance(error, commands.CommandError):
             await ctx.send(mfmt.error(str(error)))
 
         logger.exception(repr(error))
+
+    @staticmethod
+    def is_supported(session: Session):
+        return session.has_fragment(SearchHandler)
 
     @commands.command()
     async def search(self, ctx: commands.Context, *, words):
         """Start a search task"""
         session = await self.session_handler.get_or_create(ctx)
+        if not self.is_supported(session):
+            await ctx.send(self.unsupported)
+            return
+
         await session.run(ctx, SearchHandler.search, words)
 
     @commands.command()
-    async def select(self, ctx: commands.Context, no: int):
+    async def select(self, ctx: commands.Context, num: int):
         """Select from the provided search results"""
         session = await self.session_handler.get_or_create(ctx)
+        if not self.is_supported(session):
+            await ctx.send(self.unsupported)
+            return
+
         if not await session.call(SearchHandler.is_select):
             await ctx.send("Session does not require selection.")
             return
 
         if await session.call(SearchHandler.is_novel_select):
-            await session.run(ctx, SearchHandler.select_novel, no - 1)
+            await session.run(ctx, SearchHandler.select_novel, num - 1)
         else:
-            url = await session.call(SearchHandler.select_source, no - 1)
+            url = await session.call(SearchHandler.select_source, num - 1)
             await ctx.send(f"{url} selected.")
             await ctx.invoke(session.bot.get_command("download"), url)

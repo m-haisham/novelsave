@@ -24,9 +24,8 @@ class SessionHandler:
 
     async def get_or_create(self, ctx: commands.Context):
         try:
-            return self.get(ctx).renew(ctx)
+            return self.get(ctx).renew_context(ctx)
         except KeyError:
-            await ctx.send("Starting new session…")
             return self.sessions.setdefault(
                 session_key(ctx), self.session_factory(bot, ctx)
             )

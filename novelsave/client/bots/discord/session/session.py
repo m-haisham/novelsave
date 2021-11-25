@@ -43,6 +43,9 @@ class Session(mixins.ContainerMixin):
         self.ctx = ctx
         return self
 
+    def has_fragment(self, type_: type):
+        return type_.__name__ in self.fragments
+
     @classmethod
     def factory(
         cls,

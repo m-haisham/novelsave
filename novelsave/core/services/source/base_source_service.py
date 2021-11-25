@@ -29,5 +29,5 @@ class BaseSourceService(ABC):
         """
 
     @abstractmethod
-    def get_supported_novel_sources(self) -> List[BaseSourceGateway]:
+    def get_novel_sources(self) -> List[BaseSourceGateway]:
         """Get all the supported sources"""

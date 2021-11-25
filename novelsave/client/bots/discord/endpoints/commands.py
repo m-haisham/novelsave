@@ -11,7 +11,10 @@ from ..bot import bot
 @bot.command()
 async def dm(ctx: commands.Context):
     """Send a direct message to you"""
-    await ctx.author.send(f"Hello, {ctx.author.name}.")
+    await ctx.author.send(
+        f"Hello, {ctx.author.name}.\n"
+        f" Send `{ctx.clean_prefix}help` to get usage instructions."
+    )
 
 
 @bot.command()
@@ -29,9 +32,9 @@ async def sources(
         )
 
         source_list = "\n".join(
-            f"• <{gateway.base_url}> " + ("🔍" if gateway.is_search_capable else "")
+            f"• `{'🔍' if gateway.is_search_capable else ' '}` <{gateway.base_url}>"
             for gateway in sorted(
-                source_service.get_supported_novel_sources(), key=lambda g: g.base_url
+                source_service.get_novel_sources(), key=lambda g: g.base_url
             )
         )
 

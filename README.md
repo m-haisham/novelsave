@@ -25,6 +25,32 @@ or
 pip install git+https://github.com/mensch272/novelsave.git
 ```
 
+### Chatbots
+
+#### Discord
+
+Join our server: https://discord.gg/eFgtrKTFt3
+
+##### Environmental Variables
+
+The default environmental variables are shown below. Modify them to your liking when deploying.
+
+`DISCORD_TOKEN` is required, others are optional.
+
+```shell
+DISCORD_TOKEN=  # Required: discord bot token
+DISCORD_SESSION_TIMEOUT=10 # Minutes
+DISCORD_DOWNLOAD_THREADS=4
+DISCORD_SEARCH_LIMIT=20  # Maximum results to show
+DISCORD_SEARCH_DISABLED=no  # Disable search functionality
+```
+
+#### Heroku Deployment
+
+Fill out the following form and set the environmental variables.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
 ## Usage
 
 ### Basic

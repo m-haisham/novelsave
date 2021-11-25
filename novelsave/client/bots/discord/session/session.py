@@ -39,7 +39,7 @@ class Session(mixins.ContainerMixin):
 
         self.setup_container(session_key(self.ctx))
 
-    def renew(self, ctx: commands.Context):
+    def renew_context(self, ctx: commands.Context):
         self.ctx = ctx
         return self
 

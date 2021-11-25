@@ -52,9 +52,7 @@ class SearchHandler(SessionFragment):
     def search(self, word: str):
         self.session.state = self._state_searching
         search_capable = [
-            s
-            for s in self.source_service.get_supported_novel_sources()
-            if s.is_search_capable
+            s for s in self.source_service.get_novel_sources() if s.is_search_capable
         ]
 
         self.session.send_sync(
@@ -164,7 +162,7 @@ class Search(commands.Cog):
     @commands.command()
     async def search(self, ctx: commands.Context, *, words):
         """Start a search task"""
-        session = await self.session_handler.get_or_create(ctx)
+        session = self.session_handler.get_or_create(ctx)
         if not self.is_supported(session):
             await ctx.send(self.unsupported)
             return
@@ -174,7 +172,7 @@ class Search(commands.Cog):
     @commands.command()
     async def select(self, ctx: commands.Context, num: int):
         """Select from the provided search results"""
-        session = await self.session_handler.get_or_create(ctx)
+        session = self.session_handler.get_or_create(ctx)
         if not self.is_supported(session):
             await ctx.send(self.unsupported)
             return

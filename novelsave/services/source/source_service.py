@@ -56,7 +56,7 @@ class SourceService(BaseSourceService):
         except UnknownSourceException:
             raise SourceNotFoundException(url)
 
-    def get_supported_novel_sources(self) -> List[SourceGateway]:
+    def get_novel_sources(self) -> List[SourceGateway]:
         return [
             SourceGateway(source_type(), source_adapter=self.source_adapter)
             for source_type in novel_source_types()

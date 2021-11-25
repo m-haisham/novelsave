@@ -216,7 +216,7 @@ class Download(commands.Cog):
         if not await self.valid(ctx, url):
             return
 
-        session = await self.session_handler.get_or_create(ctx)
+        session = self.session_handler.get_or_create(ctx)
         await session.run(ctx, DownloadHandler.download, url, targets)
 
     @staticmethod

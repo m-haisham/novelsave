@@ -22,7 +22,7 @@ class SessionHandler:
 
         return session
 
-    async def get_or_create(self, ctx: commands.Context):
+    def get_or_create(self, ctx: commands.Context):
         try:
             return self.get(ctx).renew_context(ctx)
         except KeyError:

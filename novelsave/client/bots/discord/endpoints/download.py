@@ -40,8 +40,7 @@ class DownloadHandler(SessionFragment):
 
     async def download_state(self, ctx: commands.Context):
         await ctx.send(
-            f"The current download progress is {self.value} of {self.total}.\n"
-            f"To cancel the current download, send `{ctx.clean_prefix}cancel`"
+            f"The current download progress is {self.value} of {self.total}."
         )
 
     async def packaging_state(self, ctx: commands.Context):
@@ -186,6 +185,7 @@ class DownloadHandler(SessionFragment):
                         f"Unable to upload files larger than 8 Mb ({packager.keywords()[0]})."
                     )
                 )
+                return
 
             self.session.send_sync(file=nextcord.File(output, output.name))
 

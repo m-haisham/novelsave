@@ -4,7 +4,7 @@ from nextcord.ext import commands
 async def direct_only(ctx: commands.Context):
     """Custom direct only check
 
-    Either
+    This check returns true when one of the below checks are true
     - The message author is bot owner and is invoked with help
     - The message is not from a guild
     """

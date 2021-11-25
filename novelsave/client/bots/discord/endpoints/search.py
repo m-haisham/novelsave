@@ -105,7 +105,7 @@ class SearchHandler(SessionFragment):
             )
             return
         except KeyError:
-            self.session.send_sync("Novel not found")
+            self.session.send_sync("Novel not found.")
             return
 
         self.session.state = self.session.initial
@@ -157,6 +157,7 @@ class Search(commands.Cog):
 
     @staticmethod
     def is_supported(session: Session):
+        """Whether search is implemented"""
         return session.has_fragment(SearchHandler)
 
     @commands.command()

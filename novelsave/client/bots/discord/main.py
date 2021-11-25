@@ -6,6 +6,7 @@ from .containers import DiscordApplication
 
 
 def wire(packages):
+    """Wire the containers to the packages"""
     app_config = config.app()
     app_config["config"]["dir"].mkdir(parents=True, exist_ok=True)
 

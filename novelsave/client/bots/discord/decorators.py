@@ -6,6 +6,8 @@ from .session import Session
 
 
 def ensure_close(func):
+    """Ensures that when this method ends the session will be closed"""
+
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
         session: Session = args[0].session
@@ -28,6 +30,8 @@ def ensure_close(func):
 
 
 def log_error(func):
+    """Catches and logs errors from the method and propagates the exception"""
+
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
 

@@ -67,12 +67,14 @@ class Session(mixins.ContainerMixin):
         await ctx.send("Just spinning things up.")
 
     def sync(self, func, *args, **kwargs):
+        """Synchronously schedule an asynchronous function"""
         asyncio.run_coroutine_threadsafe(
             func(*args, **kwargs),
             self.bot.loop,
         ).result(timeout=3 * 60)
 
     def send_sync(self, *args, **kwargs):
+        """Synchronously send a function"""
         message = ", ".join(
             [" ".join(args), " ".join(f"{k}={v}" for k, v in kwargs.items())]
         )
@@ -87,6 +89,7 @@ class Session(mixins.ContainerMixin):
         ).result(timeout=3 * 60)
 
     async def run(self, ctx: commands.Context, func: Callable, *args, **kwargs):
+        """Schedule a fragment method to be run in the thread pool"""
         if self.is_busy():
             await ctx.send("Please wait…")
             await self.state(ctx)
@@ -99,6 +102,10 @@ class Session(mixins.ContainerMixin):
         self.executor.submit(method, *args, **kwargs)
 
     async def call(self, func: Callable, *args, **kwargs):
+        """Call a method and return the result
+
+        Supports sync and async functions
+        """
         method = self._get_fragment_property(func)
 
         if callable(method):
@@ -118,17 +125,20 @@ class Session(mixins.ContainerMixin):
         return method
 
     def is_busy(self):
+        """Whether the session is doing work"""
         return any(fragment.is_busy() for fragment in self.fragments.values())
 
-    def is_expired(self, current: datetime) -> bool:
+    def is_expired(self, current_time: datetime) -> bool:
+        """Whether the current session is expired"""
         if self.is_busy():
             return False
-        elif current - self.last_activity < self.session_retain:
+        elif current_time - self.last_activity < self.session_retain:
             return False
         else:
             return True
 
     async def close_and_inform(self):
+        """Close the session and inform the user"""
         await self.ctx.send("Cleaning up temporary files…")
         try:
             self.close()
@@ -138,6 +148,7 @@ class Session(mixins.ContainerMixin):
         await self.ctx.send("Session closed.")
 
     def close(self):
+        """Close the current user session and remove all temporary files"""
         if self.is_closed:
             raise AlreadyClosedException("This session is already closed.")
 

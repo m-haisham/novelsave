@@ -17,20 +17,25 @@ class SessionHandler:
         self.session_factory = session_factory
 
     def get(self, ctx: commands.Context) -> Session:
+        """Return existing user session
+
+        :raises KeyError: if user does not have a session
+        """
         self.cleanup()
         session = self.sessions[session_key(ctx)]
-
         return session
 
     def get_or_create(self, ctx: commands.Context):
+        """Create or return already existing session"""
         try:
             return self.get(ctx).renew_context(ctx)
         except KeyError:
-            return self.sessions.setdefault(
-                session_key(ctx), self.session_factory(bot, ctx)
-            )
+            session = self.session_factory(bot, ctx)
+            self.sessions[session_key(ctx)] = session
+            return session
 
     def cleanup(self):
+        """Find and remove all expired sessions"""
         current_time = datetime.now()
 
         expired = []

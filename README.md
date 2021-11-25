@@ -2,19 +2,20 @@
 
 ![PyPI](https://img.shields.io/pypi/v/novelsave)
 ![Python Version](https://img.shields.io/badge/Python-v3.8-blue)
-![Repo Size](https://img.shields.io/github/repo-size/mensch272/novelsave)
-[![Contributors](https://img.shields.io/github/contributors/mensch272/novelsave)](https://github.com/mensch272/novelsave/graphs/contributors)
 ![Last Commit](https://img.shields.io/github/last-commit/mensch272/novelsave/main)
 ![Issues](https://img.shields.io/github/issues/mensch272/novelsave)
 ![Pull Requests](https://img.shields.io/github/issues-pr/mensch272/novelsave)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/mensch272/novelsave/main.svg)](https://results.pre-commit.ci/latest/github/mensch272/novelsave/main)
 [![License](https://img.shields.io/github/license/mensch272/novelsave)](LICENSE)
+![Discord](https://img.shields.io/discord/911120379341307904)
 
 This is a tool to download and convert novels from popular sites to e-books.
 
 > **v0.7.+ is not compatible with previous versions**
 
 ## Install
+
+### Local
 
 ```bash
 pip install novelsave
@@ -25,6 +26,32 @@ or
 ```bash
 pip install git+https://github.com/mensch272/novelsave.git
 ```
+
+### Chatbots
+
+#### Discord
+
+Join our server: https://discord.gg/eFgtrKTFt3
+
+##### Environmental Variables
+
+The default environmental variables are shown below. Modify them to your liking when deploying.
+
+`DISCORD_TOKEN` is required, others are optional.
+
+```shell
+DISCORD_TOKEN=  # Required: discord bot token
+DISCORD_SESSION_TIMEOUT=10 # Minutes
+DISCORD_DOWNLOAD_THREADS=4
+DISCORD_SEARCH_LIMIT=20  # Maximum results to show
+DISCORD_SEARCH_DISABLED=no  # Disable search functionality
+```
+
+#### Heroku Deployment
+
+Fill out the following form and set the environmental variables.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 ## Usage
 

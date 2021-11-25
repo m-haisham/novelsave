@@ -5,8 +5,8 @@ from dependency_injector.wiring import inject, Provide
 from loguru import logger
 
 from ..main import cli
-from ...containers import Application
-from ...core.services.config import BaseConfigService
+from novelsave.containers import Application
+from novelsave.core.services.config import BaseConfigService
 
 
 @cli.group(name="config")

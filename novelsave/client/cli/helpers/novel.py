@@ -10,7 +10,7 @@ from dependency_injector.wiring import inject, Provide
 from loguru import logger
 from tqdm import tqdm
 
-from novelsave.cli.helpers.source import get_source_gateway
+from novelsave.client.cli.helpers.source import get_source_gateway
 from novelsave.containers import Application
 from novelsave.core.dtos import ChapterDTO
 from novelsave.core.entities.novel import Novel
@@ -185,32 +185,34 @@ def download_chapters(
     )
     successes = 0
     with tqdm(total=len(chapters), **TQDM_CONFIG) as pbar:
-        executor = futures.ThreadPoolExecutor(max_workers=thread_count)
-        download_futures = [
-            executor.submit(download, dto_adapter.chapter_to_dto(c)) for c in chapters
-        ]
+        with futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
+            download_futures = [
+                executor.submit(download, dto_adapter.chapter_to_dto(c))
+                for c in chapters
+            ]
 
-        for future in futures.as_completed(download_futures):
-            try:
-                chapter_dto = future.result()
-                chapter_dto.content = asset_service.collect_assets(novel, chapter_dto)
-                novel_service.update_content(chapter_dto)
+            for future in futures.as_completed(download_futures):
+                try:
+                    chapter_dto = future.result()
+                    chapter_dto.content = asset_service.collect_assets(
+                        novel, chapter_dto
+                    )
+                    novel_service.update_content(chapter_dto)
 
-                logger.debug(
-                    f"Chapter content downloaded: '{chapter_dto.title}' ({chapter_dto.index})"
-                )
-                successes += 1
-            except ContentUpdateFailedException as e:
-                logger.error(
-                    f"An error occurred during content download: {type(e.exception)}."
-                )
-                logger.debug(
-                    "An error occurred during content download: {}", type(e.exception)
-                )
+                    logger.debug(
+                        f"Chapter content downloaded: '{chapter_dto.title}' ({chapter_dto.index})"
+                    )
+                    successes += 1
+                except ContentUpdateFailedException as e:
+                    logger.error(
+                        f"An error occurred during content download: {type(e.exception)}."
+                    )
+                    logger.debug(
+                        "An error occurred during content download: {}",
+                        type(e.exception),
+                    )
 
-            pbar.update(1)
-
-        executor.shutdown()
+                pbar.update(1)
 
     logger.info(
         f"Chapters download complete, {successes} succeeded, with {len(chapters) - successes} errors."

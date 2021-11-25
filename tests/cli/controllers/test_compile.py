@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from novelsave.cli import controllers
+from novelsave.client.cli import controllers
 
 
 @pytest.fixture

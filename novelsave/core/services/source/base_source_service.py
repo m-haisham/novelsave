@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 from . import BaseSourceGateway, BaseMetaSourceGateway
 
@@ -26,3 +27,7 @@ class BaseSourceService(ABC):
 
         :raises MetaDataSourceNotFoundException: if no source if available for the url
         """
+
+    @abstractmethod
+    def get_novel_sources(self) -> List[BaseSourceGateway]:
+        """Get all the supported sources"""

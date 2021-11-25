@@ -1,3 +1,5 @@
+from typing import List
+
 import browser_cookie3
 from loguru import logger
 from novelsave_sources.sources.novel.source import Source
@@ -19,6 +21,10 @@ class SourceGateway(BaseSourceGateway):
         return getattr(self.source, "name", type(self.source).__name__)
 
     @property
+    def base_url(self) -> str:
+        return self.source.base_urls[0]
+
+    @property
     def is_search_capable(self) -> bool:
         return self.source.search_viable
 
@@ -26,8 +32,11 @@ class SourceGateway(BaseSourceGateway):
     def is_login_capable(self) -> bool:
         return self.source.login_viable
 
-    def search(self, keyword: str):
-        self.source.search(keyword)
+    def search(self, keyword: str) -> List[dtos.NovelDTO]:
+        return [
+            self.source_adapter.novel_to_internal(novel)
+            for novel in self.source.search(keyword)
+        ]
 
     def login(self, username: str, password: str):
         self.source.login(username, password)

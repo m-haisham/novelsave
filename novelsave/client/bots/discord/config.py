@@ -22,6 +22,8 @@ def logger_config() -> dict:
                 "sink": sys.stderr,
                 "level": "TRACE",
                 "format": console_formatter,
+                "backtrace": True,
+                "diagnose": True,
             },
             {
                 "sink": config["config"]["dir"] / "logs" / "{time}.log",

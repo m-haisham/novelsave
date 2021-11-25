@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added discord bot with (most functions are only available in private):
   - Download novel to multiple formats
   - Search for novels using a query
+- Added alternative method to acquire package version if importlib fails
 
 ### Changed
 

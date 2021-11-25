@@ -66,6 +66,12 @@ class Session(mixins.ContainerMixin):
     async def initial(ctx):
         await ctx.send("Just spinning things up.")
 
+    def sync(self, func, *args, **kwargs):
+        asyncio.run_coroutine_threadsafe(
+            func(*args, **kwargs),
+            self.bot.loop,
+        ).result(timeout=3 * 60)
+
     def send_sync(self, *args, **kwargs):
         message = ", ".join(
             [" ".join(args), " ".join(f"{k}={v}" for k, v in kwargs.items())]

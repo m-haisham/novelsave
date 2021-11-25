@@ -1,4 +1,6 @@
+import shutil
 from concurrent import futures
+from pathlib import Path
 from typing import List, Iterable
 
 import nextcord
@@ -166,19 +168,19 @@ class DownloadHandler(SessionFragment):
                 self.value += 1
 
     def package(self, novel: Novel, packagers: Iterable[BasePackager]):
-        self.session.send_sync("Packing the novel into the formats: epub…")
+        formats = ", ".join(p.keywords()[0] for p in packagers)
+        self.session.send_sync(f"Packing the novel into the formats: {formats}…")
 
         for packager in packagers:
             output = packager.package(novel)
-            if output.is_file():
-                self.session.send_sync(f"Uploading {output.name}…")
-                self.session.send_sync(file=nextcord.File(output, output.name))
+            if output.is_dir():
+                self.session.send_sync(f"Archiving and uploading {output.name}…")
+                archive = shutil.make_archive(str(output), "zip", str(output))
+                output = Path(archive)
             else:
-                self.session.send_sync(
-                    mfmt.error(
-                        f"I do not yet have support to upload directories ({packager.keywords()[0]})."
-                    )
-                )
+                self.session.send_sync(f"Uploading {output.name}…")
+
+            self.session.send_sync(file=nextcord.File(output, output.name))
 
 
 class Download(commands.Cog):

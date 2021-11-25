@@ -20,7 +20,7 @@ def ensure_close(func):
             logger.exception(e)
 
         if not session.is_closed:
-            session.close_and_inform()
+            session.sync(session.close_and_inform)
 
         return result
 

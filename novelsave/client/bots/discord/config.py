@@ -38,8 +38,7 @@ def logger_config() -> dict:
 def intenv(key: str, default: int) -> int:
     try:
         return int(os.getenv(key))
-    except (TypeError, ValueError) as e:
-        logger.exception(e)
+    except (TypeError, ValueError):
         return default
 
 

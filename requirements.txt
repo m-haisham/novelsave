@@ -8,21 +8,20 @@ browser-cookie3==0.13.0
 certifi==2021.10.8; python_version >= "3.8" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.0"
 cffi==1.15.0; python_version >= "3.6"
 chardet==4.0.0; python_version >= "3.6" and python_full_version >= "3.8.0"
-charset-normalizer==2.0.7; python_full_version >= "3.6.0" and python_version >= "3.8" and python_version < "4.0"
+charset-normalizer==2.0.8; python_full_version >= "3.6.0" and python_version >= "3.8" and python_version < "4.0"
 click==8.0.3; python_version >= "3.6"
 cloudscraper==1.2.58; python_version >= "3.8" and python_version < "4.0"
 colorama==0.4.4; python_version >= "3.6" and python_full_version < "3.0.0" and sys_platform == "win32" and platform_system == "Windows" or sys_platform == "win32" and python_version >= "3.6" and python_full_version >= "3.5.0" and platform_system == "Windows"
-cryptography==35.0.0; python_version >= "3.6"
+cryptography==36.0.0; python_version >= "3.6"
 dependency-injector==4.37.0
 deprecation==2.1.0; python_version >= "3.8" and python_version < "4.0"
-discord-ui==5.0.2; python_version >= "3.6"
 ebooklib==0.17.1
 greenlet==1.1.2; python_version >= "3" and python_full_version < "3.0.0" and (platform_machine == "aarch64" or platform_machine == "ppc64le" or platform_machine == "x86_64" or platform_machine == "amd64" or platform_machine == "AMD64" or platform_machine == "win32" or platform_machine == "WIN32") and (python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0") and (python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version >= "3.6") or python_version >= "3" and (platform_machine == "aarch64" or platform_machine == "ppc64le" or platform_machine == "x86_64" or platform_machine == "amd64" or platform_machine == "AMD64" or platform_machine == "win32" or platform_machine == "WIN32") and (python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0") and python_full_version >= "3.5.0" and (python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version >= "3.6")
 idna==3.3; python_full_version >= "3.8.0" and python_version >= "3.8" and python_version < "4.0"
 importlib-metadata==4.8.2; python_version < "3.9" and python_version >= "3.6"
 importlib-resources==5.4.0; python_version < "3.9" and python_version >= "3.6"
 jeepney==0.7.1; sys_platform == "linux" and python_version >= "3.6"
-keyring==23.2.1; python_version >= "3.6"
+keyring==23.3.0; python_version >= "3.6"
 loguru==0.5.3; python_version >= "3.5"
 lxml==4.6.4; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.5.0")
 lz4==3.1.3; python_version >= "3.5"

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "novelsave"
-version = "0.7.8"
+version = "0.8.0"
 description = "This is a tool to download and convert novels from popular sites to e-books."
 authors = ["Mensch272 <47662901+mensch272@users.noreply.github.com>"]
 maintainers = ["Mensch272 <47662901+mensch272@users.noreply.github.com>"]
@@ -47,7 +47,6 @@ tqdm = "^4.62.3"
 Mako = "^1.1.5"
 tabulate = "^0.8.9"
 nextcord = { version = "^2.0.0-alpha.3", optional = true }
-discord-ui = { version = "^5.0.2", optional = true }
 python-dotenv = "^0.19.2"
 
 [tool.poetry.dev-dependencies]
@@ -56,7 +55,7 @@ pytest-mock = "^3.6.1"
 pre-commit = "^2.15.0"
 
 [tool.poetry.extras]
-discord = ["nextcord", "discord-ui"]
+discord = ["nextcord"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

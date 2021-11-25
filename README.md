@@ -15,6 +15,8 @@ This is a tool to download and convert novels from popular sites to e-books.
 
 ## Install
 
+### Local
+
 ```bash
 pip install novelsave
 ```

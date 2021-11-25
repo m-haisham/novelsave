@@ -180,6 +180,13 @@ class DownloadHandler(SessionFragment):
             else:
                 self.session.send_sync(f"Uploading {output.name}…")
 
+            if output.stat().st_size > 7.99 * 1024 * 1024:
+                self.session.send_sync(
+                    mfmt.error(
+                        f"Unable to upload files larger than 8 Mb ({packager.keywords()[0]})."
+                    )
+                )
+
             self.session.send_sync(file=nextcord.File(output, output.name))
 
 
@@ -192,9 +199,7 @@ class Download(commands.Cog):
         return await checks.direct_only(ctx)
 
     async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, commands.CheckFailure) or isinstance(
-            error, commands.MissingRequiredArgument
-        ):
+        if isinstance(error, commands.CommandError):
             await ctx.send(mfmt.error(str(error)))
 
         logger.exception(repr(error))

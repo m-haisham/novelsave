@@ -2,7 +2,6 @@ from dependency_injector.wiring import inject, Provide
 from loguru import logger
 from nextcord.ext import commands
 
-from novelsave import __version__
 from novelsave.containers import Application
 from novelsave.core.services.source import BaseSourceService
 from .. import checks, mfmt
@@ -25,7 +24,9 @@ async def sources(
 ):
     """List all the sources supported"""
     with ctx.typing():
-        await ctx.send(f"The sources currently supported include (v{__version__}):")
+        await ctx.send(
+            f"The sources currently supported include (v{source_service.current_version}):"
+        )
 
         source_list = "\n".join(
             f"• <{gateway.base_url}> " + ("🔍" if gateway.is_search_capable else "")
@@ -43,7 +44,7 @@ async def sources(
 
 @sources.error
 async def sources_error(ctx: commands.Context, error: Exception):
-    if isinstance(error, commands.CheckFailure):
+    if isinstance(error, commands.CommandError):
         await ctx.send(mfmt.error(str(error)))
 
     logger.exception(repr(error))

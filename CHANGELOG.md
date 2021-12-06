@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+## Changed
+
+- Removed url lazy loading from db in favour of sql statement
+
 ## Fixed
 
 - Fixed where provided webnovel urls not added to db #44

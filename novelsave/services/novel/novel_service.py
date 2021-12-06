@@ -32,9 +32,8 @@ class NovelService(BaseNovelService):
 
     def get_novel_by_url(self, url: str) -> Optional[Novel]:
         """retrieve a novel from persistence using its url"""
-        return (
-            self.session.query(Novel).join(NovelUrl).filter(NovelUrl.url == url).first()
-        )
+        sql = select(Novel).join(NovelUrl).filter(NovelUrl.url == url)
+        return self.session.execute(sql).scalars().first()
 
     def get_primary_url(self, novel: Novel) -> str:
         return novel.urls[0].url

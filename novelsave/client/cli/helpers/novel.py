@@ -71,6 +71,11 @@ def create_novel(
     novel_dto = retrieve_novel_info(source_gateway, url, browser)
 
     novel = novel_service.insert_novel(novel_dto)
+    try:
+        novel_service.add_url(novel, url)
+    except ValueError as e:
+        logger.debug("(ERROR) " + str(e))
+
     novel_service.insert_chapters(novel, novel_dto.volumes)
     novel_service.insert_metadata(novel, novel_dto.metadata)
 
@@ -275,9 +280,7 @@ def get_novel(
 
     if not novel:
         quote = "'" if is_url else ""
-        msg = (
-            f"Novel not found: ({'url' if is_url else 'id'}={quote}{id_or_url}{quote})."
-        )
+        msg = f"Novel not found: {quote}{id_or_url}{quote}."
 
         logger.info(msg)
         raise ValueError(msg)

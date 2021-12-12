@@ -36,10 +36,14 @@ class NovelService(BaseNovelService):
         return self.session.execute(sql).scalars().first()
 
     def get_primary_url(self, novel: Novel) -> str:
-        return novel.urls[0].url
+        return self.get_urls(novel)[0].url
 
     def get_urls(self, novel) -> List[NovelUrl]:
-        return novel.urls
+        return (
+            self.session.execute(select(NovelUrl).filter(NovelUrl.novel_id == novel.id))
+            .scalars()
+            .all()
+        )
 
     def get_chapters(self, novel: Novel) -> List[Chapter]:
         return (

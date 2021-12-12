@@ -13,7 +13,7 @@ async def dm(ctx: commands.Context):
     """Send a direct message to you"""
     await ctx.author.send(
         f"Hello, {ctx.author.name}.\n"
-        f" Send `{ctx.clean_prefix}help` to get usage instructions."
+        f"Send `{ctx.clean_prefix}help` to get usage instructions."
     )
 
 

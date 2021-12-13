@@ -8,7 +8,7 @@ from novelsave.containers import Application
 from novelsave.core.dtos import NovelDTO
 from novelsave.core.services.source import BaseSourceService
 from .. import checks, mfmt
-from ..decorators import log_error
+from ..decorators import log_error, session_task
 from ..session import SessionHandler, SessionFragment, Session
 
 
@@ -49,6 +49,7 @@ class SearchHandler(SessionFragment):
         await ctx.send(self._source_list())
 
     @log_error
+    @session_task(False)
     def search(self, word: str):
         self.session.state = self._state_searching
         search_capable = [
@@ -178,13 +179,13 @@ class Search(commands.Cog):
             await ctx.send(self.unsupported)
             return
 
-        if not await session.call(SearchHandler.is_select):
+        if not session.get(SearchHandler.is_select)():
             await ctx.send("Session does not require selection.")
             return
 
-        if await session.call(SearchHandler.is_novel_select):
+        if session.get(SearchHandler.is_novel_select)():
             await session.run(ctx, SearchHandler.select_novel, num - 1)
         else:
-            url = await session.call(SearchHandler.select_source, num - 1)
+            url = session.get(SearchHandler.select_source)(num - 1)
             await ctx.send(f"{url} selected.")
             await ctx.invoke(session.bot.get_command("download"), url)

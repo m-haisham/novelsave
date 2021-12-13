@@ -28,7 +28,7 @@ class SessionHandler:
     def get_or_create(self, ctx: commands.Context):
         """Create or return already existing session"""
         try:
-            return self.get(ctx).renew_context(ctx)
+            return self.get(ctx)
         except KeyError:
             session = self.session_factory(bot, ctx)
             self.sessions[session_key(ctx)] = session

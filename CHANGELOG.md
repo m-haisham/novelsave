@@ -6,13 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+## [0.8.1] - 2021-12-13
+
 ## Changed
 
 - Removed url lazy loading from db in favour of sql statement
+- Changed discord session `call` to `get` and it now returns the method
+  instead of calling it
 
 ## Fixed
 
 - Fixed where provided webnovel urls not added to db #44
+- Fixed discord dm message
+- Fixed discord thread access errors
 
 ## [0.8.0] - 2021-11-25
 

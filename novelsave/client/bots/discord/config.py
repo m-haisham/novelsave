@@ -5,21 +5,21 @@ from datetime import timedelta
 
 import dotenv
 from loguru import logger
+import copy
 
 from novelsave.settings import config, console_formatter
 
 
-@functools.lru_cache()
 def app() -> dict:
     """Initialize and return the configuration used by the base application"""
-    return config.copy()
+    return copy.deepcopy(config)
 
 
 def logger_config() -> dict:
     return {
         "handlers": [
             {
-                "sink": sys.stderr,
+                "sink": sys.stdout,
                 "level": "TRACE",
                 "format": console_formatter,
                 "backtrace": True,
@@ -58,9 +58,7 @@ def discord() -> dict:
         "key": discord_token,
         "session": {
             "retain": timedelta(minutes=intenv("DISCORD_SESSION_TIMEOUT", 10)),
-        },
-        "download": {
-            "threads": intenv("DISCORD_DOWNLOAD_THREADS", 4),
+            "threads": intenv("DISCORD_SESSION_THREADS", 5),
         },
         "search": {
             "limit": intenv("DISCORD_SEARCH_LIMIT", 20),

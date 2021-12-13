@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+## [0.8.1] - 2021-12-13
+
 ## Changed
 
 - Removed url lazy loading from db in favour of sql statement

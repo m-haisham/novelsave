@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Changed
 
 - Removed url lazy loading from db in favour of sql statement
+- Changed discord session `call` to `get` and it now returns the method
+  instead of calling it
 
 ## Fixed
 

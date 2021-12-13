@@ -1,5 +1,4 @@
 import asyncio
-import inspect
 import shutil
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
@@ -98,13 +97,9 @@ class Session(mixins.ContainerMixin):
             await self.state(ctx)
             return
 
-        method = self._get_fragment_property(func)
-        if callable(method):
-            self.last_activity = datetime.now()
+        self.executor.submit(self.get(func), *args, **kwargs)
 
-        self.executor.submit(method, *args, **kwargs)
-
-    async def call(self, func: Callable, *args, **kwargs):
+    def get(self, func: Callable):
         """Call a method and return the result
 
         Supports sync and async functions
@@ -114,10 +109,7 @@ class Session(mixins.ContainerMixin):
         if callable(method):
             self.last_activity = datetime.now()
 
-        if inspect.isawaitable(method):
-            return await method(*args, **kwargs)
-        else:
-            return method(*args, **kwargs)
+        return method
 
     def _get_fragment_property(self, func: Callable):
         _type, func = func.__qualname__.split(".", maxsplit=1)

@@ -16,13 +16,11 @@ from novelsave.core.services.source import BaseSourceGateway
 from novelsave.exceptions import SourceNotFoundException
 from novelsave.utils.helpers import url_helper, string_helper
 from .. import checks, mfmt
-from ..decorators import ensure_close
+from ..decorators import session_task
 from ..session import SessionFragment, SessionHandler
 
 
 class DownloadHandler(SessionFragment):
-    download_threads: int = Provide["discord_config.download.threads"]
-
     def __init__(self, *args, **kwargs):
         super(DownloadHandler, self).__init__(*args, **kwargs)
 
@@ -46,12 +44,12 @@ class DownloadHandler(SessionFragment):
     async def packaging_state(self, ctx: commands.Context):
         await ctx.send("I'm currently packaging the novel.")
 
-    @ensure_close
+    @session_task()
     def download(self, url: str, targets: List[str]):
         self.session.state = self.info_state
 
         try:
-            source_gateway = self.session.source_service.source_from_url(url)
+            source_gateway = self.session.source_service().source_from_url(url)
         except SourceNotFoundException:
             self.session.send_sync(mfmt.error("This website is not yet supported."))
             self.session.send_sync(
@@ -61,7 +59,7 @@ class DownloadHandler(SessionFragment):
             return
 
         try:
-            packagers = self.session.packager_provider.filter_packagers(targets)
+            packagers = self.session.packager_provider().filter_packagers(targets)
         except ValueError as e:
             self.session.send_sync(mfmt.error(str(e)))
             return
@@ -77,9 +75,11 @@ class DownloadHandler(SessionFragment):
             f"volumes of {chapter_count} chapters."
         )
 
-        novel = self.session.novel_service.insert_novel(novel_dto)
-        self.session.novel_service.insert_chapters(novel, novel_dto.volumes)
-        self.session.novel_service.insert_metadata(novel, novel_dto.metadata)
+        novel_service = self.session.novel_service()
+
+        novel = novel_service.insert_novel(novel_dto)
+        novel_service.insert_chapters(novel, novel_dto.volumes)
+        novel_service.insert_metadata(novel, novel_dto.metadata)
 
         self.session.state = self.download_state
         self.download_thumbnail(novel)
@@ -114,57 +114,61 @@ class DownloadHandler(SessionFragment):
             )
             return
 
-        thumbnail_path = self.session.path_service.thumbnail_path(novel)
-        self.session.novel_service.set_thumbnail_asset(
-            novel, self.session.path_service.relative_to_data_dir(thumbnail_path)
+        path_service = self.session.path_service()
+        novel_service = self.session.novel_service()
+
+        thumbnail_path = path_service.thumbnail_path(novel)
+        novel_service.set_thumbnail_asset(
+            novel, path_service.relative_to_data_dir(thumbnail_path)
         )
 
         thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
-        self.session.file_service.write_bytes(thumbnail_path, response.content)
+        self.session.file_service().write_bytes(thumbnail_path, response.content)
 
         size = string_helper.format_bytes(len(response.content))
         self.session.send_sync(f"Downloaded and saved thumbnail image ({size}).")
 
     def download_chapters(self, novel: Novel, source_gateway: BaseSourceGateway):
-        chapters = self.session.novel_service.get_pending_chapters(novel, -1)
+        novel_service = self.session.novel_service()
+
+        chapters = novel_service.get_pending_chapters(novel, -1)
         if not chapters:
             logger.info("Skipped chapter download as none are pending.")
             return
 
         self.session.send_sync(
-            f"Downloading {len(chapters)} chapters using {self.download_threads} threads…"
+            f"Downloading {len(chapters)} chapters using {self.session.thread_count - 1} threads…"
         )
+
         self.total = len(chapters)
         self.value = 1
 
-        with futures.ThreadPoolExecutor(
-            max_workers=self.download_threads
-        ) as download_executor:
-            download_futures = [
-                download_executor.submit(
-                    source_gateway.update_chapter_content,
-                    self.session.dto_adapter.chapter_to_dto(c),
-                )
-                for c in chapters
-            ]
+        dto_adapter = self.session.dto_adapter()
+        asset_service = self.session.asset_service()
 
-            for chapter in futures.as_completed(download_futures):
-                try:
-                    chapter_dto = chapter.result()
-                except Exception as e:
-                    logger.exception(e)
-                    continue
+        download_futures = [
+            self.session.executor.submit(
+                source_gateway.update_chapter_content,
+                dto_adapter.chapter_to_dto(c),
+            )
+            for c in chapters
+        ]
 
-                chapter_dto.content = self.session.asset_service.collect_assets(
-                    novel, chapter_dto
-                )
-                self.session.novel_service.update_content(chapter_dto)
+        for chapter in futures.as_completed(download_futures):
+            try:
+                chapter_dto = chapter.result()
+            except Exception as e:
+                logger.exception(e)
+                continue
 
-                logger.debug(
-                    f"Chapter content downloaded: '{chapter_dto.title}' ({chapter_dto.index})"
-                )
+            chapter_dto.content = asset_service.collect_assets(novel, chapter_dto)
+            novel_service.update_content(chapter_dto)
 
-                self.value += 1
+            logger.debug(
+                f"Chapter content downloaded: '{chapter_dto.title}' ({chapter_dto.index})"
+            )
+
+            self.value += 1
 
     def package(self, novel: Novel, packagers: Iterable[BasePackager]):
         formats = ", ".join(p.keywords()[0] for p in packagers)
@@ -179,6 +183,7 @@ class DownloadHandler(SessionFragment):
             else:
                 self.session.send_sync(f"Uploading {output.name}…")
 
+            # TODO: ability upload larger than 8 Mb
             if output.stat().st_size > 7.99 * 1024 * 1024:
                 self.session.send_sync(
                     mfmt.error(

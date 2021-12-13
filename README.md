@@ -42,7 +42,7 @@ The default environmental variables are shown below. Modify them to your liking 
 ```shell
 DISCORD_TOKEN=  # Required: discord bot token
 DISCORD_SESSION_TIMEOUT=10 # Minutes
-DISCORD_DOWNLOAD_THREADS=4
+DISCORD_SESSION_THREADS=5
 DISCORD_SEARCH_LIMIT=20  # Maximum results to show
 DISCORD_SEARCH_DISABLED=no  # Disable search functionality
 ```

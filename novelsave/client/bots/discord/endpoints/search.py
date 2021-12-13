@@ -8,7 +8,7 @@ from novelsave.containers import Application
 from novelsave.core.dtos import NovelDTO
 from novelsave.core.services.source import BaseSourceService
 from .. import checks, mfmt
-from ..decorators import log_error
+from ..decorators import log_error, session_task
 from ..session import SessionHandler, SessionFragment, Session
 
 
@@ -49,6 +49,7 @@ class SearchHandler(SessionFragment):
         await ctx.send(self._source_list())
 
     @log_error
+    @session_task(False)
     def search(self, word: str):
         self.session.state = self._state_searching
         search_capable = [

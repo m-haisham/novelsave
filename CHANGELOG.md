@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Fixed
 
 - Fixed where provided webnovel urls not added to db #44
+- Fixed discord dm message
+- Fixed discord thread access errors
 
 ## [0.8.0] - 2021-11-25
 

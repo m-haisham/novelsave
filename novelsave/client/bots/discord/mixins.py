@@ -1,4 +1,7 @@
 import shutil
+import threading
+
+from loguru import logger
 
 from novelsave import migrations
 from novelsave.containers import Application
@@ -62,19 +65,33 @@ class ContainerMixin:
         self.application = Application()
         self.application.config.from_dict(self._make_unique_config(id_))
 
-        # acquire services
-        self.source_service = self.application.services.source_service()
-        self.novel_service = self.application.services.novel_service()
-        self.path_service = self.application.services.path_service()
-        self.dto_adapter = self.application.adapters.dto_adapter()
-        self.asset_service = self.application.services.asset_service()
-        self.file_service = self.application.services.file_service()
-        self.packager_provider = self.application.packagers.packager_provider()
-
         # migrate database to latest schema
         migrations.migrate(self.application.config.get("infrastructure.database.url"))
 
+    def source_service(self):
+        return self.application.services.source_service()
+
+    def novel_service(self):
+        return self.application.services.novel_service()
+
+    def path_service(self):
+        return self.application.services.path_service()
+
+    def dto_adapter(self):
+        return self.application.adapters.dto_adapter()
+
+    def asset_service(self):
+        return self.application.services.asset_service()
+
+    def file_service(self):
+        return self.application.services.file_service()
+
+    def packager_provider(self):
+        return self.application.packagers.packager_provider()
+
     def close_session(self):
+        logger.debug(f"Session closed; thread id: {threading.current_thread().ident}")
         self.application.infrastructure.session().close()
-        self.application.infrastructure.session_factory().close_all()
+
+    def close_engine(self):
         self.application.infrastructure.engine().dispose()

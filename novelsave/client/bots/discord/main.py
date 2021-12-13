@@ -24,9 +24,9 @@ def wire(packages):
 def main():
     """Start the discord bot"""
     from .bot import bot
-    from . import endpoints
+    from . import endpoints, session
 
-    application, discord_application = wire([endpoints])
+    application, discord_application = wire([endpoints, session])
 
     # cogs
     bot.add_cog(endpoints.SessionCog())

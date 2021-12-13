@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import List, Type, Callable, Coroutine
 
+from dependency_injector.wiring import Provide
 from loguru import logger
 from nextcord.ext import commands
 
@@ -17,6 +18,8 @@ SessionState = Callable[[commands.Context], Coroutine]
 
 
 class Session(mixins.ContainerMixin):
+    thread_count: int = Provide["discord_config.session.threads"]
+
     def __init__(
         self,
         bot: commands.Bot,
@@ -33,7 +36,7 @@ class Session(mixins.ContainerMixin):
         self.last_activity = datetime.now()
         self.session_retain = session_retain
 
-        self.executor = ThreadPoolExecutor(max_workers=10)
+        self.executor = ThreadPoolExecutor(max_workers=self.thread_count)
 
         self.fragments = {fragment.__name__: fragment(self) for fragment in fragments}
 
@@ -152,11 +155,13 @@ class Session(mixins.ContainerMixin):
         if self.is_closed:
             raise AlreadyClosedException("This session is already closed.")
 
+        logger.debug(f"Closing session: {session_key(self.ctx)}")
         for fragment in self.fragments.values():
             fragment.close()
 
         self.executor.shutdown(wait=False, cancel_futures=True)
-        self.close_session()
-        shutil.rmtree(self.path_service.config_path, ignore_errors=True)
+        self.close_engine()
+        shutil.rmtree(self.path_service().config_path, ignore_errors=True)
 
+        logger.debug("Session closed.")
         self.is_closed = True

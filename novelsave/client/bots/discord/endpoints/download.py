@@ -11,6 +11,7 @@ from nextcord.ext import commands
 
 from novelsave.core.dtos import NovelDTO
 from novelsave.core.entities.novel import Novel
+from novelsave.core.services.cloud.filehost import BaseCloudFileHost
 from novelsave.core.services.packagers import BasePackager
 from novelsave.core.services.source import BaseSourceGateway
 from novelsave.exceptions import SourceNotFoundException
@@ -21,6 +22,8 @@ from ..session import SessionFragment, SessionHandler
 
 
 class DownloadHandler(SessionFragment):
+    filehost: BaseCloudFileHost = Provide["cloud.filehost"]
+
     def __init__(self, *args, **kwargs):
         super(DownloadHandler, self).__init__(*args, **kwargs)
 
@@ -177,22 +180,30 @@ class DownloadHandler(SessionFragment):
         for packager in packagers:
             output = packager.package(novel)
             if output.is_dir():
-                self.session.send_sync(f"Archiving and uploading {output.name}…")
+                self.session.send_sync(f"Archiving {output.name}…")
                 archive = shutil.make_archive(str(output), "zip", str(output))
                 output = Path(archive)
-            else:
+
+            # discord does not allow uploads greater than 8mb
+            # hence, they are relegated to a third-party
+            if output.stat().st_size <= 7.99 * 1024 * 1024:
                 self.session.send_sync(f"Uploading {output.name}…")
-
-            # TODO: ability upload larger than 8 Mb
-            if output.stat().st_size > 7.99 * 1024 * 1024:
+                self.session.send_sync(file=nextcord.File(output, output.name))
+            else:
                 self.session.send_sync(
-                    mfmt.error(
-                        f"Unable to upload files larger than 8 Mb ({packager.keywords()[0]})."
-                    )
+                    f"File is bigger than 8Mb, uploading to {self.filehost.name()}…"
                 )
-                return
 
-            self.session.send_sync(file=nextcord.File(output, output.name))
+                try:
+                    url = self.filehost.upload(
+                        output, "An upload by novelsave discord bot"
+                    )
+                    self.session.send_sync(url)
+                except Exception as e:
+                    logger.exception(e)
+                    self.session.send_sync(
+                        mfmt.error(f"Failed to upload file.\nError: {e}")
+                    )
 
 
 class Download(commands.Cog):

@@ -45,6 +45,7 @@ DISCORD_SESSION_TIMEOUT=10 # Minutes
 DISCORD_SESSION_THREADS=5
 DISCORD_SEARCH_LIMIT=20  # Maximum results to show
 DISCORD_SEARCH_DISABLED=no  # Disable search functionality
+DISCORD_EXTERNAL_FILEHOST=none  # options: anonfiles, gofiles, none
 ```
 
 #### Heroku Deployment

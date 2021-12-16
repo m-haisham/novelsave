@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added ability to upload files to cloud
   - [anonfiles](https://anonfiles.com/)
   - [gofiles](https://gofile.io/)
+- Added external file hosting to discord bot (files larger than 8Mb)
 
 ## Changed
 

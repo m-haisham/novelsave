@@ -64,4 +64,7 @@ def discord() -> dict:
             "limit": intenv("DISCORD_SEARCH_LIMIT", 20),
             "disabled": os.getenv("DISCORD_SEARCH_DISABLED", "no").lower(),
         },
+        "cloud": {
+            "filehost": os.getenv("DISCORD_EXTERNAL_FILEHOST", "none").lower(),
+        },
     }

@@ -41,3 +41,7 @@ class PackagingException(NSException):
 
 class RequirementException(NSException):
     """Raised when a particular requirement is not met"""
+
+
+class NoneFileHostException(NSException):
+    """Raised when cloud file host is disabled"""

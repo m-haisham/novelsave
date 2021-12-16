@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+## Added
+
+- Added ability to upload files to cloud
+  - [anonfiles](https://anonfiles.com/)
+  - [gofiles](https://gofile.io/)
+
 ## Changed
 
 - lxml 4.6.4 -> 4.6.5

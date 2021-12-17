@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+## Added
+
+- Added ability to upload files to cloud
+  - [anonfiles](https://anonfiles.com/)
+  - [gofiles](https://gofile.io/)
+- Added external file hosting to discord bot (files larger than 8Mb)
+
+## Changed
+
+- lxml 4.6.4 -> 4.6.5
+
 ## [0.8.1] - 2021-12-13
 
 ## Changed

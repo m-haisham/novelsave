@@ -61,7 +61,7 @@ class Services(containers.DeclarativeContainer):
     config_service = providers.Singleton(
         ConfigService,
         config_file=config.config.file,
-        default_novel_dir=config.novel.dir,
+        default_novel_dir=config.novel.default.dir,
     )
 
     meta_service = providers.Factory(

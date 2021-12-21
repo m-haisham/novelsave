@@ -29,10 +29,11 @@ def _show_config(
             logger.error(str(e).strip('"'))
             sys.exit(1)
 
-        logger.info(f"Config ({key=}, {value=}).")
+        logger.info(f"'{key}': {value}")
+        return
 
     for key, value in config_service.get_all_configs().items():
-        logger.info(f"Config ({key=}, {value=}).")
+        logger.info(f"'{key}': {value}")
 
 
 @_config.command(name="set")
@@ -51,7 +52,7 @@ def _set_config(
         logger.error(str(e).strip('"'))
         sys.exit(1)
 
-    logger.info(f"Set config ({key=}, {value=}).")
+    logger.info(f"'{key}' set to '{value}'.")
 
 
 @_config.command(name="reset")
@@ -68,4 +69,4 @@ def _reset_config(
         logger.error(str(e).strip('"'))
         sys.exit(1)
 
-    logger.info(f"Reset config ({key=}, value='{config_service.get_config(key)}').")
+    logger.info(f"Reset '{key}' to default value '{config_service.get_config(key)}').")

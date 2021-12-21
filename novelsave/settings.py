@@ -79,6 +79,9 @@ config = {
     },
     "novel": {
         "dir": NOVEL_DIR,
+        "default": {
+            "dir": NOVEL_DIR,
+        },
     },
     "infrastructure": {
         "database": {

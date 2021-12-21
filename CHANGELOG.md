@@ -6,26 +6,31 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
-## Added
+### Added
 
 - Added ability to upload files to cloud
   - [anonfiles](https://anonfiles.com/)
   - [gofiles](https://gofile.io/)
 - Added external file hosting to discord bot (files larger than 8Mb)
 
-## Changed
+### Changed
 
+- Simplified config cli messages
 - lxml 4.6.4 -> 4.6.5
+
+### Fixed
+
+- Fixed config reset options
 
 ## [0.8.1] - 2021-12-13
 
-## Changed
+### Changed
 
 - Removed url lazy loading from db in favour of sql statement
 - Changed discord session `call` to `get` and it now returns the method
   instead of calling it
 
-## Fixed
+### Fixed
 
 - Fixed where provided webnovel urls not added to db #44
 - Fixed discord dm message

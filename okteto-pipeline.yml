@@ -1,0 +1,2 @@
+deploy:
+  - pip install .[discord]

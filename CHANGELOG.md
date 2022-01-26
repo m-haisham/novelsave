@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - [anonfiles](https://anonfiles.com/)
   - [gofiles](https://gofile.io/)
 - Added external file hosting to discord bot (files larger than 8Mb)
+- Added Okteto deployment configuration
 
 ## Changed
 

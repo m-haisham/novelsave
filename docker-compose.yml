@@ -1,0 +1,6 @@
+version: "3.9"
+services:
+  discord:
+    build: .
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}

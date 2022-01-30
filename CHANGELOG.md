@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Changed
 
-- lxml 4.6.4 -> 4.6.5
+- Updated dependencies
+  - lxml 4.6.4 -> 4.6.5
 
 ## [0.8.1] - 2021-12-13
 

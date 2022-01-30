@@ -1,6 +1,6 @@
 from loguru import logger
 
-from .config import config
+from .config import config, logger_config
 from .containers import DiscordApplication
 
 
@@ -21,6 +21,7 @@ def main():
     from .bot import bot
     from . import endpoints, session
 
+    logger.configure(**logger_config())
     discord_application = wire([endpoints, session])
 
     # cogs

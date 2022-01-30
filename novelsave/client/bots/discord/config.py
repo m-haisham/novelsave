@@ -6,7 +6,7 @@ from datetime import timedelta
 from loguru import logger
 import copy
 
-from novelsave.settings import config as base_config, console_formatter
+from novelsave.settings import config as base_config
 from novelsave.utils.helpers import dotenv_helper
 
 
@@ -21,15 +21,8 @@ def logger_config() -> dict:
             {
                 "sink": sys.stdout,
                 "level": "TRACE",
-                "format": console_formatter,
                 "backtrace": True,
                 "diagnose": True,
-            },
-            {
-                "sink": base_config["config"]["dir"] / "logs" / "{time}.log",
-                "level": "TRACE",
-                "retention": "3 days",
-                "encoding": "utf-8",
             },
         ]
     }

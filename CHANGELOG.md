@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
-## Added
+### Added
 
 - Added ability to upload files to cloud
   - [anonfiles](https://anonfiles.com/)
@@ -14,22 +14,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added external file hosting to discord bot (files larger than 8Mb)
 - Added Okteto deployment configuration
 
-## Changed
+### Changed
 
 - Updated dependencies
   - lxml 4.6.4 -> 4.6.5
 - Changed `dotenv` into an optional dependency
 - Integrated application injector into discord injector
 
+### Fixed
+
+- Fixed discord bot logging format to diagnose errors
+
 ## [0.8.1] - 2021-12-13
 
-## Changed
+### Changed
 
 - Removed url lazy loading from db in favour of sql statement
 - Changed discord session `call` to `get` and it now returns the method
   instead of calling it
 
-## Fixed
+### Fixed
 
 - Fixed where provided webnovel urls not added to db #44
 - Fixed discord dm message

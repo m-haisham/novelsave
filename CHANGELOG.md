@@ -23,7 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Fixed discord bot logging format to diagnose errors
+- Fix discord bot logging format to diagnose errors
+- Fix discord bot freezing when encountering error in searching
 
 ## [0.8.1] - 2021-12-13
 

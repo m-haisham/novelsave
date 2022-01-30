@@ -65,7 +65,17 @@ class SearchHandler(SessionFragment):
                 logger.debug(f"'{gateway.name}' does not support search.")
                 return
 
-            novels = gateway.search(word)
+            try:
+                novels = gateway.search(word)
+            except Exception as e:
+                logger.exception(e)
+                self.session.send_sync(
+                    mfmt.error(
+                        f"Encountered error while searching in {gateway.name}: {type(e).__name__}"
+                    )
+                )
+                continue
+
             logger.debug(f"Found {len(novels)} novels in '{gateway.name}'.")
             for novel in novels:
                 self.results.setdefault(novel.title, []).append(novel)

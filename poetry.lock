@@ -611,7 +611,7 @@ name = "python-dotenv"
 version = "0.19.2"
 description = "Read key-value pairs from a .env file and set them as environment variables"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.5"
 
 [package.extras]
@@ -829,7 +829,7 @@ discord = ["nextcord"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "9b610825071a914f7a230d4d63d4f18877f3018be3d84ccbb4c31706c430d368"
+content-hash = "7f35d207c9dec712a6a0ea374ccce88d6d598776e4e4121e71cef85bfb2807df"
 
 [metadata.files]
 aiohttp = [

@@ -3,11 +3,11 @@ import os
 import sys
 from datetime import timedelta
 
-import dotenv
 from loguru import logger
 import copy
 
 from novelsave.settings import config, console_formatter
+from novelsave.utils.helpers import dotenv_helper
 
 
 def app() -> dict:
@@ -48,7 +48,7 @@ def discord() -> dict:
 
     The returned dict must contain 'DISCORD_TOKEN'
     """
-    dotenv.load_dotenv()
+    dotenv_helper.load_dotenv()
 
     discord_token = os.getenv("DISCORD_TOKEN")
     if not discord_token:

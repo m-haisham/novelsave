@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Updated dependencies
   - lxml 4.6.4 -> 4.6.5
+- Changed `dotenv` into an optional dependency
 
 ## [0.8.1] - 2021-12-13
 

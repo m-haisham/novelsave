@@ -2,7 +2,6 @@ from dependency_injector.wiring import inject, Provide
 from loguru import logger
 from nextcord.ext import commands
 
-from novelsave.containers import Application
 from novelsave.core.services.source import BaseSourceService
 from .. import checks, mfmt
 from ..bot import bot
@@ -23,7 +22,7 @@ async def dm(ctx: commands.Context):
 async def sources(
     ctx: commands.Context,
     *args,
-    source_service: BaseSourceService = Provide[Application.services.source_service],
+    source_service: BaseSourceService = Provide["application.services.source_service"],
 ):
     """List all the sources supported"""
     with ctx.typing():

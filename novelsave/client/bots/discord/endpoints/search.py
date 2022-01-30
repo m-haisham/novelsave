@@ -4,7 +4,6 @@ from dependency_injector.wiring import Provide
 from loguru import logger
 from nextcord.ext import commands
 
-from novelsave.containers import Application
 from novelsave.core.dtos import NovelDTO
 from novelsave.core.services.source import BaseSourceService
 from .. import checks, mfmt
@@ -13,8 +12,8 @@ from ..session import SessionHandler, SessionFragment, Session
 
 
 class SearchHandler(SessionFragment):
-    source_service: BaseSourceService = Provide[Application.services.source_service]
-    search_limit: int = Provide["discord_config.search.limit"]
+    source_service: BaseSourceService = Provide["application.services.source_service"]
+    search_limit: int = Provide["config.discord.search.limit"]
 
     def __init__(self, *args, **kwargs):
         super(SearchHandler, self).__init__(*args, **kwargs)

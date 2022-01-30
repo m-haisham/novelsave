@@ -6,13 +6,13 @@ from datetime import timedelta
 from loguru import logger
 import copy
 
-from novelsave.settings import config, console_formatter
+from novelsave.settings import config as base_config, console_formatter
 from novelsave.utils.helpers import dotenv_helper
 
 
-def app() -> dict:
-    """Initialize and return the configuration used by the base application"""
-    return copy.deepcopy(config)
+def config() -> dict:
+    """:returns: Configuration for _discord_config bot"""
+    return {"app": copy.deepcopy(base_config), "discord": _discord_config()}
 
 
 def logger_config() -> dict:
@@ -26,7 +26,7 @@ def logger_config() -> dict:
                 "diagnose": True,
             },
             {
-                "sink": config["config"]["dir"] / "logs" / "{time}.log",
+                "sink": base_config["config"]["dir"] / "logs" / "{time}.log",
                 "level": "TRACE",
                 "retention": "3 days",
                 "encoding": "utf-8",
@@ -43,7 +43,7 @@ def intenv(key: str, default: int) -> int:
 
 
 @functools.lru_cache()
-def discord() -> dict:
+def _discord_config() -> dict:
     """Initialize and return discord configurations as a dict
 
     The returned dict must contain 'DISCORD_TOKEN'
@@ -53,6 +53,7 @@ def discord() -> dict:
     discord_token = os.getenv("DISCORD_TOKEN")
     if not discord_token:
         logger.error("Required environment variable 'DISCORD_TOKEN' is not set.")
+        sys.exit(1)
 
     return {
         "key": discord_token,

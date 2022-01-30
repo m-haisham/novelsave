@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Updated dependencies
   - lxml 4.6.4 -> 4.6.5
 - Changed `dotenv` into an optional dependency
+- Integrated application injector into discord injector
 
 ## [0.8.1] - 2021-12-13
 

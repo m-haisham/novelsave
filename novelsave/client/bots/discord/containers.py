@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from novelsave.containers import Application
 from novelsave.services.cloud.filehost import AnonFilesHost, GoFilesHost, NoneFilesHost
 from .endpoints import DownloadHandler, SearchHandler
 from .session import SessionHandler, Session
@@ -39,14 +40,19 @@ class SessionContainer(containers.DeclarativeContainer):
 
 
 class DiscordApplication(containers.DeclarativeContainer):
-    discord_config = providers.Configuration(strict=True)
+    config = providers.Configuration(strict=True)
+
+    application = providers.Container(
+        Application,
+        config=config.app,
+    )
 
     session = providers.Container(
         SessionContainer,
-        config=discord_config,
+        config=config.discord,
     )
 
     cloud = providers.Container(
         CloudContainer,
-        config=discord_config,
+        config=config.discord,
     )

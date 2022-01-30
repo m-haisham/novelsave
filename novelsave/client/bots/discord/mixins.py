@@ -14,7 +14,7 @@ from novelsave.core.services import (
 from novelsave.core.services.packagers import BasePackagerProvider
 from novelsave.core.services.source import BaseSourceService
 from novelsave.utils.adapters import DTOAdapter
-from . import config
+from .config import config
 
 
 class ContainerMixin:
@@ -29,7 +29,7 @@ class ContainerMixin:
 
     @staticmethod
     def _make_unique_config(id_: str):
-        temp: dict = config.app()
+        temp: dict = config()["app"]
 
         config_dir = temp["config"]["dir"] / "discord" / id_
         schema, url = temp["infrastructure"]["database"]["url"].split(

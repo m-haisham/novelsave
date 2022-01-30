@@ -17,7 +17,7 @@ SessionState = Callable[[commands.Context], Coroutine]
 
 
 class Session(mixins.ContainerMixin):
-    thread_count: int = Provide["discord_config.session.threads"]
+    thread_count: int = Provide["config.discord.session.threads"]
 
     def __init__(
         self,

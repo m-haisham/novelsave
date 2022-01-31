@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+## [0.8.2] - 2022-01-31
+
 ### Added
 
 - Added ability to upload files to cloud

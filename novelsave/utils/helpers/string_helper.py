@@ -30,7 +30,7 @@ def format_bytes(size: int) -> str:
     barely modified version of https://stackoverflow.com/a/49361727/11728401
     """
     # 2**10 = 1024
-    power = 2 ** 10
+    power = 2**10
     n = 0
     power_labels = {0: "", 1: "K", 2: "M", 3: "G", 4: "T"}
     while size > power:

@@ -1,19 +1,18 @@
 from dependency_injector.wiring import inject, Provide
 from loguru import logger
 from nextcord.ext import commands
+from nextcord.interactions import Interaction
 
 from novelsave.core.services.source import BaseSourceService
 from .. import checks, mfmt
 from ..bot import bot
 
 
-@bot.command()
-async def dm(ctx: commands.Context):
-    """Send a direct message to you"""
-    await ctx.author.send(
-        f"Hello, {ctx.author.name}.\n"
-        f"Send `{ctx.clean_prefix}help` to get usage instructions."
-    )
+@bot.slash_command(description="Send a direct message to you")
+async def dm(intr: Interaction):
+    await intr.send(f"{intr.user.mention} sending you a direct message now.")
+
+    await intr.user.send(f"Hello, {intr.user.name}.")
 
 
 @bot.command()

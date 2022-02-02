@@ -1,52 +1,45 @@
 from dependency_injector.wiring import inject, Provide
-from loguru import logger
-from nextcord.ext import commands
+from nextcord import Embed
+from nextcord.interactions import Interaction
 
 from novelsave.core.services.source import BaseSourceService
-from .. import checks, mfmt
 from ..bot import bot
+from ..checks import assert_check, is_direct_only
+
+source_service: BaseSourceService = Provide["application.services.source_service"]
 
 
-@bot.command()
-async def dm(ctx: commands.Context):
-    """Send a direct message to you"""
-    await ctx.author.send(
-        f"Hello, {ctx.author.name}.\n"
-        f"Send `{ctx.clean_prefix}help` to get usage instructions."
+@bot.slash_command(description="Send a direct message to you")
+async def dm(intr: Interaction):
+    await intr.send("💬 Sending you a direct message now.")
+    await intr.user.send(f"👋 Hello, {intr.user.name}.")
+
+
+@bot.slash_command(description="List all the sources supported", force_global=True)
+@inject
+async def sources(intr: Interaction):
+    """List all the sources supported"""
+    if not await assert_check(intr, is_direct_only):
+        return
+
+    await intr.response.defer()
+
+    embed = Embed(
+        title="Supported sources",
+        description="This embed shows the list of all the sources currently supported",
+        url="https://novelsave-sources.readthedocs.io/en/latest/content/support.html#supported-novel-sources",
     )
 
+    for gateway in sorted(source_service.get_novel_sources(), key=lambda g: g.base_url):
+        value = f"search: {'✅' if gateway.is_search_capable else '❌'}"
+        embed.add_field(name=f"<{gateway.base_url}>", value=value)
 
-@bot.command()
-@commands.check(checks.direct_only)
-@inject
-async def sources(
-    ctx: commands.Context,
-    *args,
-    source_service: BaseSourceService = Provide["application.services.source_service"],
-):
-    """List all the sources supported"""
-    with ctx.typing():
-        await ctx.send(
-            f"The sources currently supported include (v{source_service.current_version}):"
-        )
+    embed.set_footer(text=f"Version {source_service.current_version}")
 
-        source_list = "\n".join(
-            f"• `{'🔍' if gateway.is_search_capable else ' '}` <{gateway.base_url}>"
-            for gateway in sorted(
-                source_service.get_novel_sources(), key=lambda g: g.base_url
-            )
-        )
+    request_embed = Embed(
+        title="Looking for something else?",
+        description="You can request a new source by creating an issue at github",
+        url="https://github.com/mensch272/novelsave/issues/new/choose",
+    )
 
-        await ctx.send(source_list)
-        await ctx.send(
-            "You can request a new source by creating an issue at "
-            "<https://github.com/mensch272/novelsave/issues/new/choose>"
-        )
-
-
-@sources.error
-async def sources_error(ctx: commands.Context, error: Exception):
-    if isinstance(error, commands.CommandError):
-        await ctx.send(mfmt.error(str(error)))
-
-    logger.exception(repr(error))
+    await intr.send(embeds=[embed, request_embed])

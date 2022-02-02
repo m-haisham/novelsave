@@ -22,9 +22,13 @@ def session_task(close_on_exit=True):
 
                 logger.exception(e)
 
-            session.close_session()
-            if close_on_exit and not session.is_closed:
-                session.sync(session.close_and_inform)
+                session.close_session()
+                if not session.is_closed:
+                    session.sync(session.close_and_inform)
+            else:
+                session.close_session()
+                if close_on_exit and not session.is_closed:
+                    session.sync(session.close_and_inform)
 
             return result
 

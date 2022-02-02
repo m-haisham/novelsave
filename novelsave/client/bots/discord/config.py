@@ -7,7 +7,6 @@ from loguru import logger
 import copy
 
 from novelsave.settings import config as base_config
-from novelsave.utils.helpers import dotenv_helper
 
 
 def config() -> dict:
@@ -41,8 +40,6 @@ def _discord_config() -> dict:
 
     The returned dict must contain 'DISCORD_TOKEN'
     """
-    dotenv_helper.load_dotenv()
-
     discord_token = os.getenv("DISCORD_TOKEN")
     if not discord_token:
         logger.error("Required environment variable 'DISCORD_TOKEN' is not set.")

@@ -1,5 +1,5 @@
-from nextcord.ext import commands
+from nextcord import Interaction
 
 
-def session_key(ctx: commands.Context) -> str:
-    return str(ctx.author.id)
+def session_key(intr: Interaction) -> str:
+    return str(intr.user.id)

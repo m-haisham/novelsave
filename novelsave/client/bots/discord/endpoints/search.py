@@ -1,12 +1,16 @@
 from typing import Dict, List, Optional
 
+import nextcord
 from dependency_injector.wiring import Provide
 from loguru import logger
+from nextcord import Interaction, SlashOption
 from nextcord.ext import commands
 
 from novelsave.core.dtos import NovelDTO
 from novelsave.core.services.source import BaseSourceService
-from .. import checks, mfmt
+from .. import utils
+from ..bot import bot
+from ..checks import assert_check, is_direct_only
 from ..decorators import log_error, session_task
 from ..session import SessionHandler, SessionFragment, Session
 
@@ -34,18 +38,18 @@ class SearchHandler(SessionFragment):
     def is_novel_select(self):
         return self.session.state == self._state_novel_select
 
-    async def _state_searching(self, ctx: commands.Context):
-        await ctx.send("I'm busy searching for novels.")
+    async def _state_searching(self, intr: Interaction):
+        await intr.send("I'm busy searching for novels.")
 
-    async def _state_novel_select(self, ctx: commands.Context):
-        await ctx.send("Please select a novel from the list.")
-        await ctx.send(self._novel_list())
+    async def _state_novel_select(self, intr: Interaction):
+        await intr.send("Please select a novel from the list.")
+        await intr.send(self._novel_list())
 
-    async def _state_source_select(self, ctx: commands.Context):
+    async def _state_source_select(self, intr: Interaction):
         self.session.send_sync(
             f"**{self.key}** selected. Now please select the source from the list below."
         )
-        await ctx.send(self._source_list())
+        await intr.send(self._source_list())
 
     @log_error
     @session_task(False)
@@ -70,7 +74,7 @@ class SearchHandler(SessionFragment):
             except Exception as e:
                 logger.exception(e)
                 self.session.send_sync(
-                    mfmt.error(
+                    utils.error(
                         f"Encountered error while searching in {gateway.name}: {type(e).__name__}"
                     )
                 )
@@ -85,7 +89,7 @@ class SearchHandler(SessionFragment):
         ]
 
         self.session.send_sync(
-            f"Please select a novel from the list using `{self.session.ctx.clean_prefix}select <number>`."
+            "Please select a novel from the list using `/select <number>`."
         )
         self.session.send_sync(self._novel_list())
         self.session.state = self._state_novel_select
@@ -154,47 +158,61 @@ class Search(commands.Cog):
     """This controls search"""
 
     session_handler: SessionHandler = Provide["session.session_handler"]
-    unsupported = mfmt.error("Search is disabled.")
-
-    async def cog_check(self, ctx: commands.Context) -> bool:
-        return await checks.direct_only(ctx)
-
-    async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, commands.CommandError):
-            await ctx.send(mfmt.error(str(error)))
-
-        logger.exception(repr(error))
+    unsupported = utils.error("Search is disabled.")
 
     @staticmethod
     def is_supported(session: Session):
         """Whether search is implemented"""
         return session.has_fragment(SearchHandler)
 
-    @commands.command()
-    async def search(self, ctx: commands.Context, *, words):
+    @nextcord.slash_command(description="Start a search task", force_global=True)
+    async def search(
+        self,
+        intr: Interaction,
+        *,
+        query: str = SlashOption(description="The search query"),
+    ):
         """Start a search task"""
-        session = self.session_handler.get_or_create(ctx)
-        if not self.is_supported(session):
-            await ctx.send(self.unsupported)
+        if not await assert_check(intr, is_direct_only):
             return
 
-        await session.run(ctx, SearchHandler.search, words)
-
-    @commands.command()
-    async def select(self, ctx: commands.Context, num: int):
-        """Select from the provided search results"""
-        session = self.session_handler.get_or_create(ctx)
+        session = self.session_handler.get_or_create(intr)
         if not self.is_supported(session):
-            await ctx.send(self.unsupported)
+            await intr.send(self.unsupported)
+            return
+
+        await session.run(
+            intr, SearchHandler.search, query, message=utils.task(f"Search ({query=})")
+        )
+
+    @nextcord.slash_command(
+        description="Select from the provided search results", force_global=True
+    )
+    async def select(
+        self,
+        intr: Interaction,
+        num: int = SlashOption(
+            description="The no. of item to select",
+        ),
+    ):
+        """Select from the provided search results"""
+        if not await assert_check(intr, is_direct_only):
+            return
+
+        session = self.session_handler.get_or_create(intr)
+        if not self.is_supported(session):
+            await intr.send(self.unsupported)
             return
 
         if not session.get(SearchHandler.is_select)():
-            await ctx.send("Session does not require selection.")
+            await intr.send(utils.error("Session does not require selection."))
             return
 
         if session.get(SearchHandler.is_novel_select)():
-            await session.run(ctx, SearchHandler.select_novel, num - 1)
+            await session.run(intr, SearchHandler.select_novel, num - 1)
         else:
             url = session.get(SearchHandler.select_source)(num - 1)
-            await ctx.send(f"{url} selected.")
-            await ctx.invoke(session.bot.get_command("download"), url)
+            await intr.send(f"✔ {url} selected.")
+            await bot.get_cog("Download").download.callback(
+                bot.get_cog("Download"), intr, url, "epub"
+            )

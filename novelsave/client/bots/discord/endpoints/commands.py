@@ -10,8 +10,8 @@ source_service: BaseSourceService = Provide["application.services.source_service
 
 @bot.slash_command(description="Send a direct message to you")
 async def dm(intr: Interaction):
-    await intr.send("Sending you a direct message now.")
-    await intr.user.send(f"Hello, {intr.user.name}.")
+    await intr.send("💬 Sending you a direct message now.")
+    await intr.user.send(f"👋 Hello, {intr.user.name}.")
 
 
 @bot.slash_command(description="List all the sources supported", force_global=True)

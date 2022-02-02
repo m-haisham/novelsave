@@ -182,7 +182,7 @@ class Search(commands.Cog):
             return
 
         await session.run(
-            intr, SearchHandler.search, query, message=f"**Task: Search ({query=})**"
+            intr, SearchHandler.search, query, message=utils.task(f"Search ({query=})")
         )
 
     @nextcord.slash_command(
@@ -205,14 +205,14 @@ class Search(commands.Cog):
             return
 
         if not session.get(SearchHandler.is_select)():
-            await intr.send("Session does not require selection.")
+            await intr.send(utils.error("Session does not require selection."))
             return
 
         if session.get(SearchHandler.is_novel_select)():
             await session.run(intr, SearchHandler.select_novel, num - 1)
         else:
             url = session.get(SearchHandler.select_source)(num - 1)
-            await intr.send(f"{url} selected.")
+            await intr.send(f"✔ {url} selected.")
             await bot.get_cog("Download").download.callback(
                 bot.get_cog("Download"), intr, url, "epub"
             )

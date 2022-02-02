@@ -135,13 +135,13 @@ class Session(mixins.ContainerMixin):
 
     async def close_and_inform(self):
         """Close the session and inform the user"""
-        await self.intr.channel.send("Cleaning up temporary files…")
+        await self.intr.channel.send("🧹 Cleaning up temporary files…")
         try:
             self.close()
         except AlreadyClosedException as e:
             await self.intr.channel.send(utils.error(str(e)))
 
-        await self.intr.channel.send("Session closed.")
+        await self.intr.channel.send("❌ Session closed.")
 
     def close(self):
         """Close the current user session and remove all temporary files"""

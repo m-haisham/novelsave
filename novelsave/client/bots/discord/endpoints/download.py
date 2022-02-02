@@ -258,7 +258,7 @@ class Download(commands.Cog):
             DownloadHandler.download,
             url,
             targets,
-            message=f"**Task: Download ({url=}, {targets=})**",
+            message=utils.task(f"Download ({url=}, {targets=})"),
         )
 
     @staticmethod

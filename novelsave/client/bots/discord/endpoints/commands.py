@@ -1,4 +1,5 @@
 from dependency_injector.wiring import inject, Provide
+from nextcord import Embed
 from nextcord.interactions import Interaction
 
 from novelsave.core.services.source import BaseSourceService
@@ -16,27 +17,29 @@ async def dm(intr: Interaction):
 
 @bot.slash_command(description="List all the sources supported", force_global=True)
 @inject
-async def sources(
-    intr: Interaction,
-):
+async def sources(intr: Interaction):
     """List all the sources supported"""
     if not await assert_check(intr, is_direct_only):
         return
 
     await intr.response.defer()
 
-    messages = [
-        f"The sources currently supported include (v{source_service.current_version}):",
-        "\n".join(
-            f"• `{'🔍' if gateway.is_search_capable else ' '}` <{gateway.base_url}>"
-            for gateway in sorted(
-                source_service.get_novel_sources(), key=lambda g: g.base_url
-            )
-        ),
-    ]
-
-    await intr.send("\n".join(messages))
-    await intr.channel.send(
-        "You can request a new source by creating an issue at "
-        "<https://github.com/mensch272/novelsave/issues/new/choose>"
+    embed = Embed(
+        title="Supported sources",
+        description="This embed shows the list of all the sources currently supported",
+        url="https://novelsave-sources.readthedocs.io/en/latest/content/support.html#supported-novel-sources",
     )
+
+    for gateway in sorted(source_service.get_novel_sources(), key=lambda g: g.base_url):
+        value = f"search: {'✅' if gateway.is_search_capable else '❌'}"
+        embed.add_field(name=f"<{gateway.base_url}>", value=value)
+
+    embed.set_footer(text=f"Version {source_service.current_version}")
+
+    request_embed = Embed(
+        title="Looking for something else?",
+        description="You can request a new source by creating an issue at github",
+        url="https://github.com/mensch272/novelsave/issues/new/choose",
+    )
+
+    await intr.send(embeds=[embed, request_embed])

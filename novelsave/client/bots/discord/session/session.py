@@ -7,13 +7,14 @@ from typing import List, Type, Callable, Coroutine
 from dependency_injector.wiring import Provide
 from loguru import logger
 from nextcord.ext import commands
+from nextcord import Webhook, Interaction
 
 from .fragment import SessionFragment
 from .session_helper import session_key
-from .. import mixins, mfmt
+from .. import mixins, utils
 from ..exceptions import AlreadyClosedException
 
-SessionState = Callable[[commands.Context], Coroutine]
+SessionState = Callable[[Webhook], Coroutine]
 
 
 class Session(mixins.ContainerMixin):
@@ -22,12 +23,12 @@ class Session(mixins.ContainerMixin):
     def __init__(
         self,
         bot: commands.Bot,
-        ctx: commands.Context,
+        intr: Interaction,
         session_retain: timedelta,
         fragments: List[Type[SessionFragment]],
     ):
         self.bot = bot
-        self.ctx = ctx
+        self.intr = intr
 
         self.state: SessionState = self.initial
         self.is_closed = False
@@ -39,11 +40,7 @@ class Session(mixins.ContainerMixin):
 
         self.fragments = {fragment.__name__: fragment(self) for fragment in fragments}
 
-        self.setup_container(session_key(self.ctx))
-
-    def renew_context(self, ctx: commands.Context):
-        self.ctx = ctx
-        return self
+        self.setup_container(session_key(self.intr))
 
     def has_fragment(self, type_: type):
         return type_.__name__ in self.fragments
@@ -86,16 +83,20 @@ class Session(mixins.ContainerMixin):
 
         logger.debug(message)
         asyncio.run_coroutine_threadsafe(
-            self.ctx.send(*args, **kwargs),
+            self.intr.channel.send(*args, **kwargs),
             self.bot.loop,
         ).result(timeout=3 * 60)
 
-    async def run(self, ctx: commands.Context, func: Callable, *args, **kwargs):
+    async def run(
+        self, intr: Interaction, func: Callable, *args, message: str = None, **kwargs
+    ):
         """Schedule a fragment method to be run in the thread pool"""
         if self.is_busy():
-            await ctx.send("Please wait…")
-            await self.state(ctx)
+            await self.state(intr)
             return
+
+        if message and not self.intr.response.is_done():
+            await self.intr.send(message)
 
         self.executor.submit(self.get(func), *args, **kwargs)
 
@@ -134,20 +135,20 @@ class Session(mixins.ContainerMixin):
 
     async def close_and_inform(self):
         """Close the session and inform the user"""
-        await self.ctx.send("Cleaning up temporary files…")
+        await self.intr.channel.send("Cleaning up temporary files…")
         try:
             self.close()
         except AlreadyClosedException as e:
-            await self.ctx.send(mfmt.error(str(e)))
+            await self.intr.channel.send(utils.error(str(e)))
 
-        await self.ctx.send("Session closed.")
+        await self.intr.channel.send("Session closed.")
 
     def close(self):
         """Close the current user session and remove all temporary files"""
         if self.is_closed:
             raise AlreadyClosedException("This session is already closed.")
 
-        logger.debug(f"Closing session: {session_key(self.ctx)}")
+        logger.debug(f"Closing session: {session_key(self.intr)}")
         for fragment in self.fragments.values():
             fragment.close()
 

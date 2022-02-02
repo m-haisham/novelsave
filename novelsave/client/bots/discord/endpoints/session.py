@@ -1,8 +1,10 @@
+import nextcord
 from dependency_injector.wiring import Provide
-from loguru import logger
+from nextcord import Interaction
 from nextcord.ext import commands
 
-from .. import checks, mfmt
+from .. import utils
+from ..checks import assert_check, is_direct_only
 from ..session import SessionHandler
 
 
@@ -11,27 +13,24 @@ class SessionCog(commands.Cog, name="Session"):
 
     session_handler: SessionHandler = Provide["session.session_handler"]
 
-    async def cog_check(self, ctx: commands.Context) -> bool:
-        return await checks.direct_only(ctx)
-
-    async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, commands.CheckFailure):
-            await ctx.send(mfmt.error(str(error)))
-
-        logger.exception(repr(error))
-
-    @commands.command()
-    async def status(self, ctx: commands.Context):
+    @nextcord.slash_command(description="Show status of the session", force_global=True)
+    async def status(self, intr: Interaction):
         """Show status of the session"""
-        try:
-            await self.session_handler.get(ctx).state(ctx)
-        except KeyError:
-            await ctx.send(mfmt.error("You have no active session."))
+        if not await assert_check(intr, is_direct_only):
+            return
 
-    @commands.command()
-    async def close(self, ctx: commands.Context):
-        """Force close the session"""
         try:
-            await self.session_handler.get(ctx).close_and_inform()
+            await self.session_handler.get(intr).state(intr)
         except KeyError:
-            await ctx.send(mfmt.error("You have no active session."))
+            await intr.send(utils.error("You have no active session."))
+
+    @nextcord.slash_command(description="Force close the session", force_global=True)
+    async def close(self, intr: Interaction):
+        """Force close the session"""
+        if not await assert_check(intr, is_direct_only):
+            return
+
+        try:
+            await self.session_handler.get(intr).close_and_inform()
+        except KeyError:
+            await intr.send(utils.error("You have no active session."))

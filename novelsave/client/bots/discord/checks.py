@@ -1,20 +1,31 @@
+from nextcord import Interaction
 from nextcord.ext import commands
 
+from .bot import bot
 
-async def direct_only(ctx: commands.Context):
+
+async def is_direct_only(intr: Interaction) -> bool:
     """Custom direct only check
 
     This check returns true when one of the below checks are true
-    - The message author is bot owner and is invoked with help
     - The message is not from a guild
     """
-    if await ctx.bot.is_owner(ctx.author) and ctx.invoked_with == "help":
+    if await bot.is_owner(intr.user):
         return True
 
-    if ctx.guild is not None:
+    if intr.guild is not None:
         raise commands.CheckFailure(
-            f"You may not use this command inside a guild. "
-            f"Use the '{ctx.clean_prefix}dm' to start a private session.",
+            "This command is disabled inside guilds. "
+            "Use `/dm` to start a private session.",
         )
 
     return True
+
+
+async def assert_check(intr: Interaction, func) -> bool:
+    try:
+        return await func(intr)
+    except commands.CheckFailure as e:
+        await intr.send(str(e))
+
+    return False

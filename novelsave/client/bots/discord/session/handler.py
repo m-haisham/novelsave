@@ -2,36 +2,35 @@ from datetime import datetime
 from typing import Dict, Callable
 
 from loguru import logger
+from nextcord import Interaction
 from nextcord.ext import commands
 
-from .session_helper import session_key
 from .session import Session
+from .session_helper import session_key
 from ..bot import bot
 
 
 class SessionHandler:
-    def __init__(
-        self, session_factory: Callable[[commands.Bot, commands.Context], Session]
-    ):
+    def __init__(self, session_factory: Callable[[commands.Bot, Interaction], Session]):
         self.sessions: Dict[str, Session] = {}
         self.session_factory = session_factory
 
-    def get(self, ctx: commands.Context) -> Session:
+    def get(self, intr: Interaction) -> Session:
         """Return existing user session
 
         :raises KeyError: if user does not have a session
         """
         self.cleanup()
-        session = self.sessions[session_key(ctx)]
+        session = self.sessions[session_key(intr)]
         return session
 
-    def get_or_create(self, ctx: commands.Context):
+    def get_or_create(self, intr: Interaction):
         """Create or return already existing session"""
         try:
-            return self.get(ctx)
+            return self.get(intr)
         except KeyError:
-            session = self.session_factory(bot, ctx)
-            self.sessions[session_key(ctx)] = session
+            session = self.session_factory(bot, intr)
+            self.sessions[session_key(intr)] = session
             return session
 
     def cleanup(self):
@@ -43,7 +42,7 @@ class SessionHandler:
             if handler.is_closed:
                 expired.append(key)
             elif handler.is_expired(current_time):
-                logger.debug(f"Closing expired session: {handler.ctx.author.id}.")
+                logger.debug(f"Closing expired session: {handler.intr.user.id}.")
                 handler.close()
                 expired.append(key)
 

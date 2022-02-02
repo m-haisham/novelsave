@@ -7,6 +7,7 @@ import nextcord
 import requests
 from dependency_injector.wiring import Provide
 from loguru import logger
+from nextcord import Interaction, SlashOption
 from nextcord.ext import commands
 
 from novelsave.core.dtos import NovelDTO
@@ -16,7 +17,8 @@ from novelsave.core.services.packagers import BasePackager
 from novelsave.core.services.source import BaseSourceGateway
 from novelsave.exceptions import SourceNotFoundException
 from novelsave.utils.helpers import url_helper, string_helper
-from .. import checks, mfmt
+from .. import utils
+from ..checks import assert_check, is_direct_only
 from ..decorators import session_task
 from ..session import SessionFragment, SessionHandler
 
@@ -36,16 +38,16 @@ class DownloadHandler(SessionFragment):
             for state in [self.info_state, self.download_state, self.packaging_state]
         )
 
-    async def info_state(self, ctx: commands.Context):
-        await ctx.send("I'm busy retrieving novel information.")
+    async def info_state(self, intr: Interaction):
+        await intr.send("I'm busy retrieving novel information.")
 
-    async def download_state(self, ctx: commands.Context):
-        await ctx.send(
+    async def download_state(self, intr: Interaction):
+        await intr.send(
             f"The current download progress is {self.value} of {self.total}."
         )
 
-    async def packaging_state(self, ctx: commands.Context):
-        await ctx.send("I'm currently packaging the novel.")
+    async def packaging_state(self, intr: Interaction):
+        await intr.send("I'm currently packaging the novel.")
 
     @session_task()
     def download(self, url: str, targets: List[str]):
@@ -54,7 +56,7 @@ class DownloadHandler(SessionFragment):
         try:
             source_gateway = self.session.source_service().source_from_url(url)
         except SourceNotFoundException:
-            self.session.send_sync(mfmt.error("This website is not yet supported."))
+            self.session.send_sync(utils.error("This website is not yet supported."))
             self.session.send_sync(
                 "You can request a new source by creating an issue at "
                 "<https://github.com/mensch272/novelsave/issues/new/choose>"
@@ -64,7 +66,7 @@ class DownloadHandler(SessionFragment):
         try:
             packagers = self.session.packager_provider().filter_packagers(targets)
         except ValueError as e:
-            self.session.send_sync(mfmt.error(str(e)))
+            self.session.send_sync(utils.error(str(e)))
             return
 
         self.session.send_sync(f"Retrieving novel information from <{url}>…")
@@ -97,7 +99,7 @@ class DownloadHandler(SessionFragment):
         try:
             return source_gateway.novel_by_url(url)
         except requests.ConnectionError:
-            self.session.send_sync(mfmt.error("Connection terminated unexpectedly."))
+            self.session.send_sync(utils.error("Connection terminated unexpectedly."))
 
     def download_thumbnail(self, novel: Novel):
         if novel.thumbnail_url is None:
@@ -108,12 +110,12 @@ class DownloadHandler(SessionFragment):
         try:
             response = requests.get(novel.thumbnail_url)
         except requests.ConnectionError:
-            self.session.send_sync(mfmt.error("Connection terminated unexpectedly."))
+            self.session.send_sync(utils.error("Connection terminated unexpectedly."))
             return
 
         if not response.ok:
             self.session.send_sync(
-                mfmt.error(f"{response.status_code} {response.reason}")
+                utils.error(f"{response.status_code} {response.reason}")
             )
             return
 
@@ -202,7 +204,7 @@ class DownloadHandler(SessionFragment):
                 except Exception as e:
                     logger.exception(e)
                     self.session.send_sync(
-                        mfmt.error(f"Failed to upload file.\nError: {e}")
+                        utils.error(f"Failed to upload file.\nError: {e}")
                     )
 
 
@@ -211,41 +213,60 @@ class Download(commands.Cog):
 
     session_handler: SessionHandler = Provide["session.session_handler"]
 
-    async def cog_check(self, ctx: commands.Context) -> bool:
-        return await checks.direct_only(ctx)
-
-    async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, commands.CommandError):
-            await ctx.send(mfmt.error(str(error)))
-
-        logger.exception(repr(error))
-
-    @commands.command()
-    async def download(self, ctx: commands.Context, url: str, targets: str = None):
+    @nextcord.slash_command(
+        description="Start a new download session", force_global=True
+    )
+    async def download(
+        self,
+        intr: Interaction,
+        url: str = SlashOption(
+            description="The absolute url pointing to the novel", required=True
+        ),
+        target1: str = SlashOption(
+            description="The packaging target (1)", default="epub", required=False
+        ),
+        target2: str = SlashOption(
+            description="The packaging target (2)", default="", required=False
+        ),
+        target3: str = SlashOption(
+            description="The packaging target (3)", default="", required=False
+        ),
+    ):
         """Start a new download session
 
-        :param ctx: Command context
+        :param intr: Command interaction
         :param url: The absolute url pointing to the novel
-        :param targets: The packaging targets
+        :param target1: The packaging target (1)
+        :param target2: The packaging target (2)
+        :param target3: The packaging target (3)
         """
-        targets = targets.lower().split(",") if targets is not None else ["epub"]
-        if not await self.valid(ctx, url):
+        if not await assert_check(intr, is_direct_only):
             return
 
-        session = self.session_handler.get_or_create(ctx)
-        await session.run(ctx, DownloadHandler.download, url, targets)
+        targets = {
+            target.strip()
+            for target in (target1, target2, target3)
+            if type(target) == str and target.strip()
+        }
+
+        if not await self.valid(intr, url):
+            return
+
+        session = self.session_handler.get_or_create(intr)
+        await session.run(
+            intr,
+            DownloadHandler.download,
+            url,
+            targets,
+            message=f"**Task: Download ({url=}, {targets=})**",
+        )
 
     @staticmethod
-    async def valid(ctx: commands.Context, url: str = None) -> bool:
-        if ctx.author.bot:
-            await ctx.send(mfmt.error("Download is not allowed with bots"))
-        elif url is None:
-            await ctx.send(
-                mfmt.error("Please confirm your request to the following format:")
-            )
-            await ctx.send(f"`{ctx.clean_prefix}download <url:str> [targets]`")
+    async def valid(intr: Interaction, url: str = None) -> bool:
+        if intr.user.bot:
+            await intr.send(utils.error("Download is not allowed with bots"))
         elif not url_helper.is_url(url):
-            await ctx.send(mfmt.error("The url provided is not valid."))
+            await intr.send(utils.error("The url provided is not valid."))
         else:
             return True
 

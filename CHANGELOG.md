@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+## [0.8.3] - 2022-02-03
+
 ### Added
 
 - Added emoji's to discord replies

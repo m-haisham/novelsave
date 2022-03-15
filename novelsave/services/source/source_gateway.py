@@ -69,6 +69,6 @@ class SourceGateway(BaseSourceGateway):
         cj = RequestsCookieJar()
         for c in cookies:
             if c.domain in self.source.cookie_domains:
-                cj.set(c.name, c.values, domain=c.domain, path=c.path)
+                cj.set(c.name, c.value, domain=c.domain, path=c.path)
 
         return cj

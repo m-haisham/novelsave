@@ -53,6 +53,7 @@ python-dotenv = { version = "^0.19.2", optional = true }
 pytest = "^6.2.5"
 pytest-mock = "^3.6.1"
 pre-commit = "^2.15.0"
+flake8 = "^4.0.1"
 
 [tool.poetry.extras]
 discord = ["nextcord"]

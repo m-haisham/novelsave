@@ -7,14 +7,18 @@ from novelsave.exceptions import CookieBrowserNotSupportedException
 
 
 def test_set_cookies(mocker):
-    source_gateway = mocker.patch("novelsave.cli.helpers.novel.BaseSourceGateway")
+    source_gateway = mocker.patch(
+        "novelsave.client.cli.helpers.novel.BaseSourceGateway"
+    )
     source_gateway.use_cookies_from_browser.side_effect = (
         CookieBrowserNotSupportedException("")
     )
     novel_helper.set_cookies(source_gateway, None)
     source_gateway.use_cookies_from_browser.assert_not_called()
 
-    source_gateway = mocker.patch("novelsave.cli.helpers.novel.BaseSourceGateway")
+    source_gateway = mocker.patch(
+        "novelsave.client.cli.helpers.novel.BaseSourceGateway"
+    )
     source_gateway.use_cookies_from_browser.side_effect = (
         CookieBrowserNotSupportedException("chrome")
     )
@@ -22,7 +26,9 @@ def test_set_cookies(mocker):
         novel_helper.set_cookies(source_gateway, "chrome")
     source_gateway.use_cookies_from_browser.assert_called_with("chrome")
 
-    source_gateway = mocker.patch("novelsave.cli.helpers.novel.BaseSourceGateway")
+    source_gateway = mocker.patch(
+        "novelsave.client.cli.helpers.novel.BaseSourceGateway"
+    )
     novel_helper.set_cookies(source_gateway, "chrome")
 
 
@@ -61,8 +67,10 @@ def test_get_novel_no_int_id(novel_service):
 
 
 def test_get_or_create_no_novel(mocker):
-    mocker.patch("novelsave.cli.helpers.novel.get_novel", return_value=None)
-    mocker.patch("novelsave.cli.helpers.novel.create_novel", return_value="novel")
+    mocker.patch("novelsave.client.cli.helpers.novel.get_novel", return_value=None)
+    mocker.patch(
+        "novelsave.client.cli.helpers.novel.create_novel", return_value="novel"
+    )
 
     result = novel_helper.get_or_create_novel("https://test.site")
     assert "novel" == result
@@ -75,8 +83,10 @@ def test_get_or_create_no_novel(mocker):
 
 
 def test_get_or_create_no_novel_ok(mocker):
-    mocker.patch("novelsave.cli.helpers.novel.get_novel", return_value="novel")
-    mocker.patch("novelsave.cli.helpers.novel.create_novel", return_value="novel")
+    mocker.patch("novelsave.client.cli.helpers.novel.get_novel", return_value="novel")
+    mocker.patch(
+        "novelsave.client.cli.helpers.novel.create_novel", return_value="novel"
+    )
 
     result = novel_helper.get_or_create_novel("https://test.site")
     assert "novel" == result

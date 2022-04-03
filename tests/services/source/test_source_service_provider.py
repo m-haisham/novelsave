@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
-from novelsave_sources.sources.novel import sources
+from novelsave_sources import novel_source_types
 
 from novelsave.exceptions import SourceNotFoundException
 from novelsave.services.source import SourceService
@@ -13,7 +13,9 @@ def source_service():
 
 
 def test_source_from_url(source_service):
-    source_service = source_service.source_from_url(sources[0].base_urls[0])
+    source_service = source_service.source_from_url(
+        novel_source_types()[0].base_urls[0]
+    )
     assert source_service is not None
 
 

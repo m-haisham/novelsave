@@ -39,7 +39,6 @@ def test_novel_to_internal(source_adapter):
 def test_chapter_to_internal(source_adapter):
     test_chapter = sm.Chapter(
         index=1,
-        no=20,
         title="title",
         paragraphs="paragraphs this is",
         url="https://",
@@ -66,7 +65,6 @@ def test_chapter_from_internal(source_adapter):
 
     expected_chapter = sm.Chapter(
         index=1,
-        no=20,
         title="title",
         paragraphs="paragraphs this is",
         url="https://",
@@ -79,7 +77,6 @@ def test_chapter_from_internal(source_adapter):
 def test_chapter_content_to_internal(source_adapter):
     test_chapter = sm.Chapter(
         index=1,
-        no=20,
         title="title",
         paragraphs="paragraphs this is",
         url="https://",

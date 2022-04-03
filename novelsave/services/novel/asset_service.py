@@ -63,19 +63,19 @@ class AssetService(BaseAssetService):
         indexed_assets = {a.url: a for a in novel.assets}
         indexed_specific = {}
 
-        assets_to_add = []
+        assets_to_add = {}
         for asset in assets:
             try:
                 indexed_specific[asset.url] = indexed_assets[asset.url]
             except KeyError:
                 indexed_specific[asset.url] = asset
-                assets_to_add.append(asset)
+                assets_to_add[asset.url] = asset
 
         # we only interact with the database if we have something to add
         # this is [expected] to be more performant
         if assets_to_add:
             logger.debug(f"Adding {len(assets)} newly found assets.")
-            self.session.add_all(assets_to_add)
+            self.session.add_all(assets_to_add.values())
             self.session.flush()
         else:
             logger.debug("Skipping adding assets since there is no reason to.")

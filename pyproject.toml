@@ -30,7 +30,7 @@ novelsave = "novelsave.client.cli.main:main"
 novelsave-discord-bot = "novelsave.client.bots.discord.main:main"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 appdirs = "^1.4.4"
 requests = "^2.26.0"
 EbookLib = "^0.17.1"

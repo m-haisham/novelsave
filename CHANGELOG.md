@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Bumped dependencies versions.
-- Install requirements from `requiements.txt` in Dockererfile.
+- Install requirements from `requiements.txt` in Dockerfile.
+- Changed target python version to 3.8.
 
 ### Fixed
 

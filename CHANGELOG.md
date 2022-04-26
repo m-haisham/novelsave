@@ -17,7 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed typo in `source_gateway.py` that prevented using cookies from browsers
 - Fixed integrity error when adding assets. #70
-- Fixed issue where text packaging breaks without author name #74
+- Fixed issue where text packaging breaks without author name #74.
+- Fixed html packaging breaking when sorting volumes #74.
 
 ## [0.8.3] - 2022-02-03
 

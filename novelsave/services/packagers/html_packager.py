@@ -113,8 +113,7 @@ class HtmlPackager(BasePackager):
 
     def prepare_toc(self, novel: Novel, volumes: Dict[Volume, List[Chapter]]):
         volume_wrappers = []
-        for volume, chapters in sorted(volumes.items(), key=lambda v: v.index):
-
+        for volume, chapters in sorted(volumes.items(), key=lambda v: v[0].index):
             chapter_wrappers = [
                 {
                     "order": chapter.index,

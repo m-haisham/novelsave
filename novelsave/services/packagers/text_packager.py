@@ -87,7 +87,7 @@ class TextPackager(BasePackager):
         text = ""
 
         text += novel.title + self.endl
-        text += "by " + novel.author + self.endl
+        text += "by " + (novel.author or 'Unknown') + self.endl
         text += self.endl
         text += "Synopsis = " + self.endl
         for line in novel.synopsis.splitlines():

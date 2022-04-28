@@ -12,7 +12,7 @@ def ensure_key_exists(func):
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
         self, key = args[0], kwargs.get("key", args[1])
-        if key not in self._defaults:
+        if key not in self.defaults:
             raise KeyError(f"The specified key is not in configurations: '{key}'")
 
         return func(*args, **kwargs)

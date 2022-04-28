@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+### Added
+
+- Added ability to change html chapter font-size with config.
+
 ## [0.8.4] - 2022-04-27
 
 ### Changed

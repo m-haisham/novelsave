@@ -5,6 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>${static['bootstrap.min.css']}</style>
+        <style>${static['main.css']}</style>
         <title>${novel.title}</title>
     </head>
     <body>
@@ -59,7 +60,9 @@
                 <hr />
                 <article id="${chapter_wrapper['id']}" class="mb-4">
                     <h2 class="mb-4">${chapter_wrapper['chapter'].title}</h2>
-                    ${chapter_wrapper['content']}
+                    <div class="chapter-content">
+                        ${chapter_wrapper['content']}
+                    </div>
                 </article>
                 % endfor
             % endfor

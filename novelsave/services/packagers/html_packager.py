@@ -14,6 +14,7 @@ from novelsave.core.services import (
     BasePathService,
     BaseAssetService,
 )
+from novelsave.core.services.config.base_config_service import BaseConfigService
 from novelsave.core.services.packagers import BasePackager
 from novelsave.utils.helpers import metadata_helper, string_helper
 
@@ -26,12 +27,14 @@ class HtmlPackager(BasePackager):
         file_service: BaseFileService,
         path_service: BasePathService,
         asset_service: BaseAssetService,
+        config_service: BaseConfigService,
     ):
         self.static_dir = static_dir
         self.novel_service = novel_service
         self.file_service = file_service
         self.path_service = path_service
         self.asset_service = asset_service
+        self.config_service = config_service
 
         self.lookup = TemplateLookup(directories=[self.static_dir / "web/templates"])
 
@@ -143,6 +146,8 @@ class HtmlPackager(BasePackager):
         return volume_wrappers
 
     def prepare_static(self):
+        font_size = self.config_service.get_config("html.font_size")
+
         static = {
             "bootstrap.min.css": self.file_service.read_str(
                 self.static_dir / "web/bootstrap.min.css"
@@ -150,6 +155,7 @@ class HtmlPackager(BasePackager):
             "bootstrap.min.js": self.file_service.read_str(
                 self.static_dir / "web/bootstrap.min.js"
             ),
+            "main.css": f".chapter-content {{ font-size: {font_size}; }}",
         }
 
         logger.debug(f"Retrieved {len(static)} static data.")

@@ -122,6 +122,7 @@ class Packagers(containers.DeclarativeContainer):
         file_service=services.file_service,
         path_service=services.path_service,
         asset_service=services.asset_service,
+        config_service=services.config_service,
     )
 
     text_packager = providers.Factory(

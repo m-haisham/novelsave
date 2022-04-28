@@ -11,7 +11,7 @@
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 shadow-sm">
             <div class="container">
-                <a class="navbar-brand me-1" href="">${novel.title}</a>
+                <a class="navbar-brand me-1 text-wrap" href="">${novel.title}</a>
             </div>
         </nav>
 

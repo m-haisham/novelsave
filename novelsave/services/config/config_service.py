@@ -23,12 +23,10 @@ def ensure_key_exists(func):
 class ConfigService(BaseConfigService):
     version = 2
 
-    def __init__(self, config_file: Path, default_novel_dir: Path):
+    def __init__(self, config_file: Path, defaults: dict):
         self.data = {"version": self.version, "config": {}}
 
-        self._defaults = {
-            "novel.dir": str(default_novel_dir),
-        }
+        self.defaults = defaults
 
         self.config_file = config_file
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
@@ -52,7 +50,7 @@ class ConfigService(BaseConfigService):
         return self.data.setdefault("config", {})
 
     def get_all_configs(self) -> Dict:
-        config = self._defaults.copy()
+        config = self.defaults.copy()
         for key in config:
             try:
                 config[key] = self.config[key]
@@ -68,7 +66,7 @@ class ConfigService(BaseConfigService):
 
     @ensure_key_exists
     def get_config(self, key: str) -> object:
-        return self.config.get(key, self._defaults[key])
+        return self.config.get(key, self.defaults[key])
 
     @ensure_key_exists
     def reset_config(self, key: str):

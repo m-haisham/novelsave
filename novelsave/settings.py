@@ -24,7 +24,8 @@ DATABASE_URL = "sqlite:///" + str(DATABASE_FILE)
 
 # default novel directory, where packaged files such
 # as epub and pdf are stored.
-NOVEL_DIR = Path.home() / "novels"
+DEFAULT_NOVEL_DIR = Path.home() / "novels"
+DEFAULT_HTML_FONT_SIZE = "1rem"
 
 # the following map defines how files are stored
 # by further subdivision into sub-folders
@@ -72,13 +73,17 @@ config = {
     "config": {
         "dir": CONFIG_DIR,
         "file": CONFIG_FILE,
+        "defaults": {
+            "novel.dir": DEFAULT_NOVEL_DIR,
+            "html.font_size": DEFAULT_HTML_FONT_SIZE,
+        },
     },
     "data": {
         "dir": DATA_DIR,
         "division_rules": DIVISION_RULES,
     },
     "novel": {
-        "dir": NOVEL_DIR,
+        "dir": DEFAULT_NOVEL_DIR,
     },
     "infrastructure": {
         "database": {

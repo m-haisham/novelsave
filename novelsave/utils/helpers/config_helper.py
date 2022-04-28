@@ -20,6 +20,7 @@ def _version_2(data: dict):
 
     types = {
         "novel.dir": Path,
+        "html.font_size": str,
     }
 
     parsed = {}

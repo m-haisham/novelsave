@@ -12,7 +12,7 @@ charset-normalizer==2.0.11; python_full_version >= "3.8.0" and python_version >=
 click==8.0.3; python_version >= "3.6"
 cloudscraper==1.2.58; python_version >= "3.8" and python_version < "4.0"
 colorama==0.4.4; python_version >= "3.6" and python_full_version < "3.0.0" and sys_platform == "win32" and platform_system == "Windows" or sys_platform == "win32" and python_version >= "3.6" and python_full_version >= "3.5.0" and platform_system == "Windows"
-cryptography==41.0.4; sys_platform == "linux" and python_version >= "3.7"
+cryptography==41.0.6; sys_platform == "linux" and python_version >= "3.7"
 dependency-injector==4.38.0
 deprecation==2.1.0; python_version >= "3.8" and python_version < "4.0"
 ebooklib==0.17.1
